@@ -13,6 +13,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.chessmate.ui.theme.ChessMateTheme
 
 class MainActivity : ComponentActivity() {
+    private var consumerKey: String = BuildConfig .CONSUMER_KEY
+     private var consumerSecret: String = BuildConfig.CONSUMER_SECRET
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -22,7 +24,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    Greeting("$consumerKey $consumerSecret")
                 }
             }
         }
