@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1074106158170",
+    "project_id": "chessmate-f6095",
+    "storage_bucket": "chessmate-f6095.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1074106158170:android:eb27db141a9e1bd39f1c63",
+        "android_client_info": {
+          "package_name": "com.example.chessmate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDx7XGi7skZ3uJ34MUD1T4Zsz7dqVmUOE4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
