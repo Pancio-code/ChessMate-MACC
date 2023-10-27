@@ -10,11 +10,8 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import com.example.chessmate.ui.components.NavBarComponent
-import com.example.chessmate.ui.components.TopBarComponent
 import com.example.chessmate.ui.theme.ChessMateTheme
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun ProfilePage(
     width: WindowWidthSizeClass,

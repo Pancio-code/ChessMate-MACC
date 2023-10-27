@@ -9,7 +9,6 @@ plugins {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    implementation("androidx.compose.material:material:1.5.4")
 }
 compileKotlin {
     kotlinOptions {

@@ -24,7 +24,6 @@ import com.example.chessmate.ui.theme.ChessMateTheme
 fun NavBarComponent(navController: NavController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-        var selectedItem by remember { mutableIntStateOf(0) }
         val items = listOf("Home", "Scan", "Profile")
 
         val icons = listOf(
