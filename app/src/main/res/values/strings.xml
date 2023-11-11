@@ -1,4 +1,32 @@
 <resources>
     <string name="app_name">ChessMate</string>
     <string name="web_client_id">1074106158170-cjk0qtonod0nn3ie10tadc0d0334m02e.apps.googleusercontent.com</string>
+    <string name="navigation_drawer">Navigation Drawer</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_sign_in">Sign In</string>
+    <string name="tab_sign_up">Sign Up</string>
+    <string name="tab_scan">Scan</string>
+    <string name="tab_settings">Settings</string>
+    <string name="tab_contacs">Contact Us</string>
+
+    <string name="profile">Profile</string>
+    <string name="search">Search</string>
+    <string name="edit">Edit</string>
+    <string name="compose">Compose</string>
+
+    <string name="empty_screen_title">Screen under construction</string>
+    <string name="empty_screen_text">This screen is still under construction. This is only a sample for previews layouts in Jetpack Compose</string>
+
+    <string name="logo">ChessMate Logo</string>
+    <string name="confirm">Yes</string>
+    <string name="negate">No</string>
+    <string name="back_button">Back</string>
+    <string name="exit_button">Exit application</string>
+    <string name="exit_pop_up_content">Do you want exit ChessMate?</string>
+    <string name="more_options_button">More options</string>
+    <string name="no_item_found">No item found</string>
+
+    <string name="sign_in_success">Sign In</string>
+    <string name="facebook_app_id">646885687651820</string>
+    <string name="facebook_client_token">7a1651f8ee278c43a08d49d57af72353</string>
 </resources>

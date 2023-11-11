@@ -12,7 +12,20 @@
           "package_name": "com.example.chessmate"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1074106158170-hcemojg3jb3aahh253urquljrv0elgjl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.chessmate",
+            "certificate_hash": "f309c10f411502fc139429c4caa5026223ad202d"
+          }
+        },
+        {
+          "client_id": "1074106158170-cjk0qtonod0nn3ie10tadc0d0334m02e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDx7XGi7skZ3uJ34MUD1T4Zsz7dqVmUOE4"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1074106158170-cjk0qtonod0nn3ie10tadc0d0334m02e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -1,166 +1,215 @@
 package com.example.chessmate
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
+import com.example.chessmate.ui.theme.ChessMateTheme
+import androidx.activity.viewModels
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.chessmate.ui.theme.ChessMateTheme
-import com.google.android.gms.auth.api.identity.Identity
-import com.example.chessmate.ui.pages.ProfileScreen
-import com.example.chessmate.sign_in.GoogleAuthUiClient
-import com.example.chessmate.sign_in.NavBarSignIn
-import com.example.chessmate.sign_in.SignInScreen
+import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInViewModel
-import com.example.chessmate.ui.components.ExitApplicationComponent
-import com.example.chessmate.ui.components.Screen
-import com.example.chessmate.ui.components.TopBarComponent
+import com.example.chessmate.sign_in.UserAuthStateType
+import com.example.chessmate.ui.navigation.ExitApplicationComponent
+import com.example.chessmate.ui.utils.PreferencesManagerHelper
+import com.facebook.FacebookSdk
+import com.google.accompanist.adaptive.calculateDisplayFeatures
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
-    private val googleAuthUiClient by lazy {
-        GoogleAuthUiClient(
+    private val chessMateviewModel: ChessMateHomeViewModel by viewModels()
+    private var userAuthState =  mutableStateOf(UserAuthStateType.UNAUTHENTICATED)
+    private val db = Firebase.firestore
+    private val preferencesManager by lazy {
+        PreferencesManagerHelper(applicationContext)
+    }
+
+
+    private val authUIClient by lazy {
+        AuthUIClient(
             context = applicationContext,
-            oneTapClient = Identity.getSignInClient(applicationContext)
+            oneTapClient = Identity.getSignInClient(applicationContext),
+            db = db
         )
     }
+
+
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            ChessMateTheme {
-                val windowSizeClass = calculateWindowSizeClass(this)
-                val navController = rememberNavController()
-                when (windowSizeClass.widthSizeClass) {
-                        WindowWidthSizeClass.Expanded -> {
-                            // orientation is landscape in most devices including foldables (width 840dp+)
-                        }
+        FacebookSdk.sdkInitialize(applicationContext);
 
-                        WindowWidthSizeClass.Medium -> {
-                            // Most tablets are in landscape, larger unfolded inner displays in portrait (width 600dp+)
-                        }
-
-                        WindowWidthSizeClass.Compact -> {
-                            ExitApplicationComponent()
-                            Scaffold(
-                                topBar = {
-                                    TopBarComponent()
-                                },
-                                bottomBar = {
-                                    NavBarSignIn(navController)
-                                }
-                            ) { innerPadding ->
-                                (NavHost(
-                                        navController = navController,
-                                        startDestination = Screen.SignIn.route
-                                    ) {
-                                        composable(route = Screen.SignIn.route) {
-                                            val viewModel = viewModel<SignInViewModel>()
-                                            val state by viewModel.state.collectAsStateWithLifecycle()
-
-                                            LaunchedEffect(key1 = Unit) {
-                                                if (googleAuthUiClient.getSignedInUser() != null) {
-                                                    navController.navigate(Screen.Home.route)
-                                                }
-                                            }
-
-                                            val launcher = rememberLauncherForActivityResult(
-                                                contract = ActivityResultContracts.StartIntentSenderForResult(),
-                                                onResult = { result ->
-                                                    if (result.resultCode == RESULT_OK) {
-                                                        lifecycleScope.launch {
-                                                            val signInResult =
-                                                                googleAuthUiClient.signInWithIntent(
-                                                                    intent = result.data
-                                                                        ?: return@launch
-                                                                )
-                                                            viewModel.onSignInResult(
-                                                                signInResult
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                            )
-
-                                            LaunchedEffect(key1 = state.isSignInSuccessful) {
-                                                if (state.isSignInSuccessful) {
-                                                    Toast.makeText(
-                                                        applicationContext,
-                                                        "Sign in successful",
-                                                        Toast.LENGTH_LONG
-                                                    ).show()
-
-                                                    navController.navigate(Screen.Home.route)
-                                                    viewModel.resetState()
-                                                }
-                                            }
-
-                                            SignInScreen(
-                                                state = state,
-                                                onSignInClick = {
-                                                    lifecycleScope.launch {
-                                                        val signInIntentSender =
-                                                            googleAuthUiClient.signIn()
-                                                        launcher.launch(
-                                                            IntentSenderRequest.Builder(
-                                                                signInIntentSender
-                                                                    ?: return@launch
-                                                            ).build()
-                                                        )
-                                                    }
-                                                }
-                                            )
-                                        }
-                                    composable(Screen.SignUp.route) {
-                                        ProfileScreen(
-                                            userData = googleAuthUiClient.getSignedInUser(),
-                                            onSignOut = {
-                                                lifecycleScope.launch {
-                                                    googleAuthUiClient.signOut()
-                                                    Toast.makeText(
-                                                        applicationContext,
-                                                        "Signed out",
-                                                        Toast.LENGTH_LONG
-                                                    ).show()
-
-                                                    navController.popBackStack()
-                                                }
-                                            }
-                                        )
-                                    }
-                                        composable(Screen.Home.route) {
-                                            val context = LocalContext.current // Get the current context
-
-                                            // Create an Intent to start the game activity
-                                            val gameIntent = Intent(context, GameActivity::class.java)
-
-                                            // Start the game activity
-                                            context.startActivity(gameIntent)
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                chessMateviewModel.getAuthenticationState(handler = authUIClient).run {
+                    chessMateviewModel.isAuthenticated.collect {  userAuthState.value = it.state }
+                }
             }
         }
+
+        setContent {
+            ChessMateTheme {
+                val windowSize = calculateWindowSizeClass(this)
+                val displayFeatures = calculateDisplayFeatures(this)
+                val uiState by chessMateviewModel.uiState.collectAsStateWithLifecycle()
+
+                ExitApplicationComponent(this)
+                when (userAuthState.value) {
+                    UserAuthStateType.UNAUTHENTICATED -> {
+                        val viewModel = viewModel<SignInViewModel>()
+                        val authState by viewModel.state.collectAsStateWithLifecycle()
+
+                        val launcher = rememberLauncherForActivityResult(
+                            contract = ActivityResultContracts.StartIntentSenderForResult(),
+                            onResult = { result ->
+                                if (result.resultCode == RESULT_OK) {
+                                    lifecycleScope.launch {
+                                        val signInResult = authUIClient.signInWithIntent(
+                                            intent = result.data ?: return@launch
+                                        )
+                                        viewModel.onSignInResult(
+                                            signInResult
+                                        )
+                                    }
+                                }
+                            }
+                        )
+
+                        LaunchedEffect(key1 = authState.isSignInSuccessful) {
+                            if (authState.isSignInSuccessful) {
+                                Toast.makeText(
+                                    applicationContext,
+                                    "Sign in successful",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                viewModel.resetState()
+                                chessMateviewModel.getAuthenticationState(handler = authUIClient).run {
+                                    chessMateviewModel.isAuthenticated.collect {  userAuthState.value = it.state }
+                                }
+                            }
+                        }
+
+                        ChessMateApp(
+                            chessMateHomeUIState = uiState,
+                            windowSize = windowSize,
+                            displayFeatures = displayFeatures,
+                            isAuthenticated = false,
+                            authState = authState,
+                            authViewModel = viewModel,
+                            authHandler = authUIClient,
+                            googleIntentLaucher = launcher
+                        )
+                    }
+
+                    UserAuthStateType.AUTHENTICATED -> {
+                        ChessMateApp(
+                            chessMateHomeUIState = uiState,
+                            windowSize = windowSize,
+                            displayFeatures = displayFeatures,
+                            isAuthenticated = true,
+                            authHandler = authUIClient
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@Preview(showBackground = true)
+@Composable
+fun ChessMateAppPreview() {
+    ChessMateTheme {
+        ChessMateApp(
+            chessMateHomeUIState = ChessMateHomeUIState(),
+            windowSize = WindowSizeClass.calculateFromSize(DpSize(400.dp, 900.dp)),
+            displayFeatures = emptyList(),
+            isAuthenticated = true,
+            authHandler = null
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@Preview(showBackground = true, widthDp = 700, heightDp = 500)
+@Composable
+fun ChessMateAppPreviewTablet() {
+    ChessMateTheme {
+        ChessMateApp(
+            chessMateHomeUIState = ChessMateHomeUIState(),
+            windowSize = WindowSizeClass.calculateFromSize(DpSize(700.dp, 500.dp)),
+            displayFeatures = emptyList(),
+            isAuthenticated = true,
+            authHandler = null
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@Preview(showBackground = true, widthDp = 500, heightDp = 700)
+@Composable
+fun ChessMateAppPreviewTabletPortrait() {
+    ChessMateTheme {
+        ChessMateApp(
+            chessMateHomeUIState = ChessMateHomeUIState(),
+            windowSize = WindowSizeClass.calculateFromSize(DpSize(500.dp, 700.dp)),
+            displayFeatures = emptyList(),
+            isAuthenticated = true,
+            authHandler = null
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@Preview(showBackground = true, widthDp = 1100, heightDp = 600)
+@Composable
+fun ChessMateAppPreviewDesktop() {
+    ChessMateTheme {
+        ChessMateApp(
+            chessMateHomeUIState = ChessMateHomeUIState(),
+            windowSize = WindowSizeClass.calculateFromSize(DpSize(1100.dp, 600.dp)),
+            displayFeatures = emptyList(),
+            isAuthenticated = true,
+            authHandler = null
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@Preview(showBackground = true, widthDp = 600, heightDp = 1100)
+@Composable
+fun ChessMateAppPreviewDesktopPortrait() {
+    ChessMateTheme {
+        ChessMateApp(
+            chessMateHomeUIState = ChessMateHomeUIState(),
+            windowSize = WindowSizeClass.calculateFromSize(DpSize(600.dp, 1100.dp)),
+            displayFeatures = emptyList(),
+            isAuthenticated = true,
+            authHandler = null
+        )
     }
 }
 
