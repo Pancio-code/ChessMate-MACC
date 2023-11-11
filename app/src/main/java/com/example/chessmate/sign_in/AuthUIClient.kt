@@ -286,9 +286,10 @@ class AuthUIClient(
     } catch (e: Exception) {
         e.printStackTrace()
         if(e is CancellationException) throw e
-        SignInResult(
-            data = null,
-            errorMessage = e.message
-        )
+        Toast.makeText(
+            context,
+            e.message,
+            Toast.LENGTH_LONG
+        ).show()
     }
 }

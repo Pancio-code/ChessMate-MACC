@@ -40,6 +40,7 @@ import com.example.chessmate.ui.navigation.ChessMateNavigationActions
 import com.example.chessmate.ui.navigation.ChessMateNavigationRail
 import com.example.chessmate.ui.navigation.ChessMateRoute
 import com.example.chessmate.ui.navigation.ChessMateTopLevelDestination
+import com.example.chessmate.ui.pages.ContactUsScreen
 import com.example.chessmate.ui.pages.HomePage
 import com.example.chessmate.ui.pages.ScreenUnderConstruction
 import com.example.chessmate.ui.pages.SignInScreen
@@ -335,7 +336,13 @@ private fun ChessMateNavHost(
                 )
             }
             composable(ChessMateRoute.CONTACT) {
-                ScreenUnderConstruction()
+                ContactUsScreen(
+                    state = authState,
+                    modifier = modifier,
+                    authHandler = authHandler,
+                    authViewModel = authViewModel,
+                    navigationType = navigationType
+                )
             }
         }
     }
