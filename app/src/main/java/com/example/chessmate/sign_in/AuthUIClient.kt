@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import android.widget.Toast
+import com.example.chessmate.BuildConfig
 import com.example.chessmate.R
 import com.facebook.login.LoginResult
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
@@ -108,9 +109,14 @@ class AuthUIClient(
         } catch(e: Exception) {
             e.printStackTrace()
             if(e is CancellationException) throw e
+            Toast.makeText(
+                context,
+                e.message,
+                Toast.LENGTH_LONG
+            ).show()
             SignInResult(
                 data = null,
-                errorMessage = e.message
+                errorMessage = null
             )
         }
     }
@@ -193,9 +199,14 @@ class AuthUIClient(
         } catch(e: Exception) {
             e.printStackTrace()
             if(e is CancellationException) throw e
+            Toast.makeText(
+                context,
+                e.message,
+                Toast.LENGTH_LONG
+            ).show()
             SignInResult(
                 data = null,
-                errorMessage = e.message
+                errorMessage = null
             )
         }
     }
@@ -253,7 +264,7 @@ class AuthUIClient(
                 BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                     .setSupported(true)
                     .setFilterByAuthorizedAccounts(false)
-                    .setServerClientId(context.getString(R.string.web_client_id))
+                    .setServerClientId(BuildConfig.WEB_CLIENT_ID)
                     .build()
             )
             .setAutoSelectEnabled(true)

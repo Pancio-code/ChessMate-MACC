@@ -215,7 +215,7 @@ fun SignInScreen(
                     Text(text = "Sign in")
                 }
             Spacer(modifier = Modifier.size(8.dp))
-            FacebookButton(authHandler = authHandler!!)
+            FacebookButton(authHandler = authHandler!!,authViewModel = authViewModel, scope = lyfescope)
         }
     } else {
         Row(
@@ -345,7 +345,7 @@ fun SignInScreen(
                     Text(text = "Sign in")
                 }
                 Spacer(modifier = Modifier.size(8.dp))
-                FacebookButton(authHandler = authHandler!!)
+                FacebookButton(authHandler = authHandler!!,authViewModel = authViewModel, scope = lyfescope)
             }
         }
     }

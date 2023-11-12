@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.example.chessmate.R
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInResult
+import com.example.chessmate.sign_in.SignInViewModel
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
 import com.facebook.FacebookException
@@ -24,14 +25,16 @@ import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
 fun FacebookButton(
     authHandler: AuthUIClient,
     modifier: Modifier = Modifier,
+    authViewModel: SignInViewModel? = null,
+    scope: CoroutineScope
 ) {
-    val scope = rememberCoroutineScope()
     val loginManager = LoginManager.getInstance()
     val callbackManager = remember { CallbackManager.Factory.create() }
     val launcher = rememberLauncherForActivityResult(
@@ -56,7 +59,10 @@ fun FacebookButton(
 
             override fun onSuccess(result: LoginResult) {
                 scope.launch {
-                    authHandler.firebaseSignInWithFacebook(result)
+                    val signInResult = authHandler.firebaseSignInWithFacebook(result)
+                    authViewModel?.onSignInResult(
+                        signInResult
+                    )
                 }
             }
         })

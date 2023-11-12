@@ -22,17 +22,25 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+
+        def addConstant = {constantName, constantValue ->
+            resValue  "string", "${constantName}", "\"${constantValue}\""
+        }
+
+        addConstant("FACEBOOK_APP_ID", apikeyProperties['FACEBOOK_APP_ID'])
+        addConstant("FACEBOOK_CLIENT_TOKEN", apikeyProperties['FACEBOOK_CLIENT_TOKEN'])
     }
 
     buildTypes {
+        def addConstantTo = {target, constantName, constantValue ->
+            target.buildConfigField "String", "${constantName}", "\"${constantValue}\""
+        }
         debug {
-            buildConfigField("String", "CONSUMER_KEY", apikeyProperties['CONSUMER_KEY'])
-            buildConfigField("String", "CONSUMER_SECRET", apikeyProperties['CONSUMER_SECRET'])
+            addConstantTo(owner,"WEB_CLIENT_ID", apikeyProperties['WEB_CLIENT_ID'])
         }
         release {
             //BuildConfig
-            buildConfigField("String", "CONSUMER_KEY", apikeyProperties['CONSUMER_KEY'])
-            buildConfigField("String", "CONSUMER_SECRET", apikeyProperties['CONSUMER_SECRET'])
+            addConstantTo(owner,"WEB_CLIENT_ID", apikeyProperties['WEB_CLIENT_ID'])
 
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'

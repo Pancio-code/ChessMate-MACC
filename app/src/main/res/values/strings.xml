@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">ChessMate</string>
-    <string name="web_client_id">1074106158170-cjk0qtonod0nn3ie10tadc0d0334m02e.apps.googleusercontent.com</string>
     <string name="navigation_drawer">Navigation Drawer</string>
     <string name="tab_home">Home</string>
     <string name="tab_sign_in">Sign In</string>
@@ -30,6 +29,4 @@
     <string name="no_item_found">No item found</string>
 
     <string name="sign_in_success">Sign In</string>
-    <string name="facebook_app_id">646885687651820</string>
-    <string name="facebook_client_token">7a1651f8ee278c43a08d49d57af72353</string>
 </resources>
