@@ -38,7 +38,7 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
-    private val chessMateviewModel: ChessMateHomeViewModel by viewModels()
+    private val signInViewModel: SignInViewModel by viewModels()
     private var userAuthState =  mutableStateOf(UserAuthStateType.UNAUTHENTICATED)
     private val db = Firebase.firestore
     private val preferencesManager by lazy {
@@ -63,8 +63,8 @@ class MainActivity : ComponentActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                chessMateviewModel.getAuthenticationState(handler = authUIClient).run {
-                    chessMateviewModel.isAuthenticated.collect {  userAuthState.value = it.state }
+                signInViewModel.getAuthenticationState(handler = authUIClient).run {
+                    signInViewModel.isAuthenticated.collect {  userAuthState.value = it.state }
                 }
             }
         }
@@ -73,13 +73,11 @@ class MainActivity : ComponentActivity() {
             ChessMateTheme {
                 val windowSize = calculateWindowSizeClass(this)
                 val displayFeatures = calculateDisplayFeatures(this)
-                val uiState by chessMateviewModel.uiState.collectAsStateWithLifecycle()
+                val authState by signInViewModel.signInState.collectAsStateWithLifecycle()
 
                 ExitApplicationComponent(this)
                 when (userAuthState.value) {
                     UserAuthStateType.UNAUTHENTICATED -> {
-                        val viewModel = viewModel<SignInViewModel>()
-                        val authState by viewModel.state.collectAsStateWithLifecycle()
 
                         val launcher = rememberLauncherForActivityResult(
                             contract = ActivityResultContracts.StartIntentSenderForResult(),
@@ -89,7 +87,7 @@ class MainActivity : ComponentActivity() {
                                         val signInResult = authUIClient.signInWithIntent(
                                             intent = result.data ?: return@launch
                                         )
-                                        viewModel.onSignInResult(
+                                        signInViewModel.onSignInResult(
                                             signInResult
                                         )
                                     }
@@ -104,30 +102,44 @@ class MainActivity : ComponentActivity() {
                                     "Sign in successful",
                                     Toast.LENGTH_LONG
                                 ).show()
-                                viewModel.resetState()
-                                chessMateviewModel.getAuthenticationState(handler = authUIClient).run {
-                                    chessMateviewModel.isAuthenticated.collect {  userAuthState.value = it.state }
+                                signInViewModel.getAuthenticationState(handler = authUIClient).run {
+                                    signInViewModel.isAuthenticated.collect {  userAuthState.value = it.state }
                                 }
                             }
                         }
 
                         ChessMateApp(
-                            chessMateHomeUIState = uiState,
+                            chessMateHomeUIState = null,
                             windowSize = windowSize,
                             displayFeatures = displayFeatures,
                             isAuthenticated = false,
-                            authState = authState,
-                            authViewModel = viewModel,
+                            authViewModel = signInViewModel,
                             authHandler = authUIClient,
+                            authState= authState,
                             googleIntentLaucher = launcher
                         )
                     }
 
                     UserAuthStateType.AUTHENTICATED -> {
+                        LaunchedEffect(key1 = authState.isSignInSuccessful) {
+                            if (!authState.isSignInSuccessful) {
+                                Toast.makeText(
+                                    applicationContext,
+                                    "Sign out successful",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                signInViewModel.getAuthenticationState(handler = authUIClient).run {
+                                    signInViewModel.isAuthenticated.collect {  userAuthState.value = it.state }
+                                }
+                            }
+                        }
+
                         ChessMateApp(
-                            chessMateHomeUIState = uiState,
+                            chessMateHomeUIState = null,
                             windowSize = windowSize,
+                            authState= authState,
                             displayFeatures = displayFeatures,
+                            authViewModel = signInViewModel,
                             isAuthenticated = true,
                             authHandler = authUIClient
                         )

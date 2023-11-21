@@ -20,9 +20,12 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class AuthUIClient(
     private val context: Context,
@@ -82,16 +85,22 @@ class AuthUIClient(
         return try {
             val user = Firebase.auth.signInWithCredential(credential).await().user
             if (user != null) {
-                dbUsers.add(
-                    UserData(
-                        userId = user.uid,
-                        username = user.displayName,
-                        profilePictureUrl = user.photoUrl?.toString(),
-                        email = user.email,
-                        emailVerified = user.isEmailVerified,
-                        provider = user.providerId
+                // Check if the user document already exists
+                val userDocument = dbUsers.document(user.uid).get().await()
+
+                if (!userDocument.exists()) {
+                    // Add a new document only if it doesn't exist
+                    dbUsers.document(user.uid).set(
+                        UserData(
+                            userId = user.uid,
+                            username = user.displayName,
+                            profilePictureUrl = user.photoUrl?.toString(),
+                            email = user.email,
+                            emailVerified = user.isEmailVerified,
+                            provider = user.providerId
+                        )
                     )
-                )
+                }
             }
             SignInResult(
                 data = user?.run {
@@ -172,16 +181,22 @@ class AuthUIClient(
         return try {
             val user = auth.signInWithCredential(googleCredentials).await().user
             if (user != null) {
-                dbUsers.add(
-                    UserData(
-                        userId = user.uid,
-                        username = user.displayName,
-                        profilePictureUrl = user.photoUrl?.toString(),
-                        email = user.email,
-                        emailVerified = user.isEmailVerified,
-                        provider = user.providerId
+                // Check if the user document already exists
+                val userDocument = dbUsers.document(user.uid).get().await()
+
+                if (!userDocument.exists()) {
+                    // Add a new document only if it doesn't exist
+                    dbUsers.document(user.uid).set(
+                        UserData(
+                            userId = user.uid,
+                            username = user.displayName,
+                            profilePictureUrl = user.photoUrl?.toString(),
+                            email = user.email,
+                            emailVerified = user.isEmailVerified,
+                            provider = user.providerId
+                        )
                     )
-                )
+                }
             }
             SignInResult(
                 data = user?.run {
@@ -211,17 +226,24 @@ class AuthUIClient(
         }
     }
 
-    suspend fun signOut() {
-        try {
+    suspend fun signOut() : SignInResult = try {
             oneTapClient.signOut().await()
             auth.signOut()
+            SignInResult(
+                data = null,
+                errorMessage = null
+            )
         } catch(e: Exception) {
             e.printStackTrace()
             if(e is CancellationException) throw e
+            SignInResult(
+                data = null,
+                errorMessage = e.message
+            )
         }
-    }
 
     suspend fun reloadFirebaseUser() = try {
+
         auth.currentUser?.reload()?.await()
         val user = auth.currentUser
         SignInResult(
@@ -247,15 +269,29 @@ class AuthUIClient(
     }
 
 
-    fun getSignedInUser(): UserData? = auth.currentUser?.run {
-        UserData(
-            userId = uid,
-            username = displayName,
-            profilePictureUrl = photoUrl?.toString(),
-            email = email,
-            emailVerified = isEmailVerified,
-            provider = providerId
-        )
+    suspend fun getSignedInUser(): UserData? = auth.currentUser?.run {
+        try {
+            return withContext(Dispatchers.IO) {
+                // Fetch the Firestore document associated with the current user
+                val docRef = dbUsers.document(uid)
+                val userDocument = docRef.get().await()
+
+                val userDataFromFirestore = userDocument.toObject(UserData::class.java)
+
+                return@withContext UserData(
+                    userId = uid,
+                    username = userDataFromFirestore?.username ?: displayName,
+                    profilePictureUrl = userDataFromFirestore?.profilePictureUrl ?: photoUrl?.toString(),
+                    email = userDataFromFirestore?.email ?: email,
+                    emailVerified = userDataFromFirestore?.emailVerified ?: isEmailVerified,
+                    provider = userDataFromFirestore?.provider ?: providerId
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            if (e is CancellationException) throw e
+            null
+        }
     }
 
     private fun buildSignInRequest(): BeginSignInRequest {

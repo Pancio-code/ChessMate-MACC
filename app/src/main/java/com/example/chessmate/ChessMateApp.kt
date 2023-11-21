@@ -1,6 +1,5 @@
 package com.example.chessmate
 
-import android.app.Activity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -22,7 +21,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -42,6 +40,7 @@ import com.example.chessmate.ui.navigation.ChessMateRoute
 import com.example.chessmate.ui.navigation.ChessMateTopLevelDestination
 import com.example.chessmate.ui.pages.ContactUsScreen
 import com.example.chessmate.ui.pages.HomePage
+import com.example.chessmate.ui.pages.profile.ProfileScreen
 import com.example.chessmate.ui.pages.ScreenUnderConstruction
 import com.example.chessmate.ui.pages.SignInScreen
 import com.example.chessmate.ui.pages.SignUpScreen
@@ -57,11 +56,11 @@ import kotlinx.coroutines.launch
 fun ChessMateApp(
     windowSize: WindowSizeClass,
     displayFeatures: List<DisplayFeature>,
-    chessMateHomeUIState: ChessMateHomeUIState,
+    chessMateHomeUIState: ChessMateHomeUIState? = null,
     isAuthenticated: Boolean,
+    authState: SignInState? = null,
     authHandler: AuthUIClient?,
     authViewModel:  SignInViewModel? = null,
-    authState: SignInState? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null
 ) {
     val navigationType: ChessMateNavigationType
@@ -138,10 +137,10 @@ private fun ChessMateNavigationWrapper(
     contentType: ChessMateContentType,
     displayFeatures: List<DisplayFeature>,
     navigationContentPosition: ChessMateNavigationContentPosition,
-    chessMateHomeUIState: ChessMateHomeUIState,
+    chessMateHomeUIState: ChessMateHomeUIState? = null,
     isAuthenticated: Boolean,
-    authHandler: AuthUIClient? = null,
     authState: SignInState? = null,
+    authHandler: AuthUIClient? = null,
     authViewModel: SignInViewModel? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null
 ) {
@@ -172,11 +171,11 @@ private fun ChessMateNavigationWrapper(
                 navigationContentPosition = navigationContentPosition,
                 chessMateHomeUIState = chessMateHomeUIState,
                 navController = navController,
+                authState = authState,
                 selectedDestination = selectedDestination,
                 navigateToTopLevelDestination = navigationActions::navigateTo,
                 isAuthenticated = isAuthenticated,
                 authHandler = authHandler,
-                authState = authState,
                 authViewModel = authViewModel,
                 googleIntentLaucher = googleIntentLaucher
             )
@@ -205,6 +204,7 @@ private fun ChessMateNavigationWrapper(
                 navigationContentPosition = navigationContentPosition,
                 chessMateHomeUIState = chessMateHomeUIState,
                 navController = navController,
+                authState= authState,
                 selectedDestination = selectedDestination,
                 navigateToTopLevelDestination = navigationActions::navigateTo,
                 isAuthenticated = isAuthenticated,
@@ -214,7 +214,6 @@ private fun ChessMateNavigationWrapper(
                     }
                 },
                 authHandler = authHandler,
-                authState = authState,
                 authViewModel = authViewModel,
                 googleIntentLaucher = googleIntentLaucher
             )
@@ -229,15 +228,15 @@ fun ChessMateAppContent(
     contentType: ChessMateContentType,
     displayFeatures: List<DisplayFeature>,
     navigationContentPosition: ChessMateNavigationContentPosition,
-    chessMateHomeUIState: ChessMateHomeUIState,
+    chessMateHomeUIState: ChessMateHomeUIState? = null,
     navController: NavHostController,
     selectedDestination: String,
+    authState: SignInState? = null,
     navigateToTopLevelDestination: (ChessMateTopLevelDestination) -> Unit,
     onDrawerClicked: () -> Unit = {},
     isAuthenticated: Boolean,
     authViewModel: SignInViewModel? = null,
     authHandler: AuthUIClient? = null,
-    authState: SignInState? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null
 ) {
     Row(modifier = modifier.fillMaxSize()) {
@@ -262,9 +261,9 @@ fun ChessMateAppContent(
                 chessMateHomeUIState = chessMateHomeUIState,
                 navigationType = navigationType,
                 modifier = Modifier.weight(1f),
+                authState = authState,
                 isAuthenticated = isAuthenticated,
                 authHandler = authHandler,
-                authState = authState,
                 authViewModel = authViewModel,
                 googleIntentLaucher = googleIntentLaucher
             )
@@ -284,12 +283,12 @@ private fun ChessMateNavHost(
     navController: NavHostController,
     contentType: ChessMateContentType,
     displayFeatures: List<DisplayFeature>,
-    chessMateHomeUIState: ChessMateHomeUIState,
+    chessMateHomeUIState: ChessMateHomeUIState? = null,
     navigationType: ChessMateNavigationType,
+    authState: SignInState? = null,
     modifier: Modifier = Modifier,
     isAuthenticated: Boolean,
     authHandler: AuthUIClient? = null,
-    authState: SignInState? = null,
     authViewModel: SignInViewModel? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null
 ) {
@@ -306,7 +305,13 @@ private fun ChessMateNavHost(
                 ScreenUnderConstruction()
             }
             composable(ChessMateRoute.PROFILE) {
-                ScreenUnderConstruction()
+
+                ProfileScreen(
+                    modifier= modifier,
+                    userData = authViewModel?.getUserData(),
+                    authViewModel = authViewModel,
+                    authHandler = authHandler,
+                    navigationType = navigationType)
             }
         }
     } else {

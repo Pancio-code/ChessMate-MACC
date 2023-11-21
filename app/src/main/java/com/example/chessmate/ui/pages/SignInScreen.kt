@@ -325,8 +325,7 @@ fun SignInScreen(
             ) {
                 Button(onClick = {
                     lyfescope.launch {
-                        val signInIntentSender =
-                            authHandler!!.signIn()
+                        val signInIntentSender = authHandler!!.signIn()
                         googleIntentLaucher!!.launch(
                             IntentSenderRequest.Builder(
                                 signInIntentSender

@@ -218,7 +218,8 @@ fun SignUpScreen(
     }else {
         Column(
             modifier = modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .verticalScroll(scroll),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
