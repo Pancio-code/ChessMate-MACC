@@ -38,6 +38,7 @@ import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserData
 import com.example.chessmate.ui.utils.ChessMateNavigationType
 import kotlinx.coroutines.launch
+import com.example.chessmate.ui.components.CardProfile
 
 @Composable
 fun ProfileReadMode(
@@ -57,57 +58,14 @@ fun ProfileReadMode(
             .verticalScroll(scroll),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (userData?.profilePictureUrl != null) {
-                AsyncImage(
-                    model = userData.profilePictureUrl,
-                    contentDescription = "Profile picture",
-                    modifier = Modifier
-                        .size(30.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-            } else {
-                Image(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Default Profile picture",
-                    modifier = Modifier
-                        .size(30.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-            if (userData?.username != null) {
-                Text(
-                    text = userData.username,
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-            }
-            Spacer(modifier = Modifier.width(32.dp))
-            Button(
-                onClick = toggler,
-                colors = ButtonDefaults.buttonColors(
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                    )
-                ) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    modifier = Modifier.size(16.dp),
-                    contentDescription = "Edit icon"
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Edit")
+        if(userData?.username != null) {
+            CardProfile(userData = userData, toggler)
+            Spacer(modifier = Modifier.height(32.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Spacer(modifier = Modifier.width(32.dp))
             }
         }
-        Spacer(modifier = Modifier.height(32.dp))
+        //logout button
         Button(onClick = {
             lyfescope.launch {
                 val signInResult = authHandler?.signOut()
@@ -134,7 +92,7 @@ fun ProfileReadModePreview() {
         userData = UserData(
             userId = "1",
             profilePictureUrl = null,
-            username = "Andrea",
+            username = "Nome Cognome",
             email = "andrea.pancio00@gmail.com",
             emailVerified = false,
             provider = null
@@ -153,7 +111,7 @@ fun ProfileReadModeTabletPreview() {
         userData = UserData(
             userId = "1",
             profilePictureUrl = null,
-            username = "Andrea",
+            username = "Nome Cognome",
             email = "andrea.pancio00@gmail.com",
             emailVerified = false,
             provider = null

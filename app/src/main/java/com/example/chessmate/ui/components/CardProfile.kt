@@ -1,0 +1,177 @@
+package com.example.chessmate.ui.components
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import com.example.chessmate.R
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import com.example.chessmate.sign_in.UserData
+import com.example.chessmate.ui.theme.light_primary
+
+@Composable
+fun CardProfile(
+    userData: UserData?,
+    toggler: () -> Unit
+){
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxSize()
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(1f),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            ElevatedCard(
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 6.dp
+                ),
+                colors = CardDefaults.cardColors(
+                    containerColor = light_primary,
+                ),
+                modifier = Modifier
+                    .size(width = 240.dp, height = 100.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(1f)
+                        .padding(start = 8.dp, top = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.Center,
+                    ){
+                        ProfileImage(imageResourceId = R.drawable.profile_picture)
+                    }
+                    Column(
+                        horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Column(
+                        horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        if (userData?.username != null) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column{
+                                    Text(
+                                        text = userData.username,
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = 16.sp
+                                    )
+                                }
+                                Column(
+                                    modifier = Modifier.padding(start=20.dp),
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    IconButton(
+                                        onClick = toggler,
+                                        modifier = Modifier.size(16.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Settings,
+                                            contentDescription = "Settings"
+                                        )
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = userData.email.toString(),
+                                fontSize = 10.sp
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_italian_flag), // Replace with your actual resource ID
+                                contentDescription = "Italian Flag",
+                                modifier = Modifier.size(8.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Italy",
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(1f)
+                        .padding(start = 8.dp, top = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Column {
+                        Text(
+                            text = "Registered on 22 Nov 2023",
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+
+@Composable
+fun ProfileImage(imageResourceId: Int) {
+    Surface(
+        modifier = Modifier
+            .size(64.dp)
+            .clip(CircleShape),
+    ) {
+        Image(
+            painter = painterResource(id = imageResourceId),
+            contentDescription = null,
+            modifier = Modifier
+                .size(64.dp)
+                .clip(CircleShape)
+        )
+    }
+}
+
+@Preview
+@Composable
+fun CardProfilePreview() {
+    val userData = UserData(
+        userId = "1",
+        profilePictureUrl = null,
+        username = "Nome Cognome",
+        email = "andrea.pancio00@gmail.com",
+        emailVerified = false,
+        provider = null
+    )
+    CardProfile(userData, toggler = {})
+}
