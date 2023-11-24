@@ -16,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.chessmate.R
@@ -29,114 +30,99 @@ fun CardProfile(
     userData: UserData?,
     toggler: () -> Unit
 ){
-    Column(
+    ElevatedCard(
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 6.dp
+        ),
+        colors = CardDefaults.cardColors(
+            containerColor = light_primary,
+        ),
         modifier = Modifier
-            .padding(16.dp)
-            .fillMaxSize()
+            .size(width = 300.dp, height = 120.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(1f),
+            modifier = Modifier
+                .fillMaxWidth(1f)
+                .padding(start = 8.dp, top = 8.dp, end = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Column(
+                modifier = Modifier.padding(end=8.dp),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Center,
+            ){
+                ProfileImage(imageResourceId = R.drawable.profile_picture)
+            }
+            Column(
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Center
+            ) {
+                if (userData?.username != null) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column{
+                            Text(
+                                text = userData.username,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 20.sp
+                            )
+                        }
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(start=10.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.End
+                        ) {
+                            IconButton(
+                                onClick = toggler,
+                                modifier = Modifier.size(20.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = "Settings",
+                                    tint = Color.LightGray
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = userData.email.toString(),
+                        fontSize = 14.sp
+                    )
+                }
+                Spacer(modifier = Modifier.height(2.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_italian_flag), // Replace with your actual resource ID
+                        contentDescription = "Italian Flag",
+                        modifier = Modifier.size(10.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Italy",
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            ElevatedCard(
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 6.dp
-                ),
-                colors = CardDefaults.cardColors(
-                    containerColor = light_primary,
-                ),
-                modifier = Modifier
-                    .size(width = 240.dp, height = 100.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(1f)
-                        .padding(start = 8.dp, top = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.Start,
-                        verticalArrangement = Arrangement.Center,
-                    ){
-                        ProfileImage(imageResourceId = R.drawable.profile_picture)
-                    }
-                    Column(
-                        horizontalAlignment = Alignment.Start,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-                    Column(
-                        horizontalAlignment = Alignment.Start,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        if (userData?.username != null) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column{
-                                    Text(
-                                        text = userData.username,
-                                        fontWeight = FontWeight.Medium,
-                                        fontSize = 16.sp
-                                    )
-                                }
-                                Column(
-                                    modifier = Modifier.padding(start=20.dp),
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    IconButton(
-                                        onClick = toggler,
-                                        modifier = Modifier.size(16.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Settings,
-                                            contentDescription = "Settings"
-                                        )
-                                    }
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = userData.email.toString(),
-                                fontSize = 10.sp
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.ic_italian_flag), // Replace with your actual resource ID
-                                contentDescription = "Italian Flag",
-                                modifier = Modifier.size(8.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "Italy",
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 12.sp
-                            )
-                        }
-                    }
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(1f)
-                        .padding(start = 8.dp, top = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Column {
-                        Text(
-                            text = "Registered on 22 Nov 2023",
-                            fontWeight = FontWeight.Normal,
-                            fontSize = 12.sp
-                        )
-                    }
-                }
+            Column {
+                Text(
+                    text = "Registered on 22 Nov 2023",
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 12.sp
+                )
             }
         }
     }
@@ -149,14 +135,14 @@ fun CardProfile(
 fun ProfileImage(imageResourceId: Int) {
     Surface(
         modifier = Modifier
-            .size(64.dp)
+            .size(80.dp)
             .clip(CircleShape),
     ) {
         Image(
             painter = painterResource(id = imageResourceId),
             contentDescription = null,
             modifier = Modifier
-                .size(64.dp)
+                .size(80.dp)
                 .clip(CircleShape)
         )
     }

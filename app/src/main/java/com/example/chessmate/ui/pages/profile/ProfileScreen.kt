@@ -23,10 +23,17 @@ fun ProfileScreen(
     authViewModel: SignInViewModel? = null,
 ) {
     var isEditMode by remember { mutableStateOf(false) }
-
+    var userDataStatic = UserData(
+        userId = "1",
+        profilePictureUrl = null,
+        username = "Nome Cognome",
+        email = "andrea.pancio00@gmail.com",
+        emailVerified = false,
+        provider = null
+    )
     if (!isEditMode) {
         ProfileReadMode(
-            userData = userData,
+            userData = userDataStatic,
             navigationType = navigationType,
             modifier = modifier,
             authHandler = authHandler,
@@ -51,7 +58,7 @@ fun ProfilePagePreview() {
         userData = UserData(
             userId = "1",
             profilePictureUrl = null,
-            username = "Andrea",
+            username = "Nome Cognome",
             email = "andrea.pancio00@gmail.com",
             emailVerified = false,
             provider = null

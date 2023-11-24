@@ -66,3 +66,5 @@ val dark_outlineVariant = Color(0xFF49454F)
 val dark_scrim = Color(0xFF000000)
 
 val seed = Color(0xFF6750A4)
+
+val iconScore = Color(0xa16a2300)
