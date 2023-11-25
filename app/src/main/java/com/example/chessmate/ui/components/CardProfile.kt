@@ -67,7 +67,8 @@ fun CardProfile(
                             Text(
                                 text = userData.username,
                                 fontWeight = FontWeight.Medium,
-                                fontSize = 20.sp
+                                fontSize = 20.sp,
+                                color = Color.White
                             )
                         }
                         Column(
@@ -90,7 +91,8 @@ fun CardProfile(
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = userData.email.toString(),
-                        fontSize = 14.sp
+                        fontSize = 14.sp,
+                        color = Color.LightGray
                     )
                 }
                 Spacer(modifier = Modifier.height(2.dp))
@@ -106,22 +108,26 @@ fun CardProfile(
                     Text(
                         text = "Italy",
                         fontWeight = FontWeight.Normal,
-                        fontSize = 14.sp
+                        fontSize = 14.sp,
+                        color = Color.LightGray
                     )
                 }
             }
         }
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
             Column {
                 Text(
-                    text = "Registered on 22 Nov 2023",
+                    text = "Signup on 22 Nov 2023",
                     fontWeight = FontWeight.Normal,
-                    fontSize = 12.sp
+                    fontSize = 12.sp,
+                    color = Color.LightGray,
+                    modifier = Modifier.padding(start = 16.dp)
                 )
             }
         }
