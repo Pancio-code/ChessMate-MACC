@@ -14,11 +14,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -27,6 +32,7 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,6 +49,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.example.chessmate.R
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.UserData
@@ -50,6 +57,7 @@ import com.example.chessmate.ui.components.MenuCountryPicker
 import com.example.chessmate.ui.utils.ChessMateNavigationType
 import com.example.chessmate.ui.theme.light_primary
 import com.example.chessmate.ui.theme.dark_primaryContainer
+import com.example.chessmate.ui.theme.light_error
 
 @Composable
 fun ProfileEditMode(
@@ -60,6 +68,8 @@ fun ProfileEditMode(
     toggler: () -> Unit
 ) {
     var isConfirmMode by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -127,6 +137,30 @@ fun ProfileEditMode(
         CustomRowEdit(title = "Surname", placeholder = "Smith", isConfirmMode = {isConfirmMode = true})
         CustomRowEdit(title = "Email", placeholder = userData?.email.toString(), isConfirmMode = {isConfirmMode = true})
         CustomRowEdit(title = "Country", placeholder = "", isConfirmMode = {isConfirmMode = true})
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+            horizontalArrangement = Arrangement.Center
+        ){
+            ElevatedButton(
+                colors = ButtonColors(
+                    containerColor = light_error,
+                    contentColor = Color.White,
+                    disabledContainerColor = Color.Green,
+                    disabledContentColor = Color.Green),
+                onClick = {showDialog = true}) {
+                Text("Delete Account", fontSize = 16.sp)
+            }
+        }
+        if (showDialog) {
+            DeleteDialog(
+                onConfirm = {
+                    showDialog = false
+                },
+                onDismiss = {
+                    showDialog = false
+                }
+            )
+        }
     }
 }
 
@@ -202,24 +236,58 @@ fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit)
     )
 }
 
-@Preview
 @Composable
-fun ProfileEditModePreview() {
-    ProfileEditMode(
-        userData = UserData(
-            userId = "1",
-            profilePictureUrl = null,
-            username = "Andrea",
-            email = "andrea.pancio00@gmail.com",
-            emailVerified = false,
-            provider = null
-        ),
-        modifier = Modifier,
-        authHandler = null,
-        navigationType = ChessMateNavigationType.BOTTOM_NAVIGATION,
-        toggler = {}
-    )
+fun DeleteDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    Dialog(onDismissRequest = { onDismiss() }){
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = Color.LightGray,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+                Text(
+                    text = "Do you want to delete the account?",
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth().padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    TextButton(
+                        onClick = { onDismiss() },
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                    ) {
+                        Text("Dismiss")
+                    }
+                    TextButton(
+                        onClick = { onConfirm() },
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                    ) {
+                        Text("Confirm")
+                    }
+                }
+            }
+        }
+    }
 }
+
+
 
 // to delete
 @Composable
@@ -238,6 +306,25 @@ fun Avatar(imageResourceId: Int) {
                 .clip(CircleShape)
         )
     }
+}
+
+@Preview
+@Composable
+fun ProfileEditModePreview() {
+    ProfileEditMode(
+        userData = UserData(
+            userId = "1",
+            profilePictureUrl = null,
+            username = "Andrea",
+            email = "andrea.pancio00@gmail.com",
+            emailVerified = false,
+            provider = null
+        ),
+        modifier = Modifier,
+        authHandler = null,
+        navigationType = ChessMateNavigationType.BOTTOM_NAVIGATION,
+        toggler = {}
+    )
 }
 
 @Preview
