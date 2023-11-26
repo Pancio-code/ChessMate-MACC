@@ -143,6 +143,7 @@ fun ProfileImage(imageResourceId: Int) {
         modifier = Modifier
             .size(80.dp)
             .clip(CircleShape),
+        color = Color.Transparent
     ) {
         Image(
             painter = painterResource(id = imageResourceId),
