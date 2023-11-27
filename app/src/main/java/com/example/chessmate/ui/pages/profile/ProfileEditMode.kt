@@ -2,6 +2,7 @@ package com.example.chessmate.ui.pages.profile
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,9 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -54,6 +58,7 @@ import com.example.chessmate.R
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.UserData
 import com.example.chessmate.ui.components.MenuCountryPicker
+import com.example.chessmate.ui.theme.dark_background
 import com.example.chessmate.ui.utils.ChessMateNavigationType
 import com.example.chessmate.ui.theme.light_primary
 import com.example.chessmate.ui.theme.dark_primaryContainer
@@ -69,6 +74,7 @@ fun ProfileEditMode(
 ) {
     var isConfirmMode by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -131,14 +137,16 @@ fun ProfileEditMode(
                 }
             }
         }
-        CustomRowEdit(title = "Avatar", placeholder = "ok", isConfirmMode = {isConfirmMode = true})
+        CustomRowEdit(title = "Avatar", placeholder = "ok", isConfirmMode = {isConfirmMode = true}, isExpanded = {expanded = true})
         CustomRowEdit(title = "Username", placeholder = userData?.username.toString(), isConfirmMode = {isConfirmMode = true})
         CustomRowEdit(title = "Name", placeholder = "Jhon", isConfirmMode = {isConfirmMode = true})
         CustomRowEdit(title = "Surname", placeholder = "Smith", isConfirmMode = {isConfirmMode = true})
         CustomRowEdit(title = "Email", placeholder = userData?.email.toString(), isConfirmMode = {isConfirmMode = true})
         CustomRowEdit(title = "Country", placeholder = "", isConfirmMode = {isConfirmMode = true})
         Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.Center
         ){
             ElevatedButton(
@@ -161,12 +169,15 @@ fun ProfileEditMode(
                 }
             )
         }
+        if (expanded) {
+            ChangeAvatar(onDismiss = {expanded = false})
+        }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit){
+fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit, isExpanded: () -> Unit = { }){
     var textValue by remember { mutableStateOf(placeholder) }
     Row(
         modifier = Modifier
@@ -202,7 +213,7 @@ fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit)
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Start
                     ) {
-                        Avatar(imageResourceId = R.drawable.profile_picture)
+                        Avatar(imageResourceId = R.drawable.profile_picture, isExpanded)
                     }
                 "Country" ->
                     Row(
@@ -235,6 +246,48 @@ fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit)
             .fillMaxWidth()
     )
 }
+@Composable
+fun ChangeAvatar(
+    onDismiss: () -> Unit,
+) {
+    Dialog(onDismissRequest = { onDismiss() }) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(80.dp),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = light_primary,
+            ),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(text = "Take a picture", color = Color.White)
+                }
+                HorizontalDivider(
+                    color = Color.Gray,
+                    thickness = 1.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(text = "Choose a photo", color = Color.White)
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun DeleteDialog(
@@ -266,7 +319,8 @@ fun DeleteDialog(
                 )
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth().padding(top = 16.dp),
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
                     horizontalArrangement = Arrangement.Center,
                 ) {
                     TextButton(
@@ -291,11 +345,12 @@ fun DeleteDialog(
 
 // to delete
 @Composable
-fun Avatar(imageResourceId: Int) {
+fun Avatar(imageResourceId: Int, isExpanded: () -> Unit) {
     Surface(
         modifier = Modifier
             .size(80.dp)
-            .clip(CircleShape),
+            .clip(CircleShape)
+            .clickable { isExpanded() },
         color = Color.Transparent
     ) {
         Image(
