@@ -5,14 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.getValue
-import com.example.chessmate.ui.theme.ChessMateTheme
 import androidx.activity.viewModels
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
@@ -21,20 +20,22 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserAuthStateType
 import com.example.chessmate.ui.navigation.ExitApplicationComponent
+import com.example.chessmate.ui.theme.ChessMateTheme
 import com.example.chessmate.ui.utils.PreferencesManagerHelper
 import com.facebook.FacebookSdk
 import com.google.accompanist.adaptive.calculateDisplayFeatures
 import com.google.android.gms.auth.api.identity.Identity
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
+import org.koin.ksp.generated.defaultModule
 
 class MainActivity : ComponentActivity() {
 
@@ -54,11 +55,19 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+    private fun initKoin() {
+        startKoin {
+            androidLogger()
+            androidContext(this@MainActivity)
+            modules(defaultModule)
+        }
+    }
 
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initKoin()
         FacebookSdk.sdkInitialize(applicationContext);
 
         lifecycleScope.launch {
