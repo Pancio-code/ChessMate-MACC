@@ -6,6 +6,8 @@ import android.graphics.Color
 import android.util.Log
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.LinearLayout
+import androidx.annotation.OptIn
+import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
@@ -41,25 +43,34 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.util.concurrent.Executor
 
 
 @Composable
 fun CameraScreen(
-    viewModel: CameraViewModel = koinViewModel()
+    viewModel: CameraViewModel = koinViewModel(),
+    onImageTaken: () -> Unit,
+    onNewAvatar: (String) -> Unit,
 ) {
     val cameraState: CameraState by viewModel.state.collectAsStateWithLifecycle()
 
     CameraContent(
         onPhotoCaptured = viewModel::storePhotoInGallery,
-        lastCapturedPhoto = cameraState.capturedImage
+        lastCapturedPhoto = cameraState.capturedImage,
+        onImageTaken = onImageTaken,
+        onNewAvatar = onNewAvatar
     )
 }
 
 @Composable
 private fun CameraContent(
     onPhotoCaptured: (Bitmap) -> Unit,
-    lastCapturedPhoto: Bitmap? = null
+    lastCapturedPhoto: Bitmap? = null,
+    onImageTaken: () -> Unit,
+    onNewAvatar: (String) -> Unit
 ) {
 
     val context: Context = LocalContext.current
@@ -71,7 +82,7 @@ private fun CameraContent(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 text = { Text(text = "Take photo") },
-                onClick = { capturePhoto(context, cameraController, onPhotoCaptured) },
+                onClick = { capturePhoto(context, cameraController, onPhotoCaptured, onImageTaken, onNewAvatar); },
                 icon = { Icon(imageVector = Icons.Default.Camera, contentDescription = "Camera capture icon") }
             )
         }
@@ -108,19 +119,36 @@ private fun CameraContent(
 private fun capturePhoto(
     context: Context,
     cameraController: LifecycleCameraController,
-    onPhotoCaptured: (Bitmap) -> Unit
+    onPhotoCaptured: (Bitmap) -> Unit,
+    onImageTaken: () -> Unit,
+    onNewAvatar: (String) -> Unit
 ) {
     val mainExecutor: Executor = ContextCompat.getMainExecutor(context)
+    val file = File(context.externalMediaDirs.firstOrNull(), "${System.currentTimeMillis()}.jpg")
+
 
     cameraController.takePicture(mainExecutor, object : ImageCapture.OnImageCapturedCallback() {
-        override fun onCaptureSuccess(image: ImageProxy) {
+        @OptIn(ExperimentalGetImage::class) override fun onCaptureSuccess(image: ImageProxy) {
             val correctedBitmap: Bitmap = image
                 .toBitmap()
                 .rotateBitmap(image.imageInfo.rotationDegrees)
 
+            try {
+                FileOutputStream(file).use { out ->
+                    correctedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+                }
+            } catch (e: IOException) {
+                Log.e("CameraContent", "Error saving image to file", e)
+            }
+
+            onNewAvatar(file.absolutePath)
             onPhotoCaptured(correctedBitmap)
             image.close()
+            cameraController.unbind()
+            onImageTaken()
         }
+
+
 
         override fun onError(exception: ImageCaptureException) {
             Log.e("CameraContent", "Error capturing image", exception)
@@ -154,6 +182,8 @@ private fun LastPhotoPreview(
 @Composable
 private fun Preview_CameraContent() {
     CameraContent(
-        onPhotoCaptured = {}
+        onPhotoCaptured = {},
+        onImageTaken = {},
+        onNewAvatar = {}
     )
 }

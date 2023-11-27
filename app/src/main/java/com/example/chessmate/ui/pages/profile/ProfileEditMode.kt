@@ -1,6 +1,7 @@
 package com.example.chessmate.ui.pages.profile
 
 import android.Manifest
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -56,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.LifecycleOwner
+import coil.compose.rememberAsyncImagePainter
 import com.example.chessmate.R
 import com.example.chessmate.camera.photo_capture.CameraScreen
 import com.example.chessmate.sign_in.AuthUIClient
@@ -69,6 +71,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import java.io.File
+
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ProfileEditMode(
@@ -84,6 +88,7 @@ fun ProfileEditMode(
     var expanded by remember { mutableStateOf(false) }
     val cameraPermissionState: PermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val lifecycleOwner = LocalLifecycleOwner.current
+    var newAvatarPath by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -146,7 +151,7 @@ fun ProfileEditMode(
                 }
             }
         }
-        CustomRowEdit(title = "Avatar", placeholder = "ok", isConfirmMode = {isConfirmMode = true}, isExpanded = {expanded = true})
+        CustomRowEdit(title = "Avatar", placeholder = newAvatarPath, isConfirmMode = {isConfirmMode = true}, isExpanded = {expanded = true})
         CustomRowEdit(title = "Username", placeholder = userData?.username.toString(), isConfirmMode = {isConfirmMode = true})
         CustomRowEdit(title = "Name", placeholder = "Jhon", isConfirmMode = {isConfirmMode = true})
         CustomRowEdit(title = "Surname", placeholder = "Smith", isConfirmMode = {isConfirmMode = true})
@@ -189,7 +194,14 @@ fun ProfileEditMode(
                 hasPermission = cameraPermissionState.status.isGranted,
                 cameraPermissionState = cameraPermissionState,
                 lifecycleOwner = lifecycleOwner,
-                onDismiss = {showCamera = false}
+                onDismiss = {
+                    showCamera = false;
+                    expanded = false;
+                },
+                onNewAvatar = {
+                    newValue:String -> newAvatarPath = newValue;
+                    isConfirmMode = true;
+                }
             )
         }
     }
@@ -233,7 +245,7 @@ fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit,
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Start
                     ) {
-                        Avatar(imageResourceId = R.drawable.profile_picture, isExpanded)
+                        Avatar(imageResourceId = R.drawable.profile_picture, isExpanded, uploadedImagePath = placeholder)
                     }
                 "Country" ->
                     Row(
@@ -322,7 +334,9 @@ fun ShowAskPermissionAndCamera(
     hasPermission: Boolean,
     cameraPermissionState: PermissionState,
     lifecycleOwner: LifecycleOwner,
-    onDismiss: () -> Unit) {
+    onDismiss: () -> Unit,
+    onNewAvatar: (String) -> Unit
+    ) {
     if (hasPermission) {
         Dialog(onDismissRequest = { onDismiss() }) {
             Card(
@@ -337,7 +351,7 @@ fun ShowAskPermissionAndCamera(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    CameraScreen()
+                    CameraScreen(onImageTaken = onDismiss, onNewAvatar = onNewAvatar)
                 }
             }
         }
@@ -404,7 +418,7 @@ fun DeleteDialog(
 
 // to delete
 @Composable
-fun Avatar(imageResourceId: Int, isExpanded: () -> Unit) {
+fun Avatar(imageResourceId: Int = R.drawable.profile_picture, isExpanded: () -> Unit, uploadedImagePath: String = "") {
     Surface(
         modifier = Modifier
             .size(80.dp)
@@ -412,13 +426,24 @@ fun Avatar(imageResourceId: Int, isExpanded: () -> Unit) {
             .clickable { isExpanded() },
         color = Color.Transparent
     ) {
-        Image(
-            painter = painterResource(id = imageResourceId),
-            contentDescription = null,
-            modifier = Modifier
-                .size(80.dp)
-                .clip(CircleShape)
-        )
+        if(uploadedImagePath == ""){
+            Image(
+                painter = painterResource(id = imageResourceId),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+            )
+        } else {
+            Image(
+                rememberAsyncImagePainter(File(uploadedImagePath)),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+            )
+        }
+
     }
 }
 
