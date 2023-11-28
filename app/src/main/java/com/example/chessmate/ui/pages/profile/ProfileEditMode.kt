@@ -1,7 +1,9 @@
 package com.example.chessmate.ui.pages.profile
 
 import android.Manifest
-import android.util.Log
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,6 +50,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,7 +61,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.LifecycleOwner
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.chessmate.R
 import com.example.chessmate.camera.photo_capture.CameraScreen
 import com.example.chessmate.sign_in.AuthUIClient
@@ -72,6 +78,7 @@ import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import java.io.File
+
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -186,7 +193,10 @@ fun ProfileEditMode(
         if (expanded) {
             ChangeAvatar(
                 onDismiss = {expanded = false},
-                showCamera = {showCamera = true}
+                showCamera = {showCamera = true},
+                onUpload = {
+                    newValue:String -> newAvatarPath = newValue
+                }
             )
         }
         if (showCamera){
@@ -195,12 +205,12 @@ fun ProfileEditMode(
                 cameraPermissionState = cameraPermissionState,
                 lifecycleOwner = lifecycleOwner,
                 onDismiss = {
-                    showCamera = false;
-                    expanded = false;
+                    showCamera = false
+                    expanded = false
                 },
                 onNewAvatar = {
-                    newValue:String -> newAvatarPath = newValue;
-                    isConfirmMode = true;
+                    newValue:String -> newAvatarPath = newValue
+                    isConfirmMode = true
                 }
             )
         }
@@ -282,8 +292,15 @@ fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit,
 @Composable
 fun ChangeAvatar(
     onDismiss: () -> Unit,
-    showCamera: () -> Unit
+    showCamera: () -> Unit,
+    onUpload: (String) -> Unit
 ) {
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    val getContent = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
+        imageUri = uri
+        onUpload(imageUri.toString())
+        onDismiss()
+    }
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
             modifier = Modifier.fillMaxWidth().height(100.dp),
@@ -321,7 +338,10 @@ fun ChangeAvatar(
                         .padding(8.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(text = "Choose a photo", color = Color.White)
+                    Text(
+                        text = "Choose a photo",
+                        color = Color.White,
+                        modifier = Modifier.clickable { getContent.launch("image/*") })
                 }
             }
         }
@@ -426,26 +446,42 @@ fun Avatar(imageResourceId: Int = R.drawable.profile_picture, isExpanded: () -> 
             .clickable { isExpanded() },
         color = Color.Transparent
     ) {
-        if(uploadedImagePath == ""){
-            Image(
-                painter = painterResource(id = imageResourceId),
-                contentDescription = null,
+        if(uploadedImagePath.startsWith("content://")){
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(uploadedImagePath)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = "Uploaded Image",
                 modifier = Modifier
                     .size(80.dp)
-                    .clip(CircleShape)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop,
             )
         } else {
-            Image(
-                rememberAsyncImagePainter(File(uploadedImagePath)),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape)
-            )
+            if(uploadedImagePath == ""){
+                Image(
+                    painter = painterResource(id = imageResourceId),
+                    contentDescription = "Default Image",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape),
+                )
+            } else {
+                Image(
+                    rememberAsyncImagePainter(File(uploadedImagePath)),
+                    contentDescription = "Image from camera",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop,
+                )
+            }
         }
-
     }
 }
+
+
 
 @Preview
 @Composable
