@@ -488,7 +488,7 @@ fun Avatar(imageResourceId: Int = R.drawable.profile_picture, isExpanded: () -> 
 fun ProfileEditModePreview() {
     ProfileEditMode(
         userData = UserData(
-            userId = "1",
+            id = "1",
             profilePictureUrl = null,
             username = "Andrea",
             email = "andrea.pancio00@gmail.com",
@@ -507,7 +507,7 @@ fun ProfileEditModePreview() {
 fun ProfileEditModeTabletPreview() {
     ProfileEditMode(
         userData = UserData(
-            userId = "1",
+            id = "1",
             profilePictureUrl = null,
             username = "Andrea",
             email = "andrea.pancio00@gmail.com",

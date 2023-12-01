@@ -3,15 +3,16 @@ package com.example.chessmate.sign_in
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
+import android.util.Log
 import android.widget.Toast
 import com.example.chessmate.BuildConfig
-import com.example.chessmate.R
+import com.example.chessmate.ui.utils.HelperClass
+import com.example.chessmate.ui.utils.UserAPI
 import com.facebook.login.LoginResult
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FacebookAuthProvider
-import com.google.firebase.auth.FirebaseAuthEmailException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
@@ -22,18 +23,27 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.Response
+import okhttp3.ResponseBody
 
 class AuthUIClient(
     private val context: Context,
     private val oneTapClient: SignInClient,
-    private val db : FirebaseFirestore
+    //private val db : FirebaseFirestore
     ) {
     private val auth = Firebase.auth
-    private val dbUsers: CollectionReference = db.collection("Users_Info")
+    private val userRemoteService : UserAPI = HelperClass.getIstance()
+    private val token = BuildConfig.TOKEN
+    private val gson = Gson()
+    //private val dbUsers: CollectionReference = db.collection("Users_Info")
 
     suspend fun signIn(): IntentSender? {
         val result = try {
@@ -55,7 +65,7 @@ class AuthUIClient(
         SignInResult(
             data = user?.run {
                 UserData(
-                    userId = uid,
+                    id = uid,
                     username = displayName,
                     profilePictureUrl = photoUrl?.toString(),
                     email = email,
@@ -83,29 +93,27 @@ class AuthUIClient(
         val token = result.accessToken.token
         val credential = FacebookAuthProvider.getCredential(token)
         return try {
-            val user = Firebase.auth.signInWithCredential(credential).await().user
+            val user = Firebase.auth.signInWithCredential(credential).await().user;
             if (user != null) {
-                // Check if the user document already exists
-                val userDocument = dbUsers.document(user.uid).get().await()
-
-                if (!userDocument.exists()) {
-                    // Add a new document only if it doesn't exist
-                    dbUsers.document(user.uid).set(
+                var userResponse =  userRemoteService.get(token=token,id= user.uid)
+                if (userResponse.code() == 290) {
+                    val data = gson.toJson(
                         UserData(
-                            userId = user.uid,
-                            username = user.displayName,
-                            profilePictureUrl = user.photoUrl?.toString(),
+                            id = user.uid,
                             email = user.email,
                             emailVerified = user.isEmailVerified,
-                            provider = user.providerId
+                            profilePictureUrl = user.photoUrl?.toString(),
+                            provider = user.providerId,
+                            username = user.displayName
                         )
-                    )
+                    );
+                    userRemoteService.create(token = token, body = data)
                 }
             }
             SignInResult(
                 data = user?.run {
                     UserData(
-                        userId = uid,
+                        id = uid,
                         username = displayName,
                         profilePictureUrl = photoUrl?.toString(),
                         email = email,
@@ -135,21 +143,25 @@ class AuthUIClient(
     ) = try {
             val user  = auth.createUserWithEmailAndPassword(email, password).await().user
             if (user != null) {
-                dbUsers.add(
-                    UserData(
-                        userId = user.uid,
-                        username = username,
-                        profilePictureUrl = user.photoUrl?.toString(),
-                        email = email,
-                        emailVerified = false,
-                        provider = EmailAuthProvider.PROVIDER_ID
-                    )
-                )
+                var userResponse =  userRemoteService.get(token=token,id= user.uid)
+                if (userResponse.code() == 290) {
+                    val data = gson.toJson(
+                        UserData(
+                            id = user.uid,
+                            email = user.email,
+                            emailVerified = user.isEmailVerified,
+                            profilePictureUrl = user.photoUrl?.toString(),
+                            provider = user.providerId,
+                            username = username
+                        )
+                    );
+                    userRemoteService.create(token = token, body = data)
+                }
             }
             SignInResult(
                 data = user?.run {
                     UserData(
-                        userId = uid,
+                        id = uid,
                         username = username,
                         profilePictureUrl = photoUrl?.toString(),
                         email = email,
@@ -181,32 +193,29 @@ class AuthUIClient(
         return try {
             val user = auth.signInWithCredential(googleCredentials).await().user
             if (user != null) {
-                // Check if the user document already exists
-                val userDocument = dbUsers.document(user.uid).get().await()
-
-                if (!userDocument.exists()) {
-                    // Add a new document only if it doesn't exist
-                    dbUsers.document(user.uid).set(
-                        UserData(
-                            userId = user.uid,
-                            username = user.displayName,
-                            profilePictureUrl = user.photoUrl?.toString(),
-                            email = user.email,
-                            emailVerified = user.isEmailVerified,
-                            provider = user.providerId
+                var userResponse =  userRemoteService.get(token=token,id= user.uid)
+                if (userResponse.code() == 290) {
+                    val data = gson.toJson(UserData(
+                        id = user.uid,
+                        email = user.email,
+                        emailVerified = user.isEmailVerified,
+                        profilePictureUrl = user.photoUrl?.toString(),
+                        provider = user.providerId,
+                        username = user.displayName
                         )
-                    )
+                    );
+                    userRemoteService.create(token=token, body = data)
                 }
             }
             SignInResult(
                 data = user?.run {
                     UserData(
-                        userId = uid,
-                        username = displayName,
-                        profilePictureUrl = photoUrl?.toString(),
+                        id = uid,
                         email = email,
                         emailVerified = isEmailVerified,
-                        provider = providerId
+                        profilePictureUrl = photoUrl?.toString(),
+                        provider = providerId,
+                        username = displayName,
                     )
                 },
                 errorMessage = null
@@ -249,7 +258,7 @@ class AuthUIClient(
         SignInResult(
             data = user?.run {
                 UserData(
-                    userId = uid,
+                    id = uid,
                     username = displayName,
                     profilePictureUrl = photoUrl?.toString(),
                     email = email,
@@ -271,21 +280,17 @@ class AuthUIClient(
 
     suspend fun getSignedInUser(): UserData? = auth.currentUser?.run {
         try {
-            return withContext(Dispatchers.IO) {
-                // Fetch the Firestore document associated with the current user
-                val docRef = dbUsers.document(uid)
-                val userDocument = docRef.get().await()
-
-                val userDataFromFirestore = userDocument.toObject(UserData::class.java)
-
-                return@withContext UserData(
-                    userId = uid,
-                    username = userDataFromFirestore?.username ?: displayName,
-                    profilePictureUrl = userDataFromFirestore?.profilePictureUrl ?: photoUrl?.toString(),
-                    email = userDataFromFirestore?.email ?: email,
-                    emailVerified = userDataFromFirestore?.emailVerified ?: isEmailVerified,
-                    provider = userDataFromFirestore?.provider ?: providerId
-                )
+            var userResponse =  userRemoteService.get(token = token,id = uid)
+            if (userResponse.code() == 200) {
+                Log.d("test",gson.toJson(userResponse.body()))
+                userResponse.body()
+            } else {
+                Toast.makeText(
+                    context,
+                    userResponse.message(),
+                    Toast.LENGTH_LONG
+                ).show()
+                null
             }
         } catch (e: Exception) {
             e.printStackTrace()

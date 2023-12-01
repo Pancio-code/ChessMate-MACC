@@ -43,10 +43,14 @@ android {
         }
         debug {
             addConstantTo(owner,"WEB_CLIENT_ID", apikeyProperties['WEB_CLIENT_ID'])
+            addConstantTo(owner,"TOKEN", apikeyProperties['TOKEN'])
+            addConstantTo(owner,"API_URL", apikeyProperties['API_URL'])
         }
         release {
             //BuildConfig
             addConstantTo(owner,"WEB_CLIENT_ID", apikeyProperties['WEB_CLIENT_ID'])
+            addConstantTo(owner,"TOKEN", apikeyProperties['TOKEN'])
+            addConstantTo(owner,"API_URL", apikeyProperties['API_URL'])
 
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -115,6 +119,10 @@ dependencies {
     implementation "io.insert-koin:koin-android:3.4.2"
     implementation 'io.insert-koin:koin-androidx-compose:3.4.6'
     implementation "io.insert-koin:koin-annotations:1.2.2"
+    // retrofit
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    // GSON
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("io.coil-kt:coil-compose:2.5.0")
     ksp "io.insert-koin:koin-ksp-compiler:1.2.2"
 

@@ -6,10 +6,10 @@ data class SignInResult(
 )
 
 data class UserData(
-    val userId: String? = null,
-    val username: String? = null,
-    val profilePictureUrl: String? = null,
+    val id: String? = null,
     val email: String? = null,
     val emailVerified: Boolean = false,
-    val provider: String? = null
+    val profilePictureUrl: String? = null,
+    val provider: String? = null,
+    val username: String? = null,
 )

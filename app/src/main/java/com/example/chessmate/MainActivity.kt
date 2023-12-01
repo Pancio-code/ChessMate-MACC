@@ -41,17 +41,17 @@ class MainActivity : ComponentActivity() {
 
     private val signInViewModel: SignInViewModel by viewModels()
     private var userAuthState =  mutableStateOf(UserAuthStateType.UNAUTHENTICATED)
-    private val db = Firebase.firestore
-    private val preferencesManager by lazy {
+   // private val db = Firebase.firestore
+   /* private val preferencesManager by lazy {
         PreferencesManagerHelper(applicationContext)
-    }
+    }*/
 
 
     private val authUIClient by lazy {
         AuthUIClient(
             context = applicationContext,
             oneTapClient = Identity.getSignInClient(applicationContext),
-            db = db
+            //db = db
         )
     }
 

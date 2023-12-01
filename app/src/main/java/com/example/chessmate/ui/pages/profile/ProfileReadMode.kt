@@ -98,7 +98,7 @@ fun ProfileReadMode(
 fun ProfileReadModePreview() {
     ProfileReadMode(
         userData = UserData(
-            userId = "1",
+            id = "1",
             profilePictureUrl = null,
             username = "Nome Cognome",
             email = "andrea.pancio00@gmail.com",
@@ -130,7 +130,7 @@ fun ProfileReadModePreview() {
 fun ProfileReadModeTabletPreview() {
     ProfileReadMode(
         userData = UserData(
-            userId = "1",
+            id = "1",
             profilePictureUrl = null,
             username = "Nome Cognome",
             email = "andrea.pancio00@gmail.com",

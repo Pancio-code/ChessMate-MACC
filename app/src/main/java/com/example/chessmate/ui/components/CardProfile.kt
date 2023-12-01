@@ -159,7 +159,7 @@ fun ProfileImage(imageResourceId: Int) {
 @Composable
 fun CardProfilePreview() {
     val userData = UserData(
-        userId = "1",
+        id = "1",
         profilePictureUrl = null,
         username = "Nome Cognome",
         email = "andrea.pancio00@gmail.com",

@@ -22,7 +22,7 @@ fun ProfileScreen(
 ) {
     var isEditMode by remember { mutableStateOf(false) }
     val userDataStatic = UserData(
-        userId = "1",
+        id = "1",
         profilePictureUrl = null,
         username = "Nome Cognome",
         email = "andrea.pancio00@gmail.com",
@@ -71,7 +71,7 @@ fun ProfileScreen(
 fun ProfilePagePreview() {
     ProfileScreen(
         userData = UserData(
-            userId = "1",
+            id = "1",
             profilePictureUrl = null,
             username = "Nome Cognome",
             email = "andrea.pancio00@gmail.com",
@@ -89,7 +89,7 @@ fun ProfilePagePreview() {
 fun ProfilePageTabletPreview() {
     ProfileScreen(
         userData = UserData(
-            userId = "1",
+            id = "1",
             profilePictureUrl = null,
             username = "Andrea",
             email = "andrea.pancio00@gmail.com",
