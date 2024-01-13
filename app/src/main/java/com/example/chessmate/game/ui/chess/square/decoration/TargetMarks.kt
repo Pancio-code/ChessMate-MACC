@@ -17,7 +17,7 @@ import java.util.UUID
 object TargetMarks : SquareDecoration {
 
     @Composable
-    override fun render(properties: SquareRenderProperties) {
+    override fun Render(properties: SquareRenderProperties) {
         if (properties.isPossibleMoveWithoutCapture) {
             PossibleMoveWithoutCapture(
                 onClick = properties.onClick,

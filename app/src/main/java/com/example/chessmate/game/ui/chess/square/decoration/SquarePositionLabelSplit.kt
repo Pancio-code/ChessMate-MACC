@@ -12,7 +12,7 @@ open class SquarePositionLabelSplit(
 ) : SquareDecoration {
 
     @Composable
-    override fun render(properties: SquareRenderProperties) {
+    override fun Render(properties: SquareRenderProperties) {
         if (displayFile(properties.coordinate)) {
             PositionLabel(
                 text = properties.position.fileAsLetter.toString(),

@@ -56,10 +56,12 @@ class OnlineUIClient(
                     dataCreation = formattedDateTime
                 )
             )
-            Log.d("API",data)
             val roomResponse =  roomRemoteService.create(token=token, id = userData.id!!, body = data)
             val responseBody = roomResponse.body()
             val roomId = responseBody?.get("roomId")?.asString
+            if (responseBody != null) {
+                Log.d("API",responseBody.asString)
+            }
             if (roomId != null) {
                 listenForGameChanges(roomId = roomId , onGameUpdate = { newData ->
                     onlineViewModel.setRoomData(newData)
@@ -110,26 +112,5 @@ class OnlineUIClient(
         }
     }
 
-    //TODO: Offline Handling
-    /*private fun sendHeartbeat(roomId: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val response = roomRemoteService.sendHeartbeat(token, roomId, userData.id)
-                if (!response.isSuccessful) {
-                    Log.e("Heartbeat", "Failed to send heartbeat")
-                }
-            } catch (e: Exception) {
-                Log.e("Heartbeat", "Error sending heartbeat", e)
-            }
-        }
-    }
 
-    private fun scheduleHeartbeat(roomId: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            while (isActive) {
-                sendHeartbeat(roomId)
-                delay(30000)  // Invia l'heartbeat ogni 30 secondi
-            }
-        }
-    }*/
 }

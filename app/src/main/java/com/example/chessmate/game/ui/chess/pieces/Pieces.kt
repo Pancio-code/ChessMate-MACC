@@ -20,7 +20,7 @@ import com.example.chessmate.game.ui.chess.board.BoardRenderProperties
 object Pieces : BoardDecoration {
 
     @Composable
-    override fun render(properties: BoardRenderProperties) {
+    override fun Render(properties: BoardRenderProperties) {
         properties.toState.board.pieces.forEach { (toPosition, piece) ->
             key(piece) {
                 val fromPosition = properties.fromState.board.find(piece)?.position

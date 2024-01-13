@@ -20,7 +20,7 @@ import com.example.chessmate.game.ui.chess.square.SquareRenderProperties
 object DatasetVisualiser : SquareDecoration {
 
     @Composable
-    override fun render(properties: SquareRenderProperties) {
+    override fun Render(properties: SquareRenderProperties) {
         LocalActiveDatasetVisualisation .current.let { chessmate ->
             val datapoint = remember(chessmate, properties) { chessmate.dataPointAt(
                     properties.position,

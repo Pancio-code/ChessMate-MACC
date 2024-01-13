@@ -5,5 +5,5 @@ import androidx.compose.runtime.Composable
 interface BoardDecoration {
 
     @Composable
-    fun render(properties: BoardRenderProperties)
+    fun Render(properties: BoardRenderProperties)
 }

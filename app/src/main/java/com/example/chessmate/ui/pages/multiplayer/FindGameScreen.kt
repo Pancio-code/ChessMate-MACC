@@ -5,8 +5,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,12 +58,32 @@ fun FindGameScreen(
         Spacer(modifier = Modifier.height(20.dp))
         if (roomData.playerTwoId.isNullOrEmpty()) {
             if (!isFindingGame) {
-                Button(onClick = { isFindingGame = true }) {
-                    Text("Find game")
+                Button(
+                    onClick = { isFindingGame = true }) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        modifier = Modifier.size(16.dp),
+                        contentDescription = "Search icon"
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Find game")
                 }
             } else {
                 CircularProgressIndicator()
                 Text("Waiting for opponent...", style = MaterialTheme.typography.bodyLarge)
+                Spacer(modifier = Modifier.width(16.dp))
+                Button(
+                    onClick = {
+                        isFindingGame = false
+                    }) {
+                    Icon(
+                        imageVector = Icons.Default.StopCircle,
+                        modifier = Modifier.size(16.dp),
+                        contentDescription = "Stop icon"
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Stop search")
+                }
             }
         } else {
             // An opponent has been found, navigate to the game screen

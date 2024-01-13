@@ -284,10 +284,10 @@ fun ChessMateAppContent(
 
 @Composable
 private fun ChessMateNavHost(
+    modifier: Modifier = Modifier,
     navController: NavHostController,
     navigationType: ChessMateNavigationType,
     authState: SignInState? = null,
-    modifier: Modifier = Modifier,
     isAuthenticated: Boolean,
     authHandler: AuthUIClient? = null,
     authViewModel: SignInViewModel? = null,

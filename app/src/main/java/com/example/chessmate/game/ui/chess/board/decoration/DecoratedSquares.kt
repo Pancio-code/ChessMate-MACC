@@ -19,8 +19,8 @@ class DecoratedSquares(
 ) : BoardDecoration {
 
     @Composable
-    override fun render(properties: BoardRenderProperties) {
-        Position.values().forEach { position ->
+    override fun Render(properties: BoardRenderProperties) {
+        Position.entries.forEach { position ->
             key(position) {
                 val squareProperties = remember(properties) {
                     SquareRenderProperties(
@@ -56,7 +56,7 @@ class DecoratedSquares(
                 }
         ) {
             decorations.forEach {
-                it.render(properties)
+                it.Render(properties)
             }
         }
     }

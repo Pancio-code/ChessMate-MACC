@@ -83,9 +83,9 @@ import java.io.File
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ProfileEditMode(
+    modifier: Modifier = Modifier,
     userData: UserData?,
     authHandler: AuthUIClient? = null,
-    modifier: Modifier = Modifier,
     navigationType: ChessMateNavigationType,
     toggler: () -> Unit
 ) {

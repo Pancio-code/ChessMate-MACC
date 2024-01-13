@@ -28,6 +28,7 @@ import com.example.chessmate.multiplayer.OnlineViewModel
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserAuthStateType
+import com.example.chessmate.ui.components.IndeterminateLoaderIndicator
 import com.example.chessmate.ui.navigation.ExitApplicationComponent
 import com.example.chessmate.ui.theme.ChessMateTheme
 import com.google.accompanist.adaptive.calculateDisplayFeatures
@@ -44,8 +45,9 @@ class MainActivity : ComponentActivity() {
 
     private val signInViewModel: SignInViewModel by viewModels()
     private val onlineViewModel: OnlineViewModel by viewModels()
-    private var userAuthState =  mutableStateOf(UserAuthStateType.UNAUTHENTICATED)
+    private var userAuthState =  mutableStateOf(UserAuthStateType.UNDEFINED)
     private val db = Firebase.firestore
+    private var loadingText = "Setting up the game..."
 
     private val authUIClient by lazy {
         AuthUIClient(
@@ -84,8 +86,10 @@ class MainActivity : ComponentActivity() {
 
                 ExitApplicationComponent(this)
                 when (userAuthState.value) {
+                    UserAuthStateType.UNDEFINED -> {
+                        IndeterminateLoaderIndicator(loadingText = loadingText)
+                    }
                     UserAuthStateType.UNAUTHENTICATED -> {
-
                         val launcher = rememberLauncherForActivityResult(
                             contract = ActivityResultContracts.StartIntentSenderForResult(),
                             onResult = { result ->

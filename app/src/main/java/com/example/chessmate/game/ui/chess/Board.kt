@@ -71,7 +71,7 @@ fun Board(
             )
 
         DefaultBoardRenderer.decorations.forEach {
-            it.render(properties = boardProperties)
+            it.Render(properties = boardProperties)
         }
     }
 }

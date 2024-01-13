@@ -14,9 +14,9 @@ import com.example.chessmate.ui.utils.ChessMateNavigationType
 
 @Composable
 fun ProfileScreen(
+    modifier: Modifier = Modifier,
     userData: UserData?,
     authHandler: AuthUIClient? = null,
-    modifier: Modifier = Modifier,
     navigationType: ChessMateNavigationType,
     authViewModel: SignInViewModel? = null,
 ) {

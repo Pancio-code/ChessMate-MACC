@@ -9,9 +9,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.RestartAlt
+import androidx.compose.material.icons.filled.SmartToy
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -57,24 +64,53 @@ fun HomePage(
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
-                    onlineViewModel.setFullViewPage(ChessMateRoute.GAME)
+                onlineViewModel.setFullViewPage(ChessMateRoute.FIND_GAME)
                 togglefullView()
-                  },
+            },
             modifier = Modifier
                 .fillMaxWidth(fraction = 0.6f)
                 .height(65.dp)
         ) {
+            Icon(
+                imageVector = Icons.Default.People,
+                modifier = Modifier.size(16.dp),
+                contentDescription = "Players icon"
+            )
+            Spacer(modifier = Modifier.width(8.dp))
             Text(text = "Play 1vs1 online")
         }
         Spacer(modifier = Modifier.height(16.dp))
-
+        Button(
+            onClick = {
+                onlineViewModel.setFullViewPage(ChessMateRoute.GAME)
+                togglefullView()
+              },
+            modifier = Modifier
+                .fillMaxWidth(fraction = 0.6f)
+                .height(65.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.WifiOff,
+                modifier = Modifier.size(16.dp),
+                contentDescription = "Offline icon"
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "Play 1vs1 offline")
+        }
+        Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = { /* Handle Play against Stockfish button click */ },
             modifier = Modifier
                 .fillMaxWidth(fraction = 0.6f)
                 .height(65.dp)
         ) {
-            Text(text = "Play against Stockfish")
+            Icon(
+                imageVector = Icons.Default.SmartToy,
+                modifier = Modifier.size(16.dp),
+                contentDescription = "Robot icon"
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "Play against AI")
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(
@@ -83,6 +119,12 @@ fun HomePage(
                 .fillMaxWidth(fraction = 0.6f)
                 .height(65.dp)
         ) {
+            Icon(
+                imageVector = Icons.Default.RestartAlt,
+                modifier = Modifier.size(16.dp),
+                contentDescription = "Restart icon"
+            )
+            Spacer(modifier = Modifier.width(8.dp))
             Text(text = "Resume game")
         }
     }

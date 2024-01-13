@@ -12,7 +12,7 @@ open class HighlightSquare(
 ) : SquareDecoration {
 
     @Composable
-    override fun render(properties: SquareRenderProperties) {
+    override fun Render(properties: SquareRenderProperties) {
         if (properties.isHighlighted) {
             Canvas(properties.sizeModifier) {
                 drawRect(

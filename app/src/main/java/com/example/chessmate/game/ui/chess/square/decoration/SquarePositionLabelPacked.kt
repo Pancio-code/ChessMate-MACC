@@ -11,7 +11,7 @@ open class SquarePositionLabelPacked(
 ) : SquareDecoration {
 
     @Composable
-    override fun render(properties: SquareRenderProperties) {
+    override fun Render(properties: SquareRenderProperties) {
         if (display(properties.coordinate)) {
             PositionLabel(
                 text = properties.position.toString(),

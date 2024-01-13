@@ -13,7 +13,7 @@ open class SquareBackground(
 ) : SquareDecoration {
 
     @Composable
-    override fun render(properties: SquareRenderProperties) {
+    override fun Render(properties: SquareRenderProperties) {
         Canvas(properties.sizeModifier) {
             drawRect(color = if (properties.position.isDarkSquare()) darkSquareColor else lightSquareColor)
         }
