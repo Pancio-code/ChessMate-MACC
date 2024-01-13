@@ -66,5 +66,10 @@ val dark_outlineVariant = Color(0xFF49454F)
 val dark_scrim = Color(0xFF000000)
 
 val seed = Color(0xFF6750A4)
-
+val silver_sand = Color(0xFFBDC6D1)
+val amaranth_red = Color(0xFFD90429)
 val iconScore = Color(0xa16a2300)
+val black_coral = Color(0xFF5C6378)
+val atomic_tangerine = Color(0xFFF0965D)
+val square_light = Color.White
+val square_dark = Color(0xFFBCC0C0)

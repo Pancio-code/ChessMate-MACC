@@ -22,10 +22,7 @@ class SavePhotoToGalleryUseCase(
 
         val resolver: ContentResolver = context.applicationContext.contentResolver
 
-        val imageCollection: Uri = when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
-            else -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        }
+        val imageCollection: Uri = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
 
         // Publish a new image.
         val nowTimestamp: Long = System.currentTimeMillis()
@@ -34,11 +31,9 @@ class SavePhotoToGalleryUseCase(
             put(MediaStore.Images.Media.DISPLAY_NAME, "Your image name" + ".jpg")
             put(MediaStore.Images.Media.MIME_TYPE, "image/jpg")
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                put(MediaStore.MediaColumns.DATE_TAKEN, nowTimestamp)
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DCIM + "/YourAppNameOrAnyOtherSubFolderName")
-                put(MediaStore.MediaColumns.IS_PENDING, 1)
-            }
+            put(MediaStore.MediaColumns.DATE_TAKEN, nowTimestamp)
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DCIM + "/YourAppNameOrAnyOtherSubFolderName")
+            put(MediaStore.MediaColumns.IS_PENDING, 1)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 put(MediaStore.Images.Media.DATE_TAKEN, nowTimestamp)
@@ -59,11 +54,9 @@ class SavePhotoToGalleryUseCase(
                     capturePhotoBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
                 }
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    imageContentValues.clear()
-                    imageContentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
-                    resolver.update(uri, imageContentValues, null, null)
-                }
+                imageContentValues.clear()
+                imageContentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
+                resolver.update(uri, imageContentValues, null, null)
 
                 Result.success(Unit)
             }.getOrElse { exception: Throwable ->

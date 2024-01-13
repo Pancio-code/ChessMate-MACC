@@ -1,8 +1,12 @@
 package com.example.chessmate.camera.photo_capture
 
+import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.LinearLayout
@@ -43,11 +47,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
-import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.util.concurrent.Executor
-
 
 @Composable
 fun CameraScreen(
@@ -123,9 +124,9 @@ private fun capturePhoto(
     onImageTaken: () -> Unit,
     onNewAvatar: (String) -> Unit
 ) {
-    val mainExecutor: Executor = ContextCompat.getMainExecutor(context)
-    val file = File(context.externalMediaDirs.firstOrNull(), "${System.currentTimeMillis()}.jpg")
 
+    val mainExecutor: Executor = ContextCompat.getMainExecutor(context)
+    val imageUri = createImageFileInMediaStore(context)
 
     cameraController.takePicture(mainExecutor, object : ImageCapture.OnImageCapturedCallback() {
         @OptIn(ExperimentalGetImage::class) override fun onCaptureSuccess(image: ImageProxy) {
@@ -133,19 +134,23 @@ private fun capturePhoto(
                 .toBitmap()
                 .rotateBitmap(image.imageInfo.rotationDegrees)
 
-            try {
-                FileOutputStream(file).use { out ->
-                    correctedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+            imageUri?.let { uri ->
+                try {
+                    context.contentResolver.openOutputStream(uri).use { out ->
+                        if (out != null) {
+                            correctedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+                        }
+                    }
+                } catch (e: IOException) {
+                    Log.e("CameraContent", "Error saving image to MediaStore", e)
                 }
-            } catch (e: IOException) {
-                Log.e("CameraContent", "Error saving image to file", e)
-            }
 
-            onNewAvatar(file.absolutePath)
-            onPhotoCaptured(correctedBitmap)
-            image.close()
-            cameraController.unbind()
-            onImageTaken()
+                onNewAvatar(uri.toString())
+                onPhotoCaptured(correctedBitmap)
+                image.close()
+                cameraController.unbind()
+                onImageTaken()
+            }
         }
 
 
@@ -154,6 +159,16 @@ private fun capturePhoto(
             Log.e("CameraContent", "Error capturing image", exception)
         }
     })
+}
+
+private fun createImageFileInMediaStore(context: Context): Uri? {
+    val contentValues = ContentValues().apply {
+        put(MediaStore.MediaColumns.DISPLAY_NAME, "${System.currentTimeMillis()}.jpg")
+        put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+    }
+
+    return context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
 }
 
 @Composable

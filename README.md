@@ -2,10 +2,8 @@
 <br />
 <br />
 <p align="center">
-    <img src="app/src/main/assets/logo.png" alt="ChessMate Logo" height="200">
-  </a>
-  
-  <h3 align="center"> Project for the course of Mobile Applications and Cloud Computing 2023/2024. </h3>
+    <img src="app/src/main/assets/logo.png" alt="ChessMate Logo" height="358" />
+    <h3 align="center"> Project for the course of Mobile Applications and Cloud Computing 2023/2024. </h3>
 </p>
 
 

@@ -8,8 +8,11 @@ data class SignInResult(
 data class UserData(
     val id: String? = null,
     val email: String? = null,
-    val emailVerified: Boolean = false,
     val profilePictureUrl: String? = null,
-    val provider: String? = null,
     val username: String? = null,
+    val matchesPlayed: Int = 0,
+    val matchesWon: Int = 0,
+    val eloRank: Float = 0f,
+    val emailVerified: Boolean = false,
+    val provider : String? = null
 )

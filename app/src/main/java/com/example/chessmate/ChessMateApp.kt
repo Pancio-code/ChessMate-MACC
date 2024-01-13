@@ -12,6 +12,7 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.PermanentNavigationDrawer
+import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
@@ -28,26 +29,29 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.window.layout.DisplayFeature
 import androidx.window.layout.FoldingFeature
+import com.example.chessmate.game.ui.app.Game
+import com.example.chessmate.multiplayer.OnlineUIClient
+import com.example.chessmate.multiplayer.OnlineViewModel
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInState
 import com.example.chessmate.sign_in.SignInViewModel
-import com.example.chessmate.ui.navigation.ModalNavigationDrawerContent
-import com.example.chessmate.ui.navigation.PermanentNavigationDrawerContent
 import com.example.chessmate.ui.navigation.ChessMateBottomNavigationBar
 import com.example.chessmate.ui.navigation.ChessMateNavigationActions
 import com.example.chessmate.ui.navigation.ChessMateNavigationRail
 import com.example.chessmate.ui.navigation.ChessMateRoute
 import com.example.chessmate.ui.navigation.ChessMateTopLevelDestination
+import com.example.chessmate.ui.navigation.ModalNavigationDrawerContent
+import com.example.chessmate.ui.navigation.PermanentNavigationDrawerContent
 import com.example.chessmate.ui.pages.ContactUsScreen
 import com.example.chessmate.ui.pages.HomePage
-import com.example.chessmate.ui.pages.profile.ProfileScreen
 import com.example.chessmate.ui.pages.ScreenUnderConstruction
 import com.example.chessmate.ui.pages.SignInScreen
 import com.example.chessmate.ui.pages.SignUpScreen
-import com.example.chessmate.ui.utils.DevicePosture
-import com.example.chessmate.ui.utils.ChessMateContentType
+import com.example.chessmate.ui.pages.multiplayer.FindGameScreen
+import com.example.chessmate.ui.pages.profile.ProfileScreen
 import com.example.chessmate.ui.utils.ChessMateNavigationContentPosition
 import com.example.chessmate.ui.utils.ChessMateNavigationType
+import com.example.chessmate.ui.utils.DevicePosture
 import com.example.chessmate.ui.utils.isBookPosture
 import com.example.chessmate.ui.utils.isSeparating
 import kotlinx.coroutines.launch
@@ -56,15 +60,17 @@ import kotlinx.coroutines.launch
 fun ChessMateApp(
     windowSize: WindowSizeClass,
     displayFeatures: List<DisplayFeature>,
-    chessMateHomeUIState: ChessMateHomeUIState? = null,
     isAuthenticated: Boolean,
     authState: SignInState? = null,
     authHandler: AuthUIClient?,
     authViewModel:  SignInViewModel? = null,
-    googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null
+    onlineViewModel: OnlineViewModel? = null,
+    googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
+    togglefullView: () -> Unit = {},
+    onlineUIClient: OnlineUIClient? = null,
+    immersivePage: String? = null
 ) {
     val navigationType: ChessMateNavigationType
-    val contentType: ChessMateContentType
 
     val foldingFeature = displayFeatures.filterIsInstance<FoldingFeature>().firstOrNull()
 
@@ -81,15 +87,9 @@ fun ChessMateApp(
     when (windowSize.widthSizeClass) {
         WindowWidthSizeClass.Compact -> {
             navigationType = ChessMateNavigationType.BOTTOM_NAVIGATION
-            contentType = ChessMateContentType.SINGLE_PANE
         }
         WindowWidthSizeClass.Medium -> {
             navigationType = ChessMateNavigationType.NAVIGATION_RAIL
-            contentType = if (foldingDevicePosture != DevicePosture.NormalPosture) {
-                ChessMateContentType.DUAL_PANE
-            } else {
-                ChessMateContentType.SINGLE_PANE
-            }
         }
         WindowWidthSizeClass.Expanded -> {
             navigationType = if (foldingDevicePosture is DevicePosture.BookPosture) {
@@ -97,11 +97,9 @@ fun ChessMateApp(
             } else {
                 ChessMateNavigationType.PERMANENT_NAVIGATION_DRAWER
             }
-            contentType = ChessMateContentType.DUAL_PANE
         }
         else -> {
             navigationType = ChessMateNavigationType.BOTTOM_NAVIGATION
-            contentType = ChessMateContentType.SINGLE_PANE
         }
     }
     val navigationContentPosition = when (windowSize.heightSizeClass) {
@@ -117,32 +115,42 @@ fun ChessMateApp(
         }
     }
 
-    ChessMateNavigationWrapper(
-        navigationType = navigationType,
-        contentType = contentType,
-        displayFeatures = displayFeatures,
-        navigationContentPosition = navigationContentPosition,
-        chessMateHomeUIState = chessMateHomeUIState,
-        isAuthenticated = isAuthenticated,
-        authHandler = authHandler,
-        authState = authState,
-        authViewModel = authViewModel,
-        googleIntentLaucher = googleIntentLaucher
-    )
+    when (immersivePage) {
+        ChessMateRoute.FIND_GAME -> FindGameScreen(
+            modifier = Modifier,
+            navigationType = navigationType,
+            onlineUIClient = onlineUIClient!!,
+            onlineViewModel = onlineViewModel!!,
+            togglefullView = togglefullView,
+        )
+        ChessMateRoute.GAME -> Surface(color = MaterialTheme.colorScheme.background) {
+            Game(importGameText = "")
+        }
+        else -> ChessMateNavigationWrapper(
+            navigationType = navigationType,
+            navigationContentPosition = navigationContentPosition,
+            isAuthenticated = isAuthenticated,
+            authHandler = authHandler,
+            authState = authState,
+            authViewModel = authViewModel,
+            onlineViewModel= onlineViewModel,
+            googleIntentLaucher = googleIntentLaucher,
+            togglefullView = togglefullView,
+        )
+    }
 }
 
 @Composable
 private fun ChessMateNavigationWrapper(
     navigationType: ChessMateNavigationType,
-    contentType: ChessMateContentType,
-    displayFeatures: List<DisplayFeature>,
     navigationContentPosition: ChessMateNavigationContentPosition,
-    chessMateHomeUIState: ChessMateHomeUIState? = null,
     isAuthenticated: Boolean,
     authState: SignInState? = null,
     authHandler: AuthUIClient? = null,
     authViewModel: SignInViewModel? = null,
-    googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null
+    onlineViewModel: OnlineViewModel? = null,
+    googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
+    togglefullView: () -> Unit = {},
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -166,18 +174,17 @@ private fun ChessMateNavigationWrapper(
         }) {
             ChessMateAppContent(
                 navigationType = navigationType,
-                contentType = contentType,
-                displayFeatures = displayFeatures,
                 navigationContentPosition = navigationContentPosition,
-                chessMateHomeUIState = chessMateHomeUIState,
                 navController = navController,
                 authState = authState,
                 selectedDestination = selectedDestination,
                 navigateToTopLevelDestination = navigationActions::navigateTo,
                 isAuthenticated = isAuthenticated,
                 authHandler = authHandler,
+                onlineViewModel= onlineViewModel,
                 authViewModel = authViewModel,
-                googleIntentLaucher = googleIntentLaucher
+                googleIntentLaucher = googleIntentLaucher,
+                togglefullView = togglefullView
             )
         }
     } else {
@@ -199,10 +206,7 @@ private fun ChessMateNavigationWrapper(
         ) {
             ChessMateAppContent(
                 navigationType = navigationType,
-                contentType = contentType,
-                displayFeatures = displayFeatures,
                 navigationContentPosition = navigationContentPosition,
-                chessMateHomeUIState = chessMateHomeUIState,
                 navController = navController,
                 authState= authState,
                 selectedDestination = selectedDestination,
@@ -215,7 +219,9 @@ private fun ChessMateNavigationWrapper(
                 },
                 authHandler = authHandler,
                 authViewModel = authViewModel,
-                googleIntentLaucher = googleIntentLaucher
+                onlineViewModel = onlineViewModel,
+                googleIntentLaucher = googleIntentLaucher,
+                togglefullView = togglefullView
             )
         }
     }
@@ -225,10 +231,7 @@ private fun ChessMateNavigationWrapper(
 fun ChessMateAppContent(
     modifier: Modifier = Modifier,
     navigationType: ChessMateNavigationType,
-    contentType: ChessMateContentType,
-    displayFeatures: List<DisplayFeature>,
     navigationContentPosition: ChessMateNavigationContentPosition,
-    chessMateHomeUIState: ChessMateHomeUIState? = null,
     navController: NavHostController,
     selectedDestination: String,
     authState: SignInState? = null,
@@ -236,8 +239,10 @@ fun ChessMateAppContent(
     onDrawerClicked: () -> Unit = {},
     isAuthenticated: Boolean,
     authViewModel: SignInViewModel? = null,
+    onlineViewModel: OnlineViewModel? = null,
     authHandler: AuthUIClient? = null,
-    googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null
+    googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
+    togglefullView: () -> Unit = {},
 ) {
     Row(modifier = modifier.fillMaxSize()) {
         AnimatedVisibility(visible = navigationType == ChessMateNavigationType.NAVIGATION_RAIL) {
@@ -256,16 +261,15 @@ fun ChessMateAppContent(
         ) {
             ChessMateNavHost(
                 navController = navController,
-                contentType = contentType,
-                displayFeatures = displayFeatures,
-                chessMateHomeUIState = chessMateHomeUIState,
                 navigationType = navigationType,
                 modifier = Modifier.weight(1f),
                 authState = authState,
                 isAuthenticated = isAuthenticated,
                 authHandler = authHandler,
                 authViewModel = authViewModel,
-                googleIntentLaucher = googleIntentLaucher
+                onlineViewModel = onlineViewModel,
+                googleIntentLaucher = googleIntentLaucher,
+                togglefullView = togglefullView
             )
             AnimatedVisibility(visible = navigationType == ChessMateNavigationType.BOTTOM_NAVIGATION) {
                 ChessMateBottomNavigationBar(
@@ -281,16 +285,15 @@ fun ChessMateAppContent(
 @Composable
 private fun ChessMateNavHost(
     navController: NavHostController,
-    contentType: ChessMateContentType,
-    displayFeatures: List<DisplayFeature>,
-    chessMateHomeUIState: ChessMateHomeUIState? = null,
     navigationType: ChessMateNavigationType,
     authState: SignInState? = null,
     modifier: Modifier = Modifier,
     isAuthenticated: Boolean,
     authHandler: AuthUIClient? = null,
     authViewModel: SignInViewModel? = null,
-    googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null
+    onlineViewModel: OnlineViewModel? = null,
+    googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
+    togglefullView: () -> Unit = {}
 ) {
     if (isAuthenticated) {
         NavHost(
@@ -299,13 +302,16 @@ private fun ChessMateNavHost(
             startDestination = ChessMateRoute.HOME,
         ) {
             composable(ChessMateRoute.HOME) {
-                HomePage(modifier = modifier)
+                HomePage(
+                    modifier = modifier,
+                    onlineViewModel = onlineViewModel!!,
+                    togglefullView = togglefullView
+                )
             }
             composable(ChessMateRoute.SCAN) {
                 ScreenUnderConstruction()
             }
             composable(ChessMateRoute.PROFILE) {
-
                 ProfileScreen(
                     modifier= modifier,
                     userData = authViewModel?.getUserData(),

@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "1074106158170-qa9b2r35q0f9lsuhhensdtsckae0cmnt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.chessmate",
+            "certificate_hash": "0abd49053264f5e7b38d4eca8b1bed4f1003ebb3"
+          }
+        },
+        {
           "client_id": "1074106158170-cjk0qtonod0nn3ie10tadc0d0334m02e.apps.googleusercontent.com",
           "client_type": 3
         }

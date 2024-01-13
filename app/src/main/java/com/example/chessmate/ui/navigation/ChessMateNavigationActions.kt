@@ -1,19 +1,18 @@
 package com.example.chessmate.ui.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.automirrored.outlined.Login
 import androidx.compose.material.icons.filled.AppRegistration
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.AppRegistration
 import androidx.compose.material.icons.outlined.Camera
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Login
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.sharp.Home
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -28,6 +27,8 @@ object ChessMateRoute {
     const val SIGN_IN = "Sign In"
     const val SIGN_UP = "Sign Up"
     const val CONTACT = "Contact Us"
+    const val FIND_GAME = "Multiplayer Game"
+    const val GAME = "Game"
 }
 
 data class ChessMateTopLevelDestination(
@@ -73,8 +74,8 @@ val TOP_LEVEL_DESTINATIONS = listOf(
 val LOGIN_LEVEL_DESTINATIONS = listOf(
     ChessMateTopLevelDestination(
         route = ChessMateRoute.SIGN_IN,
-        selectedIcon = Icons.Default.Login,
-        unselectedIcon = Icons.Outlined.Login,
+        selectedIcon = Icons.AutoMirrored.Filled.Login,
+        unselectedIcon = Icons.AutoMirrored.Outlined.Login,
         iconTextId = R.string.tab_sign_in
     ),
     ChessMateTopLevelDestination(

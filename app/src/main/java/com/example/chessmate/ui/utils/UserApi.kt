@@ -29,7 +29,7 @@ interface UserAPI {
 }
 
 
-object HelperClass {
+object HelperClassUser {
     fun getIstance() : UserAPI {
         return Retrofit.Builder()
             .baseUrl(BuildConfig.API_URL)

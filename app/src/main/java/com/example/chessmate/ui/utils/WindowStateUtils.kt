@@ -38,7 +38,3 @@ enum class ChessMateNavigationType {
 enum class ChessMateNavigationContentPosition {
     TOP, CENTER
 }
-
-enum class ChessMateContentType {
-    SINGLE_PANE, DUAL_PANE
-}

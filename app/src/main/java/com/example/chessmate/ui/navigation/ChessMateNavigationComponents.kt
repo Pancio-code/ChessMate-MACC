@@ -15,11 +15,9 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.automirrored.filled.MenuOpen
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MenuOpen
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
@@ -344,7 +342,7 @@ fun ModalNavigationDrawerContent(
                         )
                         IconButton(onClick = onDrawerClicked) {
                             Icon(
-                                imageVector = Icons.Default.MenuOpen,
+                                imageVector = Icons.AutoMirrored.Filled.MenuOpen,
                                 contentDescription = stringResource(id = R.string.navigation_drawer)
                             )
                         }

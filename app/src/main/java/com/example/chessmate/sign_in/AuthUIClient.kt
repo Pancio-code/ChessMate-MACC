@@ -3,15 +3,13 @@ package com.example.chessmate.sign_in
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
-import android.util.Log
 import android.widget.Toast
 import com.example.chessmate.BuildConfig
-import com.example.chessmate.ui.utils.HelperClass
+import com.example.chessmate.ui.utils.HelperClassUser
 import com.example.chessmate.ui.utils.UserAPI
 import com.facebook.login.LoginResult
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
@@ -19,20 +17,10 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
-import com.google.gson.JsonObject
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.Response
-import okhttp3.ResponseBody
 
 class AuthUIClient(
     private val context: Context,
@@ -40,7 +28,7 @@ class AuthUIClient(
     //private val db : FirebaseFirestore
     ) {
     private val auth = Firebase.auth
-    private val userRemoteService : UserAPI = HelperClass.getIstance()
+    private val userRemoteService : UserAPI = HelperClassUser.getIstance()
     private val token = BuildConfig.TOKEN
     private val gson = Gson()
     //private val dbUsers: CollectionReference = db.collection("Users_Info")
@@ -69,8 +57,6 @@ class AuthUIClient(
                     username = displayName,
                     profilePictureUrl = photoUrl?.toString(),
                     email = email,
-                    emailVerified = isEmailVerified,
-                    provider = EmailAuthProvider.PROVIDER_ID
                 )
             },
             errorMessage = null
@@ -93,20 +79,18 @@ class AuthUIClient(
         val token = result.accessToken.token
         val credential = FacebookAuthProvider.getCredential(token)
         return try {
-            val user = Firebase.auth.signInWithCredential(credential).await().user;
+            val user = Firebase.auth.signInWithCredential(credential).await().user
             if (user != null) {
-                var userResponse =  userRemoteService.get(token=token,id= user.uid)
+                val userResponse =  userRemoteService.get(token=token,id= user.uid)
                 if (userResponse.code() == 290) {
                     val data = gson.toJson(
                         UserData(
                             id = user.uid,
                             email = user.email,
-                            emailVerified = user.isEmailVerified,
                             profilePictureUrl = user.photoUrl?.toString(),
-                            provider = user.providerId,
                             username = user.displayName
                         )
-                    );
+                    )
                     userRemoteService.create(token = token, body = data)
                 }
             }
@@ -117,8 +101,6 @@ class AuthUIClient(
                         username = displayName,
                         profilePictureUrl = photoUrl?.toString(),
                         email = email,
-                        emailVerified = isEmailVerified,
-                        provider = providerId
                     )
                 },
                 errorMessage = null
@@ -143,18 +125,16 @@ class AuthUIClient(
     ) = try {
             val user  = auth.createUserWithEmailAndPassword(email, password).await().user
             if (user != null) {
-                var userResponse =  userRemoteService.get(token=token,id= user.uid)
+                val userResponse =  userRemoteService.get(token=token,id= user.uid)
                 if (userResponse.code() == 290) {
                     val data = gson.toJson(
                         UserData(
                             id = user.uid,
                             email = user.email,
-                            emailVerified = user.isEmailVerified,
                             profilePictureUrl = user.photoUrl?.toString(),
-                            provider = user.providerId,
                             username = username
                         )
-                    );
+                    )
                     userRemoteService.create(token = token, body = data)
                 }
             }
@@ -164,9 +144,7 @@ class AuthUIClient(
                         id = uid,
                         username = username,
                         profilePictureUrl = photoUrl?.toString(),
-                        email = email,
-                        emailVerified = isEmailVerified,
-                        provider = EmailAuthProvider.PROVIDER_ID
+                        email = email
                     )
                 },
                 errorMessage = null
@@ -193,17 +171,15 @@ class AuthUIClient(
         return try {
             val user = auth.signInWithCredential(googleCredentials).await().user
             if (user != null) {
-                var userResponse =  userRemoteService.get(token=token,id= user.uid)
+                val userResponse =  userRemoteService.get(token=token,id= user.uid)
                 if (userResponse.code() == 290) {
                     val data = gson.toJson(UserData(
                         id = user.uid,
                         email = user.email,
-                        emailVerified = user.isEmailVerified,
                         profilePictureUrl = user.photoUrl?.toString(),
-                        provider = user.providerId,
                         username = user.displayName
                         )
-                    );
+                    )
                     userRemoteService.create(token=token, body = data)
                 }
             }
@@ -212,9 +188,7 @@ class AuthUIClient(
                     UserData(
                         id = uid,
                         email = email,
-                        emailVerified = isEmailVerified,
                         profilePictureUrl = photoUrl?.toString(),
-                        provider = providerId,
                         username = displayName,
                     )
                 },
@@ -251,38 +225,11 @@ class AuthUIClient(
             )
         }
 
-    suspend fun reloadFirebaseUser() = try {
-
-        auth.currentUser?.reload()?.await()
-        val user = auth.currentUser
-        SignInResult(
-            data = user?.run {
-                UserData(
-                    id = uid,
-                    username = displayName,
-                    profilePictureUrl = photoUrl?.toString(),
-                    email = email,
-                    emailVerified = isEmailVerified,
-                    provider = providerId
-                )
-            },
-            errorMessage = null
-        )
-    } catch(e: Exception) {
-        e.printStackTrace()
-        if(e is CancellationException) throw e
-        SignInResult(
-            data = null,
-            errorMessage = e.message
-        )
-    }
-
 
     suspend fun getSignedInUser(): UserData? = auth.currentUser?.run {
         try {
-            var userResponse =  userRemoteService.get(token = token,id = uid)
+            val userResponse =  userRemoteService.get(token = token,id = uid)
             if (userResponse.code() == 200) {
-                Log.d("test",gson.toJson(userResponse.body()))
                 userResponse.body()
             } else {
                 Toast.makeText(
@@ -310,22 +257,6 @@ class AuthUIClient(
             )
             .setAutoSelectEnabled(true)
             .build()
-    }
-
-   suspend fun sendEmailVerification() = try {
-        auth.currentUser?.sendEmailVerification()?.await()
-       Toast.makeText(
-           context,
-           "Email verification sent!",
-           Toast.LENGTH_LONG
-       ).show()
-    } catch (e: Exception) {
-       e.printStackTrace()
-       if(e is CancellationException) throw e
-       SignInResult(
-           data = null,
-           errorMessage = e.message
-       )
     }
 
     suspend fun sendPasswordResetEmail(email: String) = try {

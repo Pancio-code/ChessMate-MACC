@@ -11,8 +11,11 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -20,13 +23,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.chessmate.multiplayer.OnlineUIClient
+import com.example.chessmate.multiplayer.OnlineViewModel
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserAuthStateType
 import com.example.chessmate.ui.navigation.ExitApplicationComponent
 import com.example.chessmate.ui.theme.ChessMateTheme
-import com.example.chessmate.ui.utils.PreferencesManagerHelper
-import com.facebook.FacebookSdk
 import com.google.accompanist.adaptive.calculateDisplayFeatures
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.firebase.firestore.ktx.firestore
@@ -40,18 +43,14 @@ import org.koin.ksp.generated.defaultModule
 class MainActivity : ComponentActivity() {
 
     private val signInViewModel: SignInViewModel by viewModels()
+    private val onlineViewModel: OnlineViewModel by viewModels()
     private var userAuthState =  mutableStateOf(UserAuthStateType.UNAUTHENTICATED)
-   // private val db = Firebase.firestore
-   /* private val preferencesManager by lazy {
-        PreferencesManagerHelper(applicationContext)
-    }*/
-
+    private val db = Firebase.firestore
 
     private val authUIClient by lazy {
         AuthUIClient(
             context = applicationContext,
             oneTapClient = Identity.getSignInClient(applicationContext),
-            //db = db
         )
     }
 
@@ -68,7 +67,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initKoin()
-        FacebookSdk.sdkInitialize(applicationContext);
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -118,7 +116,6 @@ class MainActivity : ComponentActivity() {
                         }
 
                         ChessMateApp(
-                            chessMateHomeUIState = null,
                             windowSize = windowSize,
                             displayFeatures = displayFeatures,
                             isAuthenticated = false,
@@ -140,17 +137,36 @@ class MainActivity : ComponentActivity() {
                                 signInViewModel.getAuthenticationState(handler = authUIClient).run {
                                     signInViewModel.isAuthenticated.collect {  userAuthState.value = it.state }
                                 }
+                            } else {
+                                onlineViewModel.getRoomData()
                             }
                         }
 
+                        var isInfullView by remember { mutableStateOf(false) }
+                        val immersivePage by onlineViewModel.fullViewPage.collectAsState()
+                        val onlineUIClient by lazy {
+                            OnlineUIClient(
+                                context = applicationContext,
+                                db = db,
+                                userData = signInViewModel.getUserData()!!,
+                                onlineViewModel = onlineViewModel
+                            )
+                        }
+
                         ChessMateApp(
-                            chessMateHomeUIState = null,
                             windowSize = windowSize,
                             authState= authState,
                             displayFeatures = displayFeatures,
                             authViewModel = signInViewModel,
+                            onlineViewModel = onlineViewModel,
                             isAuthenticated = true,
-                            authHandler = authUIClient
+                            authHandler = authUIClient,
+                            onlineUIClient = onlineUIClient,
+                            togglefullView = {
+                                isInfullView = !isInfullView
+
+                             },
+                            immersivePage = immersivePage
                         )
                     }
                 }
@@ -165,7 +181,6 @@ class MainActivity : ComponentActivity() {
 fun ChessMateAppPreview() {
     ChessMateTheme {
         ChessMateApp(
-            chessMateHomeUIState = ChessMateHomeUIState(),
             windowSize = WindowSizeClass.calculateFromSize(DpSize(400.dp, 900.dp)),
             displayFeatures = emptyList(),
             isAuthenticated = true,
@@ -180,7 +195,6 @@ fun ChessMateAppPreview() {
 fun ChessMateAppPreviewTablet() {
     ChessMateTheme {
         ChessMateApp(
-            chessMateHomeUIState = ChessMateHomeUIState(),
             windowSize = WindowSizeClass.calculateFromSize(DpSize(700.dp, 500.dp)),
             displayFeatures = emptyList(),
             isAuthenticated = true,
@@ -195,7 +209,6 @@ fun ChessMateAppPreviewTablet() {
 fun ChessMateAppPreviewTabletPortrait() {
     ChessMateTheme {
         ChessMateApp(
-            chessMateHomeUIState = ChessMateHomeUIState(),
             windowSize = WindowSizeClass.calculateFromSize(DpSize(500.dp, 700.dp)),
             displayFeatures = emptyList(),
             isAuthenticated = true,
@@ -210,7 +223,6 @@ fun ChessMateAppPreviewTabletPortrait() {
 fun ChessMateAppPreviewDesktop() {
     ChessMateTheme {
         ChessMateApp(
-            chessMateHomeUIState = ChessMateHomeUIState(),
             windowSize = WindowSizeClass.calculateFromSize(DpSize(1100.dp, 600.dp)),
             displayFeatures = emptyList(),
             isAuthenticated = true,
@@ -225,7 +237,6 @@ fun ChessMateAppPreviewDesktop() {
 fun ChessMateAppPreviewDesktopPortrait() {
     ChessMateTheme {
         ChessMateApp(
-            chessMateHomeUIState = ChessMateHomeUIState(),
             windowSize = WindowSizeClass.calculateFromSize(DpSize(600.dp, 1100.dp)),
             displayFeatures = emptyList(),
             isAuthenticated = true,

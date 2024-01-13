@@ -1,6 +1,5 @@
 package com.example.chessmate.ui.pages
 
-import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
@@ -29,7 +28,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -39,7 +37,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.chessmate.R
@@ -49,12 +46,10 @@ import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.ui.components.EmailFieldComponent
 import com.example.chessmate.ui.components.FacebookButton
 import com.example.chessmate.ui.components.PasswordFieldComponent
-import com.example.chessmate.ui.navigation.ChessMateNavigationActions
 import com.example.chessmate.ui.navigation.ChessMateRoute
 import com.example.chessmate.ui.utils.ChessMateNavigationType
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SignInScreen(
     state: SignInState? = SignInState(),
