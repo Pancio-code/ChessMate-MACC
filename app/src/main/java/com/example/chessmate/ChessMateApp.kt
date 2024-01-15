@@ -1,5 +1,6 @@
 package com.example.chessmate
 
+import android.content.Context
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -35,6 +36,7 @@ import com.example.chessmate.multiplayer.OnlineViewModel
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInState
 import com.example.chessmate.sign_in.SignInViewModel
+import com.example.chessmate.sign_in.UserData
 import com.example.chessmate.ui.navigation.ChessMateBottomNavigationBar
 import com.example.chessmate.ui.navigation.ChessMateNavigationActions
 import com.example.chessmate.ui.navigation.ChessMateNavigationRail
@@ -68,7 +70,9 @@ fun ChessMateApp(
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
     togglefullView: () -> Unit = {},
     onlineUIClient: OnlineUIClient? = null,
-    immersivePage: String? = null
+    immersivePage: String? = null,
+    userData: UserData? = null,
+    context: Context? = null
 ) {
     val navigationType: ChessMateNavigationType
 
@@ -122,6 +126,7 @@ fun ChessMateApp(
             onlineUIClient = onlineUIClient!!,
             onlineViewModel = onlineViewModel!!,
             togglefullView = togglefullView,
+            userData = userData
         )
         ChessMateRoute.GAME -> Surface(color = MaterialTheme.colorScheme.background) {
             Game(importGameText = "")
@@ -136,6 +141,8 @@ fun ChessMateApp(
             onlineViewModel= onlineViewModel,
             googleIntentLaucher = googleIntentLaucher,
             togglefullView = togglefullView,
+            userData = userData,
+            context = context
         )
     }
 }
@@ -151,6 +158,8 @@ private fun ChessMateNavigationWrapper(
     onlineViewModel: OnlineViewModel? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
     togglefullView: () -> Unit = {},
+    userData: UserData? = null,
+    context: Context? = null
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -184,7 +193,9 @@ private fun ChessMateNavigationWrapper(
                 onlineViewModel= onlineViewModel,
                 authViewModel = authViewModel,
                 googleIntentLaucher = googleIntentLaucher,
-                togglefullView = togglefullView
+                togglefullView = togglefullView,
+                userData = userData,
+                context = context
             )
         }
     } else {
@@ -221,7 +232,9 @@ private fun ChessMateNavigationWrapper(
                 authViewModel = authViewModel,
                 onlineViewModel = onlineViewModel,
                 googleIntentLaucher = googleIntentLaucher,
-                togglefullView = togglefullView
+                togglefullView = togglefullView,
+                userData = userData,
+                context = context
             )
         }
     }
@@ -243,6 +256,8 @@ fun ChessMateAppContent(
     authHandler: AuthUIClient? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
     togglefullView: () -> Unit = {},
+    userData: UserData? = null,
+    context: Context? = null
 ) {
     Row(modifier = modifier.fillMaxSize()) {
         AnimatedVisibility(visible = navigationType == ChessMateNavigationType.NAVIGATION_RAIL) {
@@ -269,7 +284,9 @@ fun ChessMateAppContent(
                 authViewModel = authViewModel,
                 onlineViewModel = onlineViewModel,
                 googleIntentLaucher = googleIntentLaucher,
-                togglefullView = togglefullView
+                togglefullView = togglefullView,
+                userData = userData,
+                context = context
             )
             AnimatedVisibility(visible = navigationType == ChessMateNavigationType.BOTTOM_NAVIGATION) {
                 ChessMateBottomNavigationBar(
@@ -293,7 +310,9 @@ private fun ChessMateNavHost(
     authViewModel: SignInViewModel? = null,
     onlineViewModel: OnlineViewModel? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
-    togglefullView: () -> Unit = {}
+    togglefullView: () -> Unit = {},
+    userData: UserData? = null,
+    context: Context? = null
 ) {
     if (isAuthenticated) {
         NavHost(
@@ -314,7 +333,7 @@ private fun ChessMateNavHost(
             composable(ChessMateRoute.PROFILE) {
                 ProfileScreen(
                     modifier= modifier,
-                    userData = authViewModel?.getUserData(),
+                    userData = userData,
                     authViewModel = authViewModel,
                     authHandler = authHandler,
                     navigationType = navigationType)
@@ -334,7 +353,8 @@ private fun ChessMateNavHost(
                    authViewModel = authViewModel,
                    googleIntentLaucher = googleIntentLaucher,
                    navController = navController,
-                   navigationType = navigationType
+                   navigationType = navigationType,
+                   context = context
                )
             }
             composable(ChessMateRoute.SIGN_UP) {
@@ -343,7 +363,8 @@ private fun ChessMateNavHost(
                     modifier = modifier,
                     authHandler = authHandler,
                     authViewModel = authViewModel,
-                    navigationType = navigationType
+                    navigationType = navigationType,
+                    context = context
                 )
             }
             composable(ChessMateRoute.CONTACT) {

@@ -1,5 +1,6 @@
 package com.example.chessmate.ui.pages
 
+import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
@@ -24,12 +25,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
@@ -37,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.chessmate.R
@@ -58,11 +58,10 @@ fun SignInScreen(
     authHandler: AuthUIClient? = null,
     authViewModel: SignInViewModel? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
-    navController: NavController? = null
+    navController: NavController? = null,
+    context: Context? = null
 ) {
-    val lyfescope = rememberCoroutineScope()
     val scroll = rememberScrollState(0)
-    val context = LocalContext.current
     LaunchedEffect(key1 = state!!.signInError) {
         state.signInError?.let { error ->
             Toast.makeText(
@@ -72,7 +71,6 @@ fun SignInScreen(
             ).show()
         }
     }
-
 
     var email by rememberSaveable(
         stateSaver = TextFieldValue.Saver,
@@ -136,13 +134,14 @@ fun SignInScreen(
                         return@Button
                     }
 
-                    lyfescope.launch {
+                    authViewModel!!.viewModelScope.launch {
                         val signInResult = authHandler?.firebaseSignInWithEmailAndPassword(
                             email.text,
                             password.text
                         )
-                        authViewModel?.onSignInResult(
-                            signInResult!!
+                        authViewModel.onSignInResult(
+                            signInResult!!,
+                            context!!
                         )
                     }
                 }
@@ -191,7 +190,7 @@ fun SignInScreen(
                 )
             Spacer(modifier = Modifier.size(30.dp))
                 Button(onClick = {
-                    lyfescope.launch {
+                    authViewModel!!.viewModelScope.launch {
                         val signInIntentSender =
                         authHandler!!.signIn()
                         googleIntentLaucher!!.launch(
@@ -210,7 +209,7 @@ fun SignInScreen(
                     Text(text = "Sign in")
                 }
             Spacer(modifier = Modifier.size(8.dp))
-            FacebookButton(authHandler = authHandler!!,authViewModel = authViewModel, scope = lyfescope)
+            FacebookButton(authHandler = authHandler!!,authViewModel = authViewModel, context = context!!)
         }
     } else {
         Row(
@@ -257,13 +256,14 @@ fun SignInScreen(
                             return@Button
                         }
 
-                        lyfescope.launch {
+                        authViewModel!!.viewModelScope.launch {
                             val signInResult = authHandler?.firebaseSignInWithEmailAndPassword(
                                 email.text,
                                 password.text
                             )
-                            authViewModel?.onSignInResult(
-                                signInResult!!
+                            authViewModel.onSignInResult(
+                                signInResult!!,
+                                context = context!!
                             )
                         }
                     }
@@ -319,7 +319,7 @@ fun SignInScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Button(onClick = {
-                    lyfescope.launch {
+                    authViewModel!!.viewModelScope.launch {
                         val signInIntentSender = authHandler!!.signIn()
                         googleIntentLaucher!!.launch(
                             IntentSenderRequest.Builder(
@@ -339,7 +339,7 @@ fun SignInScreen(
                     Text(text = "Sign in")
                 }
                 Spacer(modifier = Modifier.size(8.dp))
-                FacebookButton(authHandler = authHandler!!,authViewModel = authViewModel, scope = lyfescope)
+                FacebookButton(authHandler = authHandler!!,authViewModel = authViewModel, context = context!!)
             }
         }
     }

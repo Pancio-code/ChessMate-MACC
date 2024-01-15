@@ -1,5 +1,7 @@
 package com.example.chessmate.sign_in
 
+import android.content.Context
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,13 +19,23 @@ class SignInViewModel: ViewModel() {
     val isAuthenticated : StateFlow<UserAuthState> = _isAuthenticated
 
     private val _userData = MutableStateFlow(SignInResult(data = null,errorMessage = null))
-    private val userData : StateFlow<SignInResult> = _userData
+    val userData = _userData.asStateFlow()
 
-    fun onSignInResult(result: SignInResult) {
+    fun onSignInResult(result: SignInResult,context : Context) {
         _signInState.update { it.copy(
             isSignInSuccessful = result.data != null,
             signInError = result.errorMessage
         ) }
+        _isAuthenticated.value = UserAuthState( state = if(result.data != null)  UserAuthStateType.AUTHENTICATED else UserAuthStateType.UNAUTHENTICATED ,loading = false)
+        _userData.value = SignInResult(data = result.data , errorMessage = result.errorMessage)
+        val toastText = if (result.data != null) {
+            "Sign in successful"
+        } else result.errorMessage ?: "Sign out successful"
+        Toast.makeText(
+            context,
+            toastText,
+            Toast.LENGTH_LONG
+        ).show()
     }
 
 
@@ -48,11 +60,4 @@ class SignInViewModel: ViewModel() {
         }
     }
 
-    fun resetState() {
-        _signInState.update { SignInState() }
-    }
-
-    fun getUserData(): UserData? {
-        return userData.value.data
-    }
 }

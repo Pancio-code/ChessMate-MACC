@@ -14,24 +14,24 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserData
-import com.example.chessmate.ui.utils.ChessMateNavigationType
-import kotlinx.coroutines.launch
 import com.example.chessmate.ui.components.CardProfile
 import com.example.chessmate.ui.components.Match
-import com.example.chessmate.ui.components.Score
 import com.example.chessmate.ui.components.RecentMatches
-import com.example.chessmate.ui.theme.light_primary
+import com.example.chessmate.ui.components.Score
+import com.example.chessmate.ui.utils.ChessMateNavigationType
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -45,6 +45,7 @@ fun ProfileReadMode(
     toggler: () -> Unit
 ) {
     val lyfescope = rememberCoroutineScope()
+    val context = LocalContext.current
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -70,12 +71,13 @@ fun ProfileReadMode(
             horizontalArrangement = Arrangement.Center
         ) {
             Button(
-                colors = ButtonDefaults.buttonColors(light_primary),
+                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
                 onClick = {
                 lyfescope.launch {
                     val signInResult = authHandler?.signOut()
                     authViewModel?.onSignInResult(
-                        signInResult!!
+                        signInResult!!,
+                        context = context
                     )
                 }
             }) {
@@ -83,10 +85,10 @@ fun ProfileReadMode(
                     imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                     modifier = Modifier.size(16.dp),
                     contentDescription = "Exit icon",
-                    tint = Color.LightGray
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Sign Out", color = Color.LightGray)
+                Text(text = "Sign Out", color = MaterialTheme.colorScheme.onPrimary)
             }
         }
 

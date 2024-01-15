@@ -25,13 +25,13 @@ import kotlinx.coroutines.tasks.await
 class AuthUIClient(
     private val context: Context,
     private val oneTapClient: SignInClient,
-    //private val db : FirebaseFirestore
+    private val loginToogle : () -> Unit,
+    private val loadingText : (s : String) -> Unit
     ) {
     private val auth = Firebase.auth
     private val userRemoteService : UserAPI = HelperClassUser.getIstance()
     private val token = BuildConfig.TOKEN
     private val gson = Gson()
-    //private val dbUsers: CollectionReference = db.collection("Users_Info")
 
     suspend fun signIn(): IntentSender? {
         val result = try {
@@ -49,6 +49,8 @@ class AuthUIClient(
     suspend fun firebaseSignInWithEmailAndPassword(
         email: String, password: String
     ) = try {
+        loadingText("Try to log in with email...")
+        loginToogle()
         val user = auth.signInWithEmailAndPassword(email,password).await().user
         SignInResult(
             data = user?.run {
@@ -79,10 +81,12 @@ class AuthUIClient(
         val token = result.accessToken.token
         val credential = FacebookAuthProvider.getCredential(token)
         return try {
+            loadingText("Try to log in with facebook...")
+            loginToogle()
             val user = Firebase.auth.signInWithCredential(credential).await().user
             if (user != null) {
                 val userResponse =  userRemoteService.get(token=token,id= user.uid)
-                if (userResponse.code() == 290) {
+                if (userResponse.code() == 204) {
                     val data = gson.toJson(
                         UserData(
                             id = user.uid,
@@ -108,14 +112,9 @@ class AuthUIClient(
         } catch(e: Exception) {
             e.printStackTrace()
             if(e is CancellationException) throw e
-            Toast.makeText(
-                context,
-                e.message,
-                Toast.LENGTH_LONG
-            ).show()
             SignInResult(
                 data = null,
-                errorMessage = null
+                errorMessage = e.message
             )
         }
     }
@@ -123,10 +122,12 @@ class AuthUIClient(
     suspend fun firebaseSignUpWithEmailAndPassword(
         email: String, password: String, username: String
     ) = try {
+            loadingText("Try to create your profile...")
+            loginToogle()
             val user  = auth.createUserWithEmailAndPassword(email, password).await().user
             if (user != null) {
                 val userResponse =  userRemoteService.get(token=token,id= user.uid)
-                if (userResponse.code() == 290) {
+                if (userResponse.code() == 204) {
                     val data = gson.toJson(
                         UserData(
                             id = user.uid,
@@ -169,10 +170,12 @@ class AuthUIClient(
         val googleIdToken = credential.googleIdToken
         val googleCredentials = GoogleAuthProvider.getCredential(googleIdToken, null)
         return try {
+            loadingText("Try to login with google...")
+            loginToogle()
             val user = auth.signInWithCredential(googleCredentials).await().user
             if (user != null) {
                 val userResponse =  userRemoteService.get(token=token,id= user.uid)
-                if (userResponse.code() == 290) {
+                if (userResponse.code() == 204) {
                     val data = gson.toJson(UserData(
                         id = user.uid,
                         email = user.email,
@@ -197,14 +200,9 @@ class AuthUIClient(
         } catch(e: Exception) {
             e.printStackTrace()
             if(e is CancellationException) throw e
-            Toast.makeText(
-                context,
-                e.message,
-                Toast.LENGTH_LONG
-            ).show()
             SignInResult(
                 data = null,
-                errorMessage = null
+                errorMessage = e.message
             )
         }
     }

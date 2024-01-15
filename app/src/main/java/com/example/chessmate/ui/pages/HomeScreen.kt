@@ -125,7 +125,7 @@ fun HomePage(
                 contentDescription = "Restart icon"
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Resume game")
+            Text(text = "Resume online game")
         }
     }
 }

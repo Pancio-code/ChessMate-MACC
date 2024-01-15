@@ -1,5 +1,6 @@
 package com.example.chessmate.ui.components
 
+import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
@@ -13,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import com.example.chessmate.R
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInResult
@@ -22,7 +24,6 @@ import com.facebook.FacebookCallback
 import com.facebook.FacebookException
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -30,7 +31,7 @@ fun FacebookButton(
     authHandler: AuthUIClient,
     modifier: Modifier = Modifier,
     authViewModel: SignInViewModel? = null,
-    scope: CoroutineScope
+    context: Context
 ) {
     val loginManager = LoginManager.getInstance()
     val callbackManager = remember { CallbackManager.Factory.create() }
@@ -43,22 +44,32 @@ fun FacebookButton(
     DisposableEffect(Unit) {
         loginManager.registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
             override fun onCancel() {
-                // do nothing
+                authViewModel?.onSignInResult(
+                    SignInResult(
+                        data = null,
+                        errorMessage = "Login cancelled",
+                    ),
+                    context
+                )
             }
 
             override fun onError(error: FacebookException) {
                 error.printStackTrace()
-                SignInResult(
-                    data = null,
-                    errorMessage = error.message
+                authViewModel?.onSignInResult(
+                    SignInResult(
+                        data = null,
+                        errorMessage = error.message
+                    ),
+                    context
                 )
             }
 
             override fun onSuccess(result: LoginResult) {
-                scope.launch {
+                authViewModel!!.viewModelScope.launch {
                     val signInResult = authHandler.firebaseSignInWithFacebook(result)
-                    authViewModel?.onSignInResult(
-                        signInResult
+                    authViewModel.onSignInResult(
+                        signInResult,
+                        context
                     )
                 }
             }

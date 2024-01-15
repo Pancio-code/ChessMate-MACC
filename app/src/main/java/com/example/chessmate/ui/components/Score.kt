@@ -16,17 +16,16 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.chessmate.ui.theme.light_primary
 
 @Composable
 @Preview
@@ -55,7 +54,7 @@ fun ScoreCard(
             defaultElevation = 6.dp
         ),
         colors = CardDefaults.cardColors(
-            containerColor = light_primary,
+            containerColor = MaterialTheme.colorScheme.primary,
         ),
         modifier = Modifier
             .size(width = 90.dp, height = 90.dp)
@@ -74,7 +73,7 @@ fun ScoreCard(
                     text = name,
                     textAlign = TextAlign.Center,
                     fontSize = 14.sp,
-                    color = Color.LightGray
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
             Spacer(modifier = Modifier.height(4.dp))
@@ -89,7 +88,7 @@ fun ScoreCard(
                         imageVector = Icons.Default.Person,
                         contentDescription = "User Icon",
                         modifier = Modifier.size(24.dp),
-                        tint = Color.Red
+                        tint = MaterialTheme.colorScheme.inversePrimary
                     )
                 "Multiplayer" ->
                     Icon(
@@ -97,7 +96,7 @@ fun ScoreCard(
                         contentDescription = "Two People Icon",
                         modifier = Modifier
                             .size(24.dp),
-                        tint = Color.Blue
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 else ->
                     Icon(
@@ -105,7 +104,7 @@ fun ScoreCard(
                         contentDescription = "Win",
                         modifier = Modifier
                             .size(24.dp),
-                        tint = Color.Green
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
@@ -120,7 +119,7 @@ fun ScoreCard(
                     textAlign = TextAlign.Center,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }

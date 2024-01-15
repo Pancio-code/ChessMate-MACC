@@ -1,12 +1,15 @@
 package com.example.chessmate.ui.components
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.Alignment
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -14,16 +17,21 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import com.example.chessmate.R
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.chessmate.R
 import com.example.chessmate.sign_in.UserData
-import com.example.chessmate.ui.theme.light_primary
 
 @Composable
 fun CardProfile(
@@ -35,7 +43,7 @@ fun CardProfile(
             defaultElevation = 6.dp
         ),
         colors = CardDefaults.cardColors(
-            containerColor = light_primary,
+            containerColor = MaterialTheme.colorScheme.primary,
         ),
         modifier = Modifier
             .size(width = 300.dp, height = 120.dp)
@@ -68,7 +76,7 @@ fun CardProfile(
                                 text = userData.username,
                                 fontWeight = FontWeight.Medium,
                                 fontSize = 20.sp,
-                                color = Color.White
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
                         }
                         Column(
@@ -83,7 +91,7 @@ fun CardProfile(
                                 Icon(
                                     imageVector = Icons.Default.Settings,
                                     contentDescription = "Settings",
-                                    tint = Color.LightGray
+                                    tint = MaterialTheme.colorScheme.inversePrimary
                                 )
                             }
                         }
@@ -92,7 +100,7 @@ fun CardProfile(
                     Text(
                         text = userData.email.toString(),
                         fontSize = 14.sp,
-                        color = Color.LightGray
+                        color = MaterialTheme.colorScheme.inversePrimary
                     )
                 }
                 Spacer(modifier = Modifier.height(2.dp))
@@ -109,7 +117,7 @@ fun CardProfile(
                         text = "Italy",
                         fontWeight = FontWeight.Normal,
                         fontSize = 14.sp,
-                        color = Color.LightGray
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
@@ -126,7 +134,7 @@ fun CardProfile(
                     text = "Signup on 22 Nov 2023",
                     fontWeight = FontWeight.Normal,
                     fontSize = 12.sp,
-                    color = Color.LightGray,
+                    color = MaterialTheme.colorScheme.inversePrimary,
                     modifier = Modifier.padding(start = 16.dp)
                 )
             }

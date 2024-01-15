@@ -1,5 +1,6 @@
 package com.example.chessmate
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -53,22 +54,26 @@ class MainActivity : ComponentActivity() {
         AuthUIClient(
             context = applicationContext,
             oneTapClient = Identity.getSignInClient(applicationContext),
+            loginToogle = { userAuthState.value = UserAuthStateType.UNDEFINED},
+            loadingText = {s : String -> loadingText = s}
         )
     }
 
-    private fun initKoin() {
+    //TODO: Bug when rotate
+    /*private fun initKoin() {
         startKoin {
             androidLogger()
             androidContext(this@MainActivity)
             modules(defaultModule)
         }
-    }
+    }*/
 
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initKoin()
+        //TODO
+        //initKoin()
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -83,6 +88,13 @@ class MainActivity : ComponentActivity() {
                 val windowSize = calculateWindowSizeClass(this)
                 val displayFeatures = calculateDisplayFeatures(this)
                 val authState by signInViewModel.signInState.collectAsStateWithLifecycle()
+                val userData by signInViewModel.userData.collectAsStateWithLifecycle()
+
+                LaunchedEffect(key1 = userData) {
+                    signInViewModel.getAuthenticationState(handler = authUIClient).run {
+                        signInViewModel.isAuthenticated.collect {  userAuthState.value = it.state }
+                    }
+                }
 
                 ExitApplicationComponent(this)
                 when (userAuthState.value) {
@@ -99,25 +111,13 @@ class MainActivity : ComponentActivity() {
                                             intent = result.data ?: return@launch
                                         )
                                         signInViewModel.onSignInResult(
-                                            signInResult
+                                            signInResult,
+                                            applicationContext
                                         )
                                     }
                                 }
                             }
                         )
-
-                        LaunchedEffect(key1 = authState.isSignInSuccessful) {
-                            if (authState.isSignInSuccessful) {
-                                Toast.makeText(
-                                    applicationContext,
-                                    "Sign in successful",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                                signInViewModel.getAuthenticationState(handler = authUIClient).run {
-                                    signInViewModel.isAuthenticated.collect {  userAuthState.value = it.state }
-                                }
-                            }
-                        }
 
                         ChessMateApp(
                             windowSize = windowSize,
@@ -126,25 +126,12 @@ class MainActivity : ComponentActivity() {
                             authViewModel = signInViewModel,
                             authHandler = authUIClient,
                             authState= authState,
-                            googleIntentLaucher = launcher
+                            googleIntentLaucher = launcher,
+                            context = applicationContext
                         )
                     }
 
                     UserAuthStateType.AUTHENTICATED -> {
-                        LaunchedEffect(key1 = authState.isSignInSuccessful) {
-                            if (!authState.isSignInSuccessful) {
-                                Toast.makeText(
-                                    applicationContext,
-                                    "Sign out successful",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                                signInViewModel.getAuthenticationState(handler = authUIClient).run {
-                                    signInViewModel.isAuthenticated.collect {  userAuthState.value = it.state }
-                                }
-                            } else {
-                                onlineViewModel.getRoomData()
-                            }
-                        }
 
                         var isInfullView by remember { mutableStateOf(false) }
                         val immersivePage by onlineViewModel.fullViewPage.collectAsState()
@@ -152,7 +139,7 @@ class MainActivity : ComponentActivity() {
                             OnlineUIClient(
                                 context = applicationContext,
                                 db = db,
-                                userData = signInViewModel.getUserData()!!,
+                                userData = userData.data!!,
                                 onlineViewModel = onlineViewModel
                             )
                         }
@@ -170,6 +157,7 @@ class MainActivity : ComponentActivity() {
                                 isInfullView = !isInfullView
 
                              },
+                            userData = userData.data!!,
                             immersivePage = immersivePage
                         )
                     }

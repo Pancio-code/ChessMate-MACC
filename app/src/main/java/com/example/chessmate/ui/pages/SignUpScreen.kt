@@ -1,5 +1,6 @@
 package com.example.chessmate.ui.pages
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,16 +21,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInState
 import com.example.chessmate.sign_in.SignInViewModel
@@ -47,10 +47,9 @@ fun SignUpScreen(
     navigationType: ChessMateNavigationType,
     authHandler: AuthUIClient? = null,
     authViewModel: SignInViewModel? = null,
+    context: Context? = null
     ) {
-    val lyfescope = rememberCoroutineScope()
     val scroll = rememberScrollState(0)
-    val context = LocalContext.current
     LaunchedEffect(key1 = state!!.signInError) {
         state.signInError?.let { error ->
             Toast.makeText(
@@ -181,7 +180,7 @@ fun SignUpScreen(
                 onClick = {
                     keyboard?.hide()
 
-                    if (emailError != null && passwordError != null && passwordTwoError != null && emailError != null && usernameError != null) {
+                    if (emailError != null && passwordError != null && passwordTwoError != null  && usernameError != null) {
                         Toast.makeText(
                             context,
                             "Please fill in all fields correctly.",
@@ -190,14 +189,15 @@ fun SignUpScreen(
                         return@Button
                     }
 
-                    lyfescope.launch {
+                    authViewModel!!.viewModelScope.launch {
                         val signInResult = authHandler?.firebaseSignUpWithEmailAndPassword(
                             email.text,
                             password.text,
                             username.text
                         )
-                        authViewModel?.onSignInResult(
-                            signInResult!!
+                        authViewModel.onSignInResult(
+                            signInResult!!,
+                            context = context!!
                         )
                     }
                 }
@@ -303,7 +303,7 @@ fun SignUpScreen(
                 Button(
                     onClick = {
                         keyboard?.hide()
-                        if (emailError != null && passwordError != null && passwordTwoError != null && emailError != null && usernameError != null) {
+                        if (emailError != null && passwordError != null && passwordTwoError != null && usernameError != null) {
                             Toast.makeText(
                                 context,
                                 "Please fill in all fields correctly.",
@@ -312,14 +312,15 @@ fun SignUpScreen(
                             return@Button
                         }
 
-                        lyfescope.launch {
+                        authViewModel!!.viewModelScope.launch {
                             val signInResult = authHandler?.firebaseSignUpWithEmailAndPassword(
                                 email.text,
                                 password.text,
                                 username.text
                             )
-                            authViewModel?.onSignInResult(
-                                signInResult!!
+                            authViewModel.onSignInResult(
+                                signInResult!!,
+                                context = context!!
                             )
                         }
                     }
