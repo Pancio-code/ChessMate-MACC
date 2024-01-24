@@ -14,7 +14,7 @@ import java.nio.ShortBuffer
 
 
 
-class CubeOpenGL(private val context: Context ){
+class CubeOpenGL(context: Context ){
     ///vertex shader
     var vShaderStr =
         """

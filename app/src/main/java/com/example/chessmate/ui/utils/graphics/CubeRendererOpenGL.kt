@@ -69,10 +69,4 @@ class CubeRendererOpenGL(val context: Context, c : Color) : GLSurfaceView.Render
         // Update the rotation angle for animation
         angle += 0.3f
     }
-
-    // Methods to set cube translation
-    fun setTranslation(x: Float, y: Float) {
-        this.x = x
-        this.y = y
-    }
 }
