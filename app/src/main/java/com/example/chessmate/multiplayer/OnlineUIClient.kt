@@ -15,8 +15,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import kotlin.coroutines.cancellation.CancellationException
 
 class OnlineUIClient(
@@ -32,9 +30,58 @@ class OnlineUIClient(
     private val roomDbReference = getString(context,R.string.roomDbReference)
     private val dbRooms: CollectionReference = db.collection(roomDbReference)
 
+    private fun saveRoomData(model : RoomData) {
+        onlineViewModel.setRoomData(model)
+        if(model.roomId != "-1") {
+            fetchRoomData()
+        }
+    }
+
+    fun updateRoomData(model : RoomData) {
+         try {
+            if(model.roomId != "-1") {
+                dbRooms.document(model.roomId).set(model)
+            }
+        } catch(e: Exception) {
+            e.printStackTrace()
+            if(e is CancellationException) throw e
+        } finally {}
+    }
+
+    fun deleteRoomData(model: RoomData)  {
+        dbRooms.document(model.roomId).delete()
+    }
+
+    private fun fetchRoomData() {
+        onlineViewModel.roomData.value.apply {
+            if (roomId != "-1") {
+                dbRooms.document(roomId).addSnapshotListener { value, e ->
+                    if (e != null) {
+                        Log.w("Game fetch", "Listen failed.", e)
+                        return@addSnapshotListener
+                    }
+
+                    val source = if (value != null && value.metadata.hasPendingWrites()) {
+                        "Local"
+                    } else {
+                        "Server"
+                    }
+
+                    if (value != null && value.exists()) {
+                        Log.d("Game fetch", "$source data: ${value.data}")
+                        val model = value.toObject(RoomData::class.java)!!
+                        onlineViewModel.setRoomData(model)
+                    } else {
+                        Log.d("Game fetch","$source data: null")
+                    }
+                }
+            }
+        }
+    }
+
     suspend fun getRoom() : RoomData? {
         return try {
-            val roomResponse =  roomRemoteService.get(token=token, userId = userData.id!!)
+            val roomResponse =  roomRemoteService.get(token=token, userId = userData.id)
             roomResponse.body()
         } catch(e: Exception) {
             e.printStackTrace()
@@ -46,68 +93,30 @@ class OnlineUIClient(
     suspend fun startGame() : JsonObject? {
         return try {
 
-            val currentDateTime = LocalDateTime.now()
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-            val formattedDateTime = currentDateTime.format(formatter)
-
-            val data = gson.toJson(RoomData(
+            val data = gson.toJson(
+                RoomData(
                     playerOneId = userData.id,
-                    rankPlayerOne =  userData.eloRank,
-                    dataCreation = formattedDateTime
+                    playerOneUsername = userData.username!!,
+                    gameState = RoomStatus.CREATED,
+                    rankPlayerOne = userData.eloRank
                 )
             )
-            val roomResponse =  roomRemoteService.create(token=token, id = userData.id!!, body = data)
+            val roomResponse = roomRemoteService.create(token = token, id = userData.id, body = data)
             val responseBody = roomResponse.body()
-            val roomId = responseBody?.get("roomId")?.asString
-            if (responseBody != null) {
-                Log.d("API",responseBody.asString)
+            if (responseBody?.get("roomId") != null && responseBody.get("roomId").asString != "-1") {
+                saveRoomData(gson.fromJson(responseBody, RoomData::class.java))
             }
-            if (roomId != null) {
-                listenForGameChanges(roomId = roomId , onGameUpdate = { newData ->
-                    onlineViewModel.setRoomData(newData)
-                })
-            }
-            return responseBody
-        } catch(e: Exception) {
+            Log.d("Online Client",responseBody.toString())
+            return roomResponse.body()
+        } catch (e: Exception) {
             e.printStackTrace()
-            if(e is CancellationException) throw e
+            if (e is CancellationException) throw e
             Toast.makeText(
                 context,
                 "Could not start the game!",
                 Toast.LENGTH_LONG
             ).show()
-            null
-        }
-    }
-
-    fun listenForGameChanges(roomId: String, onGameUpdate: (RoomData) -> Unit) {
-        dbRooms.document(roomId).addSnapshotListener { snapshot, e ->
-            if (e != null) {
-                Log.w("Listen", "Listen failed.", e)
-                return@addSnapshotListener
-            }
-
-            if (snapshot != null && snapshot.exists()) {
-                Log.d("Snapshot", "Current data: ${snapshot.data}")
-                if (snapshot.data?.get("gameState") == "Start") {
-                        val roomData = gson.fromJson(gson.toJson(snapshot.data), RoomData::class.java)
-                        onGameUpdate(roomData)
-                }
-            } else {
-                Log.d("Snapshot", "Current data: null")
-            }
-        }
-    }
-
-    suspend fun makeMove(roomId: String, move: String): Int? {
-        return try {
-            val moveData = mapOf("move" to move)
-            val moveResponse = roomRemoteService.move(token=token, id = userData.id!!, body = gson.toJson(moveData))
-            moveResponse.code()
-        } catch(e: Exception) {
-            e.printStackTrace()
-            if(e is CancellationException) throw e
-            Toast.makeText(context, "Failed to make a move!", Toast.LENGTH_LONG).show()
+            saveRoomData(RoomData())
             null
         }
     }

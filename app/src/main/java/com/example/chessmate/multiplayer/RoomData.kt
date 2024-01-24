@@ -1,24 +1,52 @@
 package com.example.chessmate.multiplayer
 
+import com.google.firebase.firestore.Exclude
+
 data class RoomData(
-    val roomId: String? = null,
-    val playerOneId: String? = null,
+    val roomId: String = "-1",
+    val playerOneId: String = "",
     val playerTwoId: String? = null,
-    val isFree: Boolean = true,
-    val gameState: String? = RoomDataHelper.GAME_STATE,
-    val lastOnlinePlayerOne: String? = null,
-    val lastOnlinePlayerTwo: String? = null,
-    val rankPlayerOne: Float? = null,
+    val playerOneUsername: String = "",
+    val playerTwoUsername: String? = null,
+    val gameState: RoomStatus = RoomStatus.WAITING,
+    val rankPlayerOne: Float = 0.0f,
     val rankPlayerTwo: Float? = null,
-    val dataCreation: String? = null,
     val currentTurn: String? = null,
-    val boardState: String? = RoomDataHelper.FEN_START, // We use FEN notation to represent current board situation.
+    val boardState: String = RoomDataHelper.FEN_START, // We use FEN notation to represent current board situation.
     val lastMove: String? = null,
     val winner: String = "",
     val termination: String= ""
 )
+{
+    constructor() : this("-1", "", null,"",null,RoomStatus.WAITING,0.0f,null,null,RoomDataHelper.FEN_START,null,"","") {}
+    @Exclude
+    fun toMap(): Map<String, Any?> {
+        return mapOf(
+            "roomId" to roomId,
+            "playerOneId" to playerOneId,
+            "playerTwoId" to playerTwoId,
+            "playerOneUsername" to playerOneUsername,
+            "playerTwoUsername" to playerTwoUsername,
+            "gameState" to gameState,
+            "rankPlayerOne" to rankPlayerOne,
+            "rankPlayerTwo" to rankPlayerTwo,
+            "currentTurn" to currentTurn,
+            "boardState" to boardState,
+            "lastMove" to lastMove,
+            "winner" to winner,
+            "termination" to termination
+        )
+    }
+}
 
 object RoomDataHelper {
     const val FEN_START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-    const val GAME_STATE = "Pending"
+}
+
+enum class RoomStatus {
+    WAITING,
+    CREATED,
+    JOINED,
+    INPROGRESS,
+    FINISHED
 }

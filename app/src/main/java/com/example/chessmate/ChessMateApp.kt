@@ -128,7 +128,10 @@ fun ChessMateApp(
             togglefullView = togglefullView,
             userData = userData
         )
-        ChessMateRoute.GAME -> Surface(color = MaterialTheme.colorScheme.background) {
+        ChessMateRoute.OFFLINE_GAME -> Surface(color = MaterialTheme.colorScheme.background) {
+            Game(importGameText = "")
+        }
+        ChessMateRoute.ONLINE_GAME -> Surface(color = MaterialTheme.colorScheme.background) {
             Game(importGameText = "")
         }
         else -> ChessMateNavigationWrapper(

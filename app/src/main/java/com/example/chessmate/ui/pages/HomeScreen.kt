@@ -82,7 +82,7 @@ fun HomePage(
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
-                onlineViewModel.setFullViewPage(ChessMateRoute.GAME)
+                onlineViewModel.setFullViewPage(ChessMateRoute.OFFLINE_GAME)
                 togglefullView()
               },
             modifier = Modifier

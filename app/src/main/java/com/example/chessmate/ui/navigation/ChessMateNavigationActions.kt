@@ -28,7 +28,8 @@ object ChessMateRoute {
     const val SIGN_UP = "Sign Up"
     const val CONTACT = "Contact Us"
     const val FIND_GAME = "Multiplayer Game"
-    const val GAME = "Game"
+    const val ONLINE_GAME = "Online Game"
+    const val OFFLINE_GAME = "Offline Game"
 }
 
 data class ChessMateTopLevelDestination(
