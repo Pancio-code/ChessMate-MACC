@@ -1,12 +1,14 @@
 package com.example.chessmate
+import android.app.ActivityManager
+import android.opengl.GLSurfaceView
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
@@ -26,22 +28,18 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
-import com.example.chessmate.multiplayer.RoomData
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserAuthStateType
 import com.example.chessmate.ui.components.IndeterminateLoaderIndicator
 import com.example.chessmate.ui.navigation.ExitApplicationComponent
 import com.example.chessmate.ui.theme.ChessMateTheme
+import com.example.chessmate.ui.utils.graphics.CubeRendererOpenGL
 import com.google.accompanist.adaptive.calculateDisplayFeatures
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
-import org.koin.android.ext.koin.androidContext
-import org.koin.android.ext.koin.androidLogger
-import org.koin.core.context.startKoin
-import org.koin.ksp.generated.defaultModule
 
 class MainActivity : ComponentActivity() {
 
@@ -50,6 +48,10 @@ class MainActivity : ComponentActivity() {
     private var userAuthState =  mutableStateOf(UserAuthStateType.UNDEFINED)
     private val db = Firebase.firestore
     private var loadingText = "Setting up the game..."
+
+
+    private var glSurfaceView: GLSurfaceView? = null
+    private var renderer: CubeRendererOpenGL? = null
 
     private val authUIClient by lazy {
         AuthUIClient(
@@ -76,6 +78,7 @@ class MainActivity : ComponentActivity() {
         //TODO
         //initKoin()
 
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 signInViewModel.getAuthenticationState(handler = authUIClient).run {
@@ -100,7 +103,18 @@ class MainActivity : ComponentActivity() {
                 ExitApplicationComponent(this)
                 when (userAuthState.value) {
                     UserAuthStateType.UNDEFINED -> {
-                        IndeterminateLoaderIndicator(loadingText = loadingText)
+                        if (checkOpenGL3()) {
+                            glSurfaceView = GLSurfaceView(this)
+                            glSurfaceView?.setEGLContextClientVersion(3)
+
+                            renderer = CubeRendererOpenGL(this,MaterialTheme.colorScheme.inverseOnSurface)
+                            glSurfaceView?.setRenderer(renderer)
+
+                            IndeterminateLoaderIndicator(loadingText = loadingText, drawing = glSurfaceView!!)
+                        } else {
+                            Log.d("OPENGL", "OpenGL ES 3.0 not supported on device")
+                            finish()
+                        }
                     }
                     UserAuthStateType.UNAUTHENTICATED -> {
                         val launcher = rememberLauncherForActivityResult(
@@ -166,6 +180,25 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        glSurfaceView?.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        glSurfaceView?.onPause()
+    }
+
+    // Check if OpenGL ES 3.0 is supported
+    private fun checkOpenGL3(): Boolean {
+
+        val am = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        val info = am.deviceConfigurationInfo
+        return info.reqGlEsVersion >= 0x30000
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
