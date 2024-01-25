@@ -1,5 +1,6 @@
 package com.example.chessmate.ui.pages
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,26 +23,36 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.chessmate.R
+import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
+import com.example.chessmate.sign_in.UserData
 import com.example.chessmate.ui.navigation.ChessMateRoute
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
 
 @Composable
 
 fun HomePage(
     modifier: Modifier = Modifier,
     onlineViewModel: OnlineViewModel,
-    togglefullView: () -> Unit = {}
+    togglefullView: () -> Unit = {},
+    onlineUIClient: OnlineUIClient,
 ) {
     val scroll = rememberScrollState(0)
+    val localContext = LocalContext.current
+    val resumeGameError =  stringResource(id = R.string.resume_game)
+    val lyfescope = rememberCoroutineScope()
     Column(
         modifier = modifier.fillMaxSize().verticalScroll(scroll),
         verticalArrangement = Arrangement.Center,
@@ -99,7 +110,10 @@ fun HomePage(
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { /* Handle Play against Stockfish button click */ },
+            onClick = {
+                onlineViewModel.setFullViewPage(ChessMateRoute.AI_GAME)
+                togglefullView()
+            },
             modifier = Modifier
                 .fillMaxWidth(fraction = 0.6f)
                 .height(65.dp)
@@ -114,7 +128,20 @@ fun HomePage(
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { /* Handle Resume game button click */ },
+            onClick = {
+                lyfescope.launch {
+                    if (onlineUIClient.getRoom() != null) {
+                        onlineViewModel.setFullViewPage(ChessMateRoute.ONLINE_GAME)
+                        togglefullView()
+                    } else {
+                        Toast.makeText(
+                            localContext,
+                            resumeGameError,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth(fraction = 0.6f)
                 .height(65.dp)
@@ -133,6 +160,8 @@ fun HomePage(
 @Preview
 @Composable
 fun HomePagePreview() {
-    HomePage(onlineViewModel = OnlineViewModel())
+    HomePage(onlineViewModel = OnlineViewModel(), onlineUIClient = OnlineUIClient(context = LocalContext.current,
+        FirebaseFirestore.getInstance(), onlineViewModel = OnlineViewModel(), UserData()
+    ))
 }
 

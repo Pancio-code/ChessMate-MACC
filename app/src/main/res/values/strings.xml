@@ -13,6 +13,8 @@
     <string name="edit">Edit</string>
     <string name="compose">Compose</string>
 
+    <string name="resume_game">No game in progress!</string>
+
     <string name="password_reset_title">Forgot Password</string>
     <string name="password_reset_subtitle">Insert your email and you will receive an email for reset your password.</string>
 
@@ -49,6 +51,7 @@
     <string name="game_new">New</string>
     <string name="game_import">Import</string>
     <string name="game_export">Export</string>
+    <string name="game_exit">Exit</string>
 
     <string name="resolution_white_to_move">WHITE to move</string>
     <string name="resolution_black_to_move">BLACK to move</string>

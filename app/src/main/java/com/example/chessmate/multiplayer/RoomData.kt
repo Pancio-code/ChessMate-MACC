@@ -50,3 +50,9 @@ enum class RoomStatus {
     INPROGRESS,
     FINISHED
 }
+
+enum class GameType {
+    ONLINE,
+    TWO_OFFLINE,
+    ONE_OFFLINE
+}

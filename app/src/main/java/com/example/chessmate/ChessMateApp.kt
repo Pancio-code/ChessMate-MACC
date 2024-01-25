@@ -31,6 +31,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.window.layout.DisplayFeature
 import androidx.window.layout.FoldingFeature
 import com.example.chessmate.game.ui.app.Game
+import com.example.chessmate.game.ui.app.GameOnline
+import com.example.chessmate.multiplayer.GameType
 import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
 import com.example.chessmate.sign_in.AuthUIClient
@@ -129,10 +131,23 @@ fun ChessMateApp(
             userData = userData
         )
         ChessMateRoute.OFFLINE_GAME -> Surface(color = MaterialTheme.colorScheme.background) {
-            Game(importGameText = "")
+            Game(
+                importGameFEN = "",
+                gameType = GameType.TWO_OFFLINE,
+                onlineViewModel = onlineViewModel!!,
+                togglefullView = togglefullView
+            )
         }
         ChessMateRoute.ONLINE_GAME -> Surface(color = MaterialTheme.colorScheme.background) {
-            Game(importGameText = "")
+            GameOnline(onlineViewModel = onlineViewModel!!, onlineUIClient = onlineUIClient!!)
+        }
+        ChessMateRoute.AI_GAME -> Surface(color = MaterialTheme.colorScheme.background) {
+            Game(
+                importGameFEN = "",
+                gameType = GameType.ONE_OFFLINE,
+                onlineViewModel = onlineViewModel!!,
+                togglefullView = togglefullView
+            )
         }
         else -> ChessMateNavigationWrapper(
             navigationType = navigationType,
@@ -142,6 +157,7 @@ fun ChessMateApp(
             authState = authState,
             authViewModel = authViewModel,
             onlineViewModel= onlineViewModel,
+            onlineUIClient = onlineUIClient,
             googleIntentLaucher = googleIntentLaucher,
             togglefullView = togglefullView,
             userData = userData,
@@ -159,6 +175,7 @@ private fun ChessMateNavigationWrapper(
     authHandler: AuthUIClient? = null,
     authViewModel: SignInViewModel? = null,
     onlineViewModel: OnlineViewModel? = null,
+    onlineUIClient: OnlineUIClient? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
     togglefullView: () -> Unit = {},
     userData: UserData? = null,
@@ -194,6 +211,7 @@ private fun ChessMateNavigationWrapper(
                 isAuthenticated = isAuthenticated,
                 authHandler = authHandler,
                 onlineViewModel= onlineViewModel,
+                onlineUIClient = onlineUIClient,
                 authViewModel = authViewModel,
                 googleIntentLaucher = googleIntentLaucher,
                 togglefullView = togglefullView,
@@ -234,6 +252,7 @@ private fun ChessMateNavigationWrapper(
                 authHandler = authHandler,
                 authViewModel = authViewModel,
                 onlineViewModel = onlineViewModel,
+                onlineUIClient = onlineUIClient,
                 googleIntentLaucher = googleIntentLaucher,
                 togglefullView = togglefullView,
                 userData = userData,
@@ -256,6 +275,7 @@ fun ChessMateAppContent(
     isAuthenticated: Boolean,
     authViewModel: SignInViewModel? = null,
     onlineViewModel: OnlineViewModel? = null,
+    onlineUIClient: OnlineUIClient? = null,
     authHandler: AuthUIClient? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
     togglefullView: () -> Unit = {},
@@ -286,6 +306,7 @@ fun ChessMateAppContent(
                 authHandler = authHandler,
                 authViewModel = authViewModel,
                 onlineViewModel = onlineViewModel,
+                onlineUIClient = onlineUIClient,
                 googleIntentLaucher = googleIntentLaucher,
                 togglefullView = togglefullView,
                 userData = userData,
@@ -312,6 +333,7 @@ private fun ChessMateNavHost(
     authHandler: AuthUIClient? = null,
     authViewModel: SignInViewModel? = null,
     onlineViewModel: OnlineViewModel? = null,
+    onlineUIClient: OnlineUIClient? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
     togglefullView: () -> Unit = {},
     userData: UserData? = null,
@@ -327,7 +349,8 @@ private fun ChessMateNavHost(
                 HomePage(
                     modifier = modifier,
                     onlineViewModel = onlineViewModel!!,
-                    togglefullView = togglefullView
+                    togglefullView = togglefullView,
+                    onlineUIClient = onlineUIClient!!
                 )
             }
             composable(ChessMateRoute.SCAN) {

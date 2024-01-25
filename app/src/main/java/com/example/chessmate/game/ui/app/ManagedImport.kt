@@ -14,10 +14,10 @@ import kotlinx.coroutines.withContext
 
 @Composable
 fun ManagedImport(
-    pgnToImport: MutableState<String?>,
+    fenToImport: MutableState<String?>,
     gamePlayState: MutableState<GamePlayState>,
 ) {
-    val pgn = pgnToImport.value
+    val pgn = fenToImport.value
     val context = LocalContext.current
     val genericError = "Error while importing game"
 
@@ -39,7 +39,7 @@ fun ManagedImport(
                     }
                 }
 
-                pgnToImport.value = null
+                fenToImport.value = null
             }
         }
     }

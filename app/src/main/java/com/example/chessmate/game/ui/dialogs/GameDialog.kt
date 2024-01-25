@@ -9,6 +9,7 @@ import com.example.chessmate.R
 fun GameDialog(
     onDismiss: () -> Unit,
     onNewGame: () -> Unit,
+    onExitGame: () -> Unit,
     onImportGame: () -> Unit,
     onExportGame: () -> Unit,
 ) {
@@ -18,6 +19,7 @@ fun GameDialog(
             stringResource(R.string.game_new) to onNewGame,
             stringResource(R.string.game_import) to onImportGame,
             stringResource(R.string.game_export) to onExportGame,
+            stringResource(R.string.game_exit) to onExitGame,
         )
     )
 }
@@ -30,5 +32,6 @@ private fun GameDialogContent() {
         onNewGame = {},
         onImportGame = {},
         onExportGame = {},
+        onExitGame = {}
     )
 }

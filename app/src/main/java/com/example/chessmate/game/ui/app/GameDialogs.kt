@@ -14,6 +14,7 @@ import com.example.chessmate.game.ui.dialogs.GameDialog
 import com.example.chessmate.game.ui.dialogs.ImportDialog
 import com.example.chessmate.game.ui.dialogs.PickActiveVisualisationDialog
 import com.example.chessmate.game.ui.dialogs.PromotionDialog
+import com.example.chessmate.multiplayer.OnlineViewModel
 
 @Composable
 fun GameDialogs(
@@ -22,7 +23,9 @@ fun GameDialogs(
     showChessMateDialog: MutableState<Boolean>,
     showGameDialog: MutableState<Boolean>,
     showImportDialog: MutableState<Boolean>,
-    pgnToImport: MutableState<String?>,
+    fenToImport: MutableState<String?>,
+    togglefullView: () -> Unit = {},
+    onlineViewModel: OnlineViewModel
 ) {
     ManagedPromotionDialog(
         showPromotionDialog = gamePlayState.value.uiState.showPromotionDialog,
@@ -38,11 +41,13 @@ fun GameDialogs(
         showImportDialog = showImportDialog,
         gameState = gamePlayState.value.gameState,
         gameController = gameController,
+        onlineViewModel = onlineViewModel,
+        togglefullView = togglefullView
     )
 
     ManagedImportDialog(
         showImportDialog = showImportDialog,
-        pgnToImport = pgnToImport
+        fenToImport = fenToImport
     )
 }
 
@@ -82,6 +87,8 @@ fun ManagedGameDialog(
     showImportDialog: MutableState<Boolean>,
     gameState: GameState,
     gameController: GameController,
+    togglefullView: () -> Unit = {},
+    onlineViewModel: OnlineViewModel
 ) {
     if (showGameDialog.value) {
         val context = LocalContext.current
@@ -109,6 +116,10 @@ fun ManagedGameDialog(
 
                 val shareIntent = Intent.createChooser(sendIntent, null)
                 ContextCompat.startActivity(context, shareIntent, Bundle())
+            },
+            onExitGame = {
+                onlineViewModel.setFullViewPage("")
+                togglefullView()
             }
         )
     }
@@ -117,7 +128,7 @@ fun ManagedGameDialog(
 @Composable
 fun ManagedImportDialog(
     showImportDialog: MutableState<Boolean>,
-    pgnToImport: MutableState<String?>,
+    fenToImport: MutableState<String?>,
 ) {
     if (showImportDialog.value) {
         ImportDialog(
@@ -126,7 +137,7 @@ fun ManagedImportDialog(
             },
             onImport = { pgn ->
                 showImportDialog.value = false
-                pgnToImport.value = pgn
+                fenToImport.value = pgn
             }
         )
     }

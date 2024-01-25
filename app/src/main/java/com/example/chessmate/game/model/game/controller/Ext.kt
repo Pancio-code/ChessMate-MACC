@@ -15,6 +15,7 @@ fun GameMetaInfo.withResolution(resolution: Resolution, lastMoveBy: Set): GameMe
                     .plus(GameMetaInfo.KEY_RESULT to result)
                     .plus(GameMetaInfo.KEY_TERMINATION to "$winner won by checkmate")
             )
+
         }
         Resolution.STALEMATE -> {
             copy(

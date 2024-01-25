@@ -1,6 +1,6 @@
 package com.example.chessmate.game.ui.app
 
-import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,11 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Loop
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,10 +28,26 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.chessmate.R
+import com.example.chessmate.game.model.board.Position.b1
+import com.example.chessmate.game.model.board.Position.b5
+import com.example.chessmate.game.model.board.Position.b8
+import com.example.chessmate.game.model.board.Position.c3
+import com.example.chessmate.game.model.board.Position.c6
+import com.example.chessmate.game.model.board.Position.d5
+import com.example.chessmate.game.model.board.Position.d7
+import com.example.chessmate.game.model.board.Position.d8
+import com.example.chessmate.game.model.board.Position.e2
+import com.example.chessmate.game.model.board.Position.e4
+import com.example.chessmate.game.model.board.Position.e5
+import com.example.chessmate.game.model.board.Position.e7
+import com.example.chessmate.game.model.board.Position.f1
+import com.example.chessmate.game.model.board.Position.g8
 import com.example.chessmate.game.model.data_chessmate.LocalActiveDatasetVisualisation
 import com.example.chessmate.game.model.game.controller.GameController
 import com.example.chessmate.game.model.game.preset.Preset
@@ -45,24 +58,24 @@ import com.example.chessmate.game.ui.chess.Board
 import com.example.chessmate.game.ui.chess.CapturedPieces
 import com.example.chessmate.game.ui.chess.Moves
 import com.example.chessmate.game.ui.chess.resolutionText
-import com.example.chessmate.multiplayer.GameType
+import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
+import com.example.chessmate.multiplayer.RoomData
+import com.example.chessmate.ui.theme.ChessMateTheme
 
 @Composable
-fun Game(
+fun GameOnline(
     state: GamePlayState = GamePlayState(),
-    importGameFEN: String? = null,
     preset: Preset? = null,
-    gameType : GameType = GameType.ONE_OFFLINE,
-    togglefullView: () -> Unit = {},
-    onlineViewModel: OnlineViewModel
+    onlineUIClient: OnlineUIClient,
+    onlineViewModel: OnlineViewModel,
 ) {
     var isFlipped by rememberSaveable { mutableStateOf(false) }
     val gamePlayState = rememberSaveable { mutableStateOf(state) }
     val showChessMateDialog = remember { mutableStateOf(false) }
     val showGameDialog = remember { mutableStateOf(false) }
     val showImportDialog = remember { mutableStateOf(false) }
-    val fenToImport = remember { mutableStateOf(importGameFEN) }
+    val roomData by onlineViewModel.roomData.collectAsStateWithLifecycle()
 
     val gameController = remember {
         GameController(
@@ -73,15 +86,12 @@ fun Game(
     }
 
     CompositionLocalProvider(LocalActiveDatasetVisualisation  provides gamePlayState.value.visualisation) {
-        Log.d("LOGS",gamePlayState.value.gameState.gameMetaInfo.black.toString())
-        Log.d("LOGS",gamePlayState.value.gameState.gameMetaInfo.white.toString())
-        Log.d("LOGS",gamePlayState.value.gameState.gameMetaInfo.result.toString())
-        Log.d("LOGS",gamePlayState.value.gameState.gameMetaInfo.termination.toString())
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
+            Players(roomData = roomData)
             Status(gamePlayState.value.gameState)
             Moves(
                 moves = gamePlayState.value.gameState.moves(),
@@ -114,44 +124,6 @@ fun Game(
                 onFlipBoard = { isFlipped = !isFlipped },
                 onGameClicked = { showGameDialog.value = true }
             )
-
-            if (gamePlayState.value.gameState.gameMetaInfo.result != null && gamePlayState.value.gameState.gameMetaInfo.termination != null) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = gamePlayState.value.gameState.gameMetaInfo.result!!,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = gamePlayState.value.gameState.gameMetaInfo.termination!!,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(15.dp))
-                    Button(
-                        onClick = {
-                            onlineViewModel.setFullViewPage("")
-                            togglefullView()
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ChevronLeft,
-                            modifier = Modifier.size(8.dp),
-                            contentDescription = "Left icon"
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Back to Home", style = MaterialTheme.typography.bodySmall)
-                    }
-                }
-            }
         }
 
         GameDialogs(
@@ -160,14 +132,9 @@ fun Game(
             showChessMateDialog = showChessMateDialog,
             showGameDialog = showGameDialog,
             showImportDialog = showImportDialog,
-            fenToImport = fenToImport,
+            fenToImport = remember { mutableStateOf("") },
             onlineViewModel = onlineViewModel,
-            togglefullView = togglefullView
-        )
-
-        ManagedImport(
-            fenToImport = fenToImport,
-            gamePlayState = gamePlayState,
+            togglefullView = {}
         )
     }
 }
@@ -190,6 +157,60 @@ private fun Status(gameState: GameState) {
 }
 
 @Composable
+private fun Players(roomData: RoomData) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(36.dp)
+            .background(MaterialTheme.colorScheme.primaryContainer),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column (
+            modifier = Modifier.fillMaxWidth(0.5f)
+        ){
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Text(
+                    text = roomData.playerOneUsername,
+                    modifier = Modifier.padding(start = 16.dp),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Image(
+                    painter = painterResource(id = R.drawable.chess_bishop_light),
+                    contentDescription = "Icon WHITE",
+                    modifier = Modifier.size(17.dp)
+                )
+            }
+        }
+        Column (
+            modifier = Modifier.fillMaxWidth()
+        ){
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Absolute.Right
+            ){
+                Text(
+                    text = roomData.playerTwoUsername!!,
+                    modifier = Modifier.padding(start = 16.dp),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Image(
+                    painter = painterResource(id = R.drawable.chess_bishop_dark),
+                    contentDescription = "Icon WHITE",
+                    modifier = Modifier.size(17.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+            }
+        }
+    }
+}
+
+@Composable
 private fun GameControls(
     gamePlayState: GamePlayState,
     onStepBack: () -> Unit,
@@ -202,32 +223,8 @@ private fun GameControls(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
     ) {
-
-        Button(
-            onClick = onStepBack,
-            enabled = gamePlayState.gameState.hasPrevIndex && gamePlayState.gameState.gameMetaInfo.result == null
-        ) {
-            Icon(
-                imageVector = Icons.Default.ChevronLeft,
-                tint = MaterialTheme.colorScheme.onPrimary,
-                contentDescription = stringResource(R.string.action_previous_move)
-            )
-        }
-        Spacer(Modifier.size(4.dp))
-        Button(
-            onClick = onStepForward,
-            enabled = gamePlayState.gameState.hasNextIndex && gamePlayState.gameState.gameMetaInfo.result == null
-        ) {
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                tint = MaterialTheme.colorScheme.onPrimary,
-                contentDescription = stringResource(R.string.action_next_move)
-            )
-        }
-        Spacer(Modifier.size(4.dp))
         Button(
             onClick = onChessMateClicked,
-            enabled = gamePlayState.gameState.gameMetaInfo.result == null
         ) {
             Icon(
                 imageVector = Icons.Default.Layers,
@@ -245,16 +242,30 @@ private fun GameControls(
                 contentDescription = stringResource(R.string.action_flip)
             )
         }
-        Spacer(Modifier.size(4.dp))
-        Button(
-            onClick = onGameClicked,
-        ) {
-            Icon(
-                imageVector = Icons.Default.Menu,
-                tint = MaterialTheme.colorScheme.onPrimary,
-                contentDescription = stringResource(R.string.action_game_menu)
-            )
-        }
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun GamePreview() {
+    ChessMateTheme {
+        var gamePlayState = GamePlayState()
+        GameController({ gamePlayState }, { gamePlayState = it }).apply {
+            applyMove(e2, e4)
+            applyMove(e7, e5)
+            applyMove(b1, c3)
+            applyMove(b8, c6)
+            applyMove(f1, b5)
+            applyMove(d7, d5)
+            applyMove(e4, d5)
+            applyMove(d8, d5)
+            applyMove(c3, d5)
+            onClick(g8)
+        }
+        Game(
+            state = gamePlayState,
+            onlineViewModel = OnlineViewModel(),
+            togglefullView = {}
+        )
+    }
+}
