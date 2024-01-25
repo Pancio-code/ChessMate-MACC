@@ -55,7 +55,6 @@ object PgnConverter : Converter {
                 createMove(idx / 2 + 1, moveText, gamePlayState.gameState).let { move ->
                     gameController.applyMove(move)
                 }
-
             }
         } catch (t: Throwable) {
             return ImportResult.ValidationError(t.message ?: "Import error")
@@ -73,7 +72,7 @@ object PgnConverter : Converter {
 
         val tagsPattern = """\[(\w+)\s"(.*?)"\]""".toRegex()
         val tagsResults = tagsPattern.findAll(target)
-        val tags = GameMetaInfo.createforUnknown().tags + tagsResults
+        val tags = GameMetaInfo.createFromPNG().tags + tagsResults
             .associate { it.groupValues[1] to it.groupValues[2] }
 
         val moveChars = """[\w-=+#]"""

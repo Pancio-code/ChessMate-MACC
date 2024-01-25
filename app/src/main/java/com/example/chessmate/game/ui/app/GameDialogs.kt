@@ -23,7 +23,7 @@ fun GameDialogs(
     showChessMateDialog: MutableState<Boolean>,
     showGameDialog: MutableState<Boolean>,
     showImportDialog: MutableState<Boolean>,
-    fenToImport: MutableState<String?>,
+    pngToImport: MutableState<String?>,
     togglefullView: () -> Unit = {},
     onlineViewModel: OnlineViewModel
 ) {
@@ -47,7 +47,7 @@ fun GameDialogs(
 
     ManagedImportDialog(
         showImportDialog = showImportDialog,
-        fenToImport = fenToImport
+        pngToImport = pngToImport
     )
 }
 
@@ -128,16 +128,16 @@ fun ManagedGameDialog(
 @Composable
 fun ManagedImportDialog(
     showImportDialog: MutableState<Boolean>,
-    fenToImport: MutableState<String?>,
+    pngToImport: MutableState<String?>,
 ) {
     if (showImportDialog.value) {
         ImportDialog(
             onDismiss = {
                 showImportDialog.value = false
             },
-            onImport = { pgn ->
+            onImport = { png ->
                 showImportDialog.value = false
-                fenToImport.value = pgn
+                pngToImport.value = png
             }
         )
     }

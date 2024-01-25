@@ -1,7 +1,5 @@
 package com.example.chessmate.game.model.game.state
 
-import com.example.chessmate.game.model.piece.King
-import com.example.chessmate.game.model.piece.Piece
 import android.os.Parcelable
 import com.example.chessmate.game.model.board.Board
 import com.example.chessmate.game.model.board.Position
@@ -11,6 +9,8 @@ import com.example.chessmate.game.model.move.BoardMove
 import com.example.chessmate.game.model.move.Capture
 import com.example.chessmate.game.model.move.MoveEffect
 import com.example.chessmate.game.model.move.targetPositions
+import com.example.chessmate.game.model.piece.King
+import com.example.chessmate.game.model.piece.Piece
 import com.example.chessmate.game.model.piece.Set
 import com.example.chessmate.game.model.piece.Set.WHITE
 import kotlinx.parcelize.IgnoredOnParcel
@@ -18,7 +18,8 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class GameSnapshotState(
-    val board: Board = Board(),
+    val stringFEN: String? = null,
+    val board: Board = if (stringFEN != null) Board(stringFEN) else Board(),
     val toMove: Set = WHITE,
     val resolution: Resolution = Resolution.IN_PROGRESS,
     val move: AppliedMove? = null,

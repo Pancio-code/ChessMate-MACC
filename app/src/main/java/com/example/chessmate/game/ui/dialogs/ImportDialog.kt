@@ -71,7 +71,7 @@ private fun ImportDialogContent(
             isError = !isValid,
             label = @Composable {
                 Text(
-                    text = "PGN",
+                    text = "FEN",
                     fontWeight = FontWeight.Bold
                 )
             },

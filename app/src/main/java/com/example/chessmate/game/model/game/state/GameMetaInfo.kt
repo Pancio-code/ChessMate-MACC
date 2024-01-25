@@ -49,8 +49,8 @@ data class GameMetaInfo(
         fun createWithDefaults(): GameMetaInfo =
             GameMetaInfo(
                 tags = mapOf(
-                    KEY_EVENT to "Chesso game",
-                    KEY_SITE to "Chesso app",
+                    KEY_EVENT to "ChessMate game",
+                    KEY_SITE to "ChessMate app",
                     KEY_DATE to SimpleDateFormat("yyyy-M-dd").format(Date()),
                     KEY_WHITE to "Player 1",
                     KEY_BLACK to "Player 2",
@@ -58,7 +58,7 @@ data class GameMetaInfo(
             )
 
         @SuppressLint("SimpleDateFormat")
-        fun createforUnknown(): GameMetaInfo =
+        fun createFromPNG(): GameMetaInfo =
             GameMetaInfo(
                 tags = mapOf(
                     KEY_EVENT to "?",

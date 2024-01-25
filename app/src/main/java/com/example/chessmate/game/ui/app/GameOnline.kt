@@ -132,7 +132,7 @@ fun GameOnline(
             showChessMateDialog = showChessMateDialog,
             showGameDialog = showGameDialog,
             showImportDialog = showImportDialog,
-            fenToImport = remember { mutableStateOf("") },
+            pngToImport = remember { mutableStateOf("") },
             onlineViewModel = onlineViewModel,
             togglefullView = {}
         )

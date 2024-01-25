@@ -12,13 +12,13 @@ data class RoomData(
     val rankPlayerOne: Float = 0.0f,
     val rankPlayerTwo: Float? = null,
     val currentTurn: String? = null,
-    val boardState: String = RoomDataHelper.FEN_START, // We use FEN notation to represent current board situation.
+    val boardState: String = RoomDataHelper.PNG_START, // We use PNG notation to represent current board situation.
     val lastMove: String? = null,
     val winner: String = "",
     val termination: String= ""
 )
 {
-    constructor() : this("-1", "", null,"",null,RoomStatus.WAITING,0.0f,null,null,RoomDataHelper.FEN_START,null,"","") {}
+    constructor() : this("-1", "", null,"",null,RoomStatus.WAITING,0.0f,null,null,RoomDataHelper.PNG_START,null,"","") {}
     @Exclude
     fun toMap(): Map<String, Any?> {
         return mapOf(
@@ -40,7 +40,7 @@ data class RoomData(
 }
 
 object RoomDataHelper {
-    const val FEN_START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    const val PNG_START = ""
 }
 
 enum class RoomStatus {

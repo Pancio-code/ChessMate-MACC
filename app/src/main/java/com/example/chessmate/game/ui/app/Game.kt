@@ -50,8 +50,9 @@ import com.example.chessmate.multiplayer.OnlineViewModel
 
 @Composable
 fun Game(
-    state: GamePlayState = GamePlayState(),
     importGameFEN: String? = null,
+    state: GamePlayState = if (importGameFEN != null) GamePlayState(stringFEN = importGameFEN) else GamePlayState(),
+    importGamePGN: String? = null,
     preset: Preset? = null,
     gameType : GameType = GameType.ONE_OFFLINE,
     togglefullView: () -> Unit = {},
@@ -62,7 +63,7 @@ fun Game(
     val showChessMateDialog = remember { mutableStateOf(false) }
     val showGameDialog = remember { mutableStateOf(false) }
     val showImportDialog = remember { mutableStateOf(false) }
-    val fenToImport = remember { mutableStateOf(importGameFEN) }
+    val pngToImport = remember { mutableStateOf(importGamePGN) }
 
     val gameController = remember {
         GameController(
@@ -160,13 +161,13 @@ fun Game(
             showChessMateDialog = showChessMateDialog,
             showGameDialog = showGameDialog,
             showImportDialog = showImportDialog,
-            fenToImport = fenToImport,
+            pngToImport = pngToImport,
             onlineViewModel = onlineViewModel,
             togglefullView = togglefullView
         )
 
         ManagedImport(
-            fenToImport = fenToImport,
+            pngToImport = pngToImport,
             gamePlayState = gamePlayState,
         )
     }

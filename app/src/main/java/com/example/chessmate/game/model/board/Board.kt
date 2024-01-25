@@ -1,5 +1,40 @@
 package com.example.chessmate.game.model.board
 
+import android.os.Parcelable
+import com.example.chessmate.game.model.board.Position.a1
+import com.example.chessmate.game.model.board.Position.a2
+import com.example.chessmate.game.model.board.Position.a7
+import com.example.chessmate.game.model.board.Position.a8
+import com.example.chessmate.game.model.board.Position.b1
+import com.example.chessmate.game.model.board.Position.b2
+import com.example.chessmate.game.model.board.Position.b7
+import com.example.chessmate.game.model.board.Position.b8
+import com.example.chessmate.game.model.board.Position.c1
+import com.example.chessmate.game.model.board.Position.c2
+import com.example.chessmate.game.model.board.Position.c7
+import com.example.chessmate.game.model.board.Position.c8
+import com.example.chessmate.game.model.board.Position.d1
+import com.example.chessmate.game.model.board.Position.d2
+import com.example.chessmate.game.model.board.Position.d7
+import com.example.chessmate.game.model.board.Position.d8
+import com.example.chessmate.game.model.board.Position.e1
+import com.example.chessmate.game.model.board.Position.e2
+import com.example.chessmate.game.model.board.Position.e7
+import com.example.chessmate.game.model.board.Position.e8
+import com.example.chessmate.game.model.board.Position.entries
+import com.example.chessmate.game.model.board.Position.f1
+import com.example.chessmate.game.model.board.Position.f2
+import com.example.chessmate.game.model.board.Position.f7
+import com.example.chessmate.game.model.board.Position.f8
+import com.example.chessmate.game.model.board.Position.g1
+import com.example.chessmate.game.model.board.Position.g2
+import com.example.chessmate.game.model.board.Position.g7
+import com.example.chessmate.game.model.board.Position.g8
+import com.example.chessmate.game.model.board.Position.h1
+import com.example.chessmate.game.model.board.Position.h2
+import com.example.chessmate.game.model.board.Position.h7
+import com.example.chessmate.game.model.board.Position.h8
+import com.example.chessmate.game.model.move.PieceEffect
 import com.example.chessmate.game.model.piece.Bishop
 import com.example.chessmate.game.model.piece.King
 import com.example.chessmate.game.model.piece.Knight
@@ -7,23 +42,25 @@ import com.example.chessmate.game.model.piece.Pawn
 import com.example.chessmate.game.model.piece.Piece
 import com.example.chessmate.game.model.piece.Queen
 import com.example.chessmate.game.model.piece.Rook
-import android.os.Parcelable
-import com.example.chessmate.game.model.board.Position.*
-import com.example.chessmate.game.model.move.PieceEffect
 import com.example.chessmate.game.model.piece.Set
 import com.example.chessmate.game.model.piece.Set.BLACK
 import com.example.chessmate.game.model.piece.Set.WHITE
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
-import java.lang.IllegalArgumentException
 
 @Parcelize
 data class Board(
-    val pieces: Map<Position, Piece>
+    val pieces: Map<Position, Piece>,
+    val stringFEN: String? = null
 ) : Parcelable {
+
     constructor() : this(
         pieces = initialPieces
     )
+    constructor(stringFEN: String) : this(
+        pieces = fenToMap(stringFEN)
+    )
+
 
     @IgnoredOnParcel
     val squares = entries.associateWith { position ->
@@ -99,3 +136,34 @@ private val initialPieces = mapOf(
     g1 to Knight(WHITE),
     h1 to Rook(WHITE),
 )
+
+private fun fenToMap(fen: String): Map<Position, Piece> {
+    val parts = fen.split(" ")
+    val rows = parts[0].split("/")
+    val pieceMap = mutableMapOf<Position, Piece>()
+
+    for ((rowIndex, row) in rows.withIndex()) {
+        var columnIndex = 0
+        for (char in row) {
+            val position = enumValueOf<Position>("${('a' + columnIndex)}${8 - rowIndex}")
+            when (char) {
+                'r' -> pieceMap[position] = Rook(BLACK)
+                'n' -> pieceMap[position] = Knight(BLACK)
+                'b' -> pieceMap[position] = Bishop(BLACK)
+                'q' -> pieceMap[position] = Queen(BLACK)
+                'k' -> pieceMap[position] = King(BLACK)
+                'p' -> pieceMap[position] = Pawn(BLACK)
+                'R' -> pieceMap[position] = Rook(WHITE)
+                'N' -> pieceMap[position] = Knight(WHITE)
+                'B' -> pieceMap[position] = Bishop(WHITE)
+                'Q' -> pieceMap[position] = Queen(WHITE)
+                'K' -> pieceMap[position] = King(WHITE)
+                'P' -> pieceMap[position] = Pawn(WHITE)
+                else -> columnIndex += char.toString().toInt() - 1
+            }
+            columnIndex++
+        }
+    }
+
+    return pieceMap
+}

@@ -132,7 +132,7 @@ fun ChessMateApp(
         )
         ChessMateRoute.OFFLINE_GAME -> Surface(color = MaterialTheme.colorScheme.background) {
             Game(
-                importGameFEN = "",
+                importGameFEN = "8/5N2/4p2p/5p1k/1p4rP/1P2Q1P1/P4P1K/5q2 w - - 15 44",
                 gameType = GameType.TWO_OFFLINE,
                 onlineViewModel = onlineViewModel!!,
                 togglefullView = togglefullView

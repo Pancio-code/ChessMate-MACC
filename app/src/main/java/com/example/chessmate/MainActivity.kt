@@ -40,6 +40,10 @@ import com.google.android.gms.auth.api.identity.Identity
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.GlobalContext.startKoin
+import org.koin.ksp.generated.defaultModule
 
 class MainActivity : ComponentActivity() {
 
@@ -63,21 +67,21 @@ class MainActivity : ComponentActivity() {
     }
 
     //TODO: Bug when rotate
-    /*private fun initKoin() {
+    private fun initKoin() {
         startKoin {
             androidLogger()
             androidContext(this@MainActivity)
             modules(defaultModule)
         }
-    }*/
+    }
 
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //TODO
-        //initKoin()
 
+        //TODO
+        initKoin()
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

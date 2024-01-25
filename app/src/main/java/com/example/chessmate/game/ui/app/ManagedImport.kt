@@ -14,22 +14,22 @@ import kotlinx.coroutines.withContext
 
 @Composable
 fun ManagedImport(
-    fenToImport: MutableState<String?>,
+    pngToImport: MutableState<String?>,
     gamePlayState: MutableState<GamePlayState>,
 ) {
-    val pgn = fenToImport.value
+    val png = pngToImport.value
     val context = LocalContext.current
     val genericError = "Error while importing game"
 
-    if (pgn != null) {
+    if (png != null) {
         LoadingSpinner()
-        LaunchedEffect(pgn) {
+        LaunchedEffect(png) {
             withContext(Dispatchers.IO) {
-                when (val result = PgnConverter.import(pgn)) {
-                    is ImportResult.ImportedGame -> gamePlayState.value = GamePlayState(result.gameState)
+                when (val result = PgnConverter.import(png)) {
+                    is ImportResult.ImportedGame -> gamePlayState.value = GamePlayState(gameState =result.gameState)
                     is ImportResult.ValidationError -> {
                         withContext(Dispatchers.Main) {
-                            Log.e("Chesso", result.msg)
+                            Log.e("ChessMate PNGCOnverter", result.msg)
                             Toast.makeText(
                                 context,
                                 genericError.replace("%s", result.msg),
@@ -39,7 +39,7 @@ fun ManagedImport(
                     }
                 }
 
-                fenToImport.value = null
+                pngToImport.value = null
             }
         }
     }
