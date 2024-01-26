@@ -17,9 +17,9 @@ Francesco Sudoso, matricola: 1808353
 
 The flask micro-service can be reached here <a href="https://github.com/Pancio-code/ChessMate-MicroService-MACC">Link</a>
 
-## 📖 Report
+## 📖 Presentation
 
-The report can be reached through this [link]('#')
+The report can be reached through this [link]('https://docs.google.com/presentation/d/14m4oKUa0NtrDsfDYBSc2E8W-CHii6r46UYwr1hnUr1E/edit?usp=sharing')
 
 ## 🎮 Manual of the game
 
