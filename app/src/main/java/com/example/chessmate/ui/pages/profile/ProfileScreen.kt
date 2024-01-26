@@ -21,14 +21,6 @@ fun ProfileScreen(
     authViewModel: SignInViewModel? = null,
 ) {
     var isEditMode by remember { mutableStateOf(false) }
-    val userDataStatic = UserData(
-        id = "1",
-        profilePictureUrl = null,
-        username = "Nome Cognome",
-        email = "andrea.pancio00@gmail.com",
-        emailVerified = false,
-        provider = null
-    )
     val recentMatches = arrayOf(
         Match(0,"avatar","Awenega",1),
         Match(1,"avatar","Username",0),
@@ -47,7 +39,7 @@ fun ProfileScreen(
     )
     if (!isEditMode) {
         ProfileReadMode(
-            userData = userDataStatic,
+            userData = userData,
             navigationType = navigationType,
             modifier = modifier,
             authHandler = authHandler,
@@ -76,7 +68,9 @@ fun ProfilePagePreview() {
             username = "Nome Cognome",
             email = "andrea.pancio00@gmail.com",
             emailVerified = false,
-            provider = null
+            provider = null,
+            country = "it",
+            signupDate = "26 Jan 2024"
         ),
         modifier = Modifier,
         authHandler = null,
@@ -94,7 +88,9 @@ fun ProfilePageTabletPreview() {
             username = "Andrea",
             email = "andrea.pancio00@gmail.com",
             emailVerified = false,
-            provider = null
+            provider = null,
+            country = "it",
+            signupDate = "26 Jan 2024"
         ),
         modifier = Modifier,
         authHandler = null,

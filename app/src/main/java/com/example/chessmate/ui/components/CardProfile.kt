@@ -56,7 +56,7 @@ fun CardProfile(
             horizontalArrangement = Arrangement.Start
         ) {
             Column(
-                modifier = Modifier.padding(end=8.dp),
+                modifier = Modifier.padding(end=8.dp, top = 8.dp),
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Center,
             ){
@@ -64,7 +64,6 @@ fun CardProfile(
             }
             Column(
                 horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Center
             ) {
                 if (userData?.username != null) {
                     Row(
@@ -86,7 +85,7 @@ fun CardProfile(
                         ) {
                             IconButton(
                                 onClick = toggler,
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(24.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Settings,
@@ -96,28 +95,28 @@ fun CardProfile(
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(0.dp))
                     Text(
                         text = userData.email.toString(),
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.inversePrimary
                     )
                 }
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(0.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_italian_flag), // Replace with your actual resource ID
-                        contentDescription = "Italian Flag",
-                        modifier = Modifier.size(10.dp)
+                        painter = painterResource(id = getFlags(userData?.country.toString())),
+                        contentDescription = "Flag",
+                        modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Italy",
+                        text = getNameOfCountry(userData?.country.toString()),
                         fontWeight = FontWeight.Normal,
                         fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.inversePrimary
                     )
                 }
             }
@@ -131,7 +130,7 @@ fun CardProfile(
         ) {
             Column {
                 Text(
-                    text = "Signup on 22 Nov 2023",
+                    text = "Signup on ${userData?.signupDate}",
                     fontWeight = FontWeight.Normal,
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.inversePrimary,
@@ -169,10 +168,12 @@ fun CardProfilePreview() {
     val userData = UserData(
         id = "1",
         profilePictureUrl = null,
-        username = "Nome Cognome",
+        username = "Username",
         email = "andrea.pancio00@gmail.com",
         emailVerified = false,
-        provider = null
+        provider = null,
+        country = "it",
+        signupDate = "26 Jan 2024"
     )
     CardProfile(userData, toggler = {})
 }

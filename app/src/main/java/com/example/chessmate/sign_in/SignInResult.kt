@@ -14,5 +14,7 @@ data class UserData(
     val matchesWon: Int = 0,
     val eloRank: Float = 0f,
     val emailVerified: Boolean = false,
-    val provider : String? = null
+    val provider: String? = null,
+    val country: String? = null,
+    val signupDate: String? = null,
 )

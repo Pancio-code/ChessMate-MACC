@@ -3,7 +3,6 @@
 package com.example.chessmate.ui.components
 
 import com.example.chessmate.R
-import java.util.*
 
 data class CountryCode(
     var countryCode: String,
@@ -502,4 +501,10 @@ fun getListOfCountries(): List<CountryCode> {
     countries.add(CountryCode("zm", "+260", "Zambia"))
     countries.add(CountryCode("zw", "+263", "Zimbabwe"))
     return countries
+}
+
+fun getNameOfCountry(countryId: String): String {
+    val countries = getListOfCountries()
+    val countryName = countries.find { it.countryCode == countryId }
+    return countryName?.countryName ?: "NotFound"
 }
