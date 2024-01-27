@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserData
@@ -20,6 +21,8 @@ fun ProfileScreen(
     navigationType: ChessMateNavigationType,
     authViewModel: SignInViewModel? = null,
 ) {
+    val userData by authViewModel!!.userData.collectAsStateWithLifecycle()
+
     var isEditMode by remember { mutableStateOf(false) }
     val recentMatches = arrayOf(
         Match(0,"avatar","Awenega",1),
@@ -39,7 +42,7 @@ fun ProfileScreen(
     )
     if (!isEditMode) {
         ProfileReadMode(
-            userData = userData,
+            userData = userData.data,
             navigationType = navigationType,
             modifier = modifier,
             authHandler = authHandler,
@@ -49,11 +52,11 @@ fun ProfileScreen(
         )
     } else {
         ProfileEditMode(
-            userData = userData,
+            userData = userData.data,
             navigationType = navigationType,
             modifier = modifier,
             authHandler = authHandler,
-            toggler = { isEditMode = !isEditMode },
+            toggler = { isEditMode = !isEditMode }
         )
     }
 }

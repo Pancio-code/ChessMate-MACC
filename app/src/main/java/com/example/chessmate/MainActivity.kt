@@ -62,7 +62,8 @@ class MainActivity : ComponentActivity() {
             context = applicationContext,
             oneTapClient = Identity.getSignInClient(applicationContext),
             loginToogle = { userAuthState.value = UserAuthStateType.UNDEFINED},
-            loadingText = {s : String -> loadingText = s}
+            loadingText = {s : String -> loadingText = s},
+            signInViewModel = signInViewModel
         )
     }
 

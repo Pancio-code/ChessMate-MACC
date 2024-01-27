@@ -26,7 +26,8 @@ class AuthUIClient(
     private val context: Context,
     private val oneTapClient: SignInClient,
     private val loginToogle : () -> Unit,
-    private val loadingText : (s : String) -> Unit
+    private val loadingText : (s : String) -> Unit,
+    private val signInViewModel: SignInViewModel
     ) {
     private val auth = Firebase.auth
     private val userRemoteService : UserAPI = HelperClassUser.getIstance()
@@ -272,5 +273,23 @@ class AuthUIClient(
             e.message,
             Toast.LENGTH_LONG
         ).show()
+    }
+
+    suspend fun confirmEdits(userId: String?, newEmail: String?, newProfilePictureUrl: String?, newUsername: String?): Boolean {
+        val userData = UserData(
+            id = userId.toString(),
+            email = newEmail,
+            profilePictureUrl = newProfilePictureUrl,
+            username = newUsername
+        )
+        try {
+            val data = gson.toJson(userData)
+            val userResponse =  userRemoteService.update(token=BuildConfig.TOKEN, id= userId.toString(), body = data)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            if (e is CancellationException) throw e
+            null
+        }
+        return signInViewModel.setUserData(SignInResult(data = userData, errorMessage = null))
     }
 }

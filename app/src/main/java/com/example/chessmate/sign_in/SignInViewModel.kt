@@ -60,4 +60,9 @@ class SignInViewModel: ViewModel() {
         }
     }
 
+    fun setUserData(newValue : SignInResult) : Boolean {
+        _userData.update { newValue }
+        return true
+    }
+
 }

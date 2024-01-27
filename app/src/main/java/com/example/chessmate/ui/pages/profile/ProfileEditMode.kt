@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,12 +30,14 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -61,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -69,14 +73,15 @@ import com.example.chessmate.camera.photo_capture.CameraScreen
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.UserData
 import com.example.chessmate.ui.components.MenuCountryPicker
-import com.example.chessmate.ui.theme.dark_primaryContainer
-import com.example.chessmate.ui.theme.light_error
 import com.example.chessmate.ui.theme.light_primary
 import com.example.chessmate.ui.utils.ChessMateNavigationType
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import java.io.File
 
 
@@ -96,17 +101,18 @@ fun ProfileEditMode(
     val cameraPermissionState: PermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val lifecycleOwner = LocalLifecycleOwner.current
     var newAvatarPath by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(light_primary)
+            .background(MaterialTheme.colorScheme.inverseOnSurface)
     ) {
         //header
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(dark_primaryContainer),
+                .background(MaterialTheme.colorScheme.primaryContainer),
         ) {
             IconButton(
                 onClick = toggler,
@@ -136,7 +142,15 @@ fun ProfileEditMode(
                     modifier = Modifier.align(Alignment.CenterEnd)
                 ) {
                     IconButton(
-                        onClick = toggler,
+                        onClick = {
+                            isLoading = true
+                            lifecycleOwner.lifecycleScope.launch {
+                                authHandler!!.confirmEdits(userId = userData?.id, newEmail = "wein@ok.it", newProfilePictureUrl = null, newUsername = null)
+                                delay(1000)
+                                joinAll()
+                                toggler()
+                            }
+                        },
                         modifier = Modifier.padding(end = 40.dp)
                     ) {
                         Icon(
@@ -160,24 +174,31 @@ fun ProfileEditMode(
         }
         CustomRowEdit(title = "Avatar", placeholder = newAvatarPath, isConfirmMode = {isConfirmMode = true}, isExpanded = {expanded = true})
         CustomRowEdit(title = "Username", placeholder = userData?.username.toString(), isConfirmMode = {isConfirmMode = true})
-        CustomRowEdit(title = "Name", placeholder = "Jhon", isConfirmMode = {isConfirmMode = true})
-        CustomRowEdit(title = "Surname", placeholder = "Smith", isConfirmMode = {isConfirmMode = true})
         CustomRowEdit(title = "Email", placeholder = userData?.email.toString(), isConfirmMode = {isConfirmMode = true})
         CustomRowEdit(title = "Country", placeholder = "", isConfirmMode = {isConfirmMode = true})
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            horizontalArrangement = Arrangement.Center
+                .padding(vertical = 16.dp, horizontal = 24.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ){
             ElevatedButton(
                 colors = ButtonColors(
-                    containerColor = light_error,
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
                     contentColor = Color.White,
                     disabledContainerColor = Color.Green,
                     disabledContentColor = Color.Green),
                 onClick = {showDialog = true}) {
                 Text("Delete Account", fontSize = 16.sp)
+            }
+            ElevatedButton(
+                colors = ButtonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = Color.White,
+                    disabledContainerColor = Color.Green,
+                    disabledContentColor = Color.Green),
+                onClick = {showDialog = true}) {
+                Text("Reset Score", fontSize = 16.sp)
             }
         }
         if (showDialog) {
@@ -214,6 +235,9 @@ fun ProfileEditMode(
                 }
             )
         }
+        if (isLoading) {
+            LoadingDialog()
+        }
     }
 }
 
@@ -231,7 +255,7 @@ fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit,
     ){
         Column(
             modifier = Modifier
-                .background(light_primary)
+                .background(MaterialTheme.colorScheme.inverseOnSurface)
                 .fillMaxHeight()
                 .padding(vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -245,7 +269,7 @@ fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit,
         }
         Column(
             modifier = Modifier
-                .background(light_primary),
+                .background(MaterialTheme.colorScheme.inverseOnSurface),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -272,10 +296,10 @@ fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit,
                         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
                         textStyle = LocalTextStyle.current.copy(fontSize = 16.sp, color = Color.White),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = light_primary, // Change the border color when focused
-                            unfocusedBorderColor = light_primary, // Change the border color when unfocused
-                            disabledBorderColor = light_primary, // Change the border color when disabled
-                            containerColor = light_primary
+                            focusedBorderColor = MaterialTheme.colorScheme.inverseOnSurface, // Change the border color when focused
+                            unfocusedBorderColor = MaterialTheme.colorScheme.inverseOnSurface, // Change the border color when unfocused
+                            disabledBorderColor = MaterialTheme.colorScheme.inverseOnSurface, // Change the border color when disabled
+                            containerColor = MaterialTheme.colorScheme.inverseOnSurface
                         )
                     )
             }
@@ -303,7 +327,9 @@ fun ChangeAvatar(
     }
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
-            modifier = Modifier.fillMaxWidth().height(100.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(
                 containerColor = light_primary,
@@ -407,7 +433,7 @@ fun DeleteDialog(
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
                 Text(
-                    text = "Do you want to delete the account?",
+                    text = "Do you the operation on the account?",
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
                 Row(
@@ -434,6 +460,37 @@ fun DeleteDialog(
     }
 }
 
+@Composable
+fun LoadingDialog(
+) {
+    Dialog(onDismissRequest = { null  }) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(90.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .padding(8.dp),
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Updating...", color = Color.White)
+            }
+        }
+    }
+}
 
 
 // to delete
