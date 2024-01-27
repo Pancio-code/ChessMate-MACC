@@ -44,13 +44,14 @@ import androidx.compose.ui.window.Dialog
 
 
 @Composable
-fun MenuCountryPicker(isConfirmMode: () -> Unit) {
+fun MenuCountryPicker(isConfirmMode: () -> Unit, onValueChange: (String) -> Unit, currentCountry: String) {
     val countryCode = CountryPicker()
     countryCode.CountryCodeDialog(
         pickedCountry = {
             Log.v("TAG", "country name is : ${it.countryName}")
+            onValueChange(it.countryCode)
         },
-        defaultSelectedCountry = getListOfCountries().single { it.countryCode == "it" },
+        defaultSelectedCountry = getListOfCountries().single { it.countryCode == currentCountry },
         dialogSearch = true,
         dialogRounded = 22,
         isConfirmMode = isConfirmMode

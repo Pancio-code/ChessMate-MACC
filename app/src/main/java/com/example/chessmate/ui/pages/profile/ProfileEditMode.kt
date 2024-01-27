@@ -98,10 +98,14 @@ fun ProfileEditMode(
     var showCamera by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
     val cameraPermissionState: PermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val lifecycleOwner = LocalLifecycleOwner.current
+    var newUsername by remember { mutableStateOf(userData!!.username.toString()) }
+    var newEmail by remember { mutableStateOf(userData!!.email.toString()) }
+    var newCounty by remember { mutableStateOf(userData!!.country.toString()) }
     var newAvatarPath by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
+
 
     Column(
         modifier = Modifier
@@ -145,7 +149,7 @@ fun ProfileEditMode(
                         onClick = {
                             isLoading = true
                             lifecycleOwner.lifecycleScope.launch {
-                                authHandler!!.confirmEdits(userId = userData?.id, newEmail = "wein@ok.it", newProfilePictureUrl = null, newUsername = null)
+                                authHandler!!.confirmEdits(userId = userData?.id, newEmail = newEmail, newProfilePictureUrl = null, newUsername = newUsername, country = newCounty)
                                 delay(1000)
                                 joinAll()
                                 toggler()
@@ -172,10 +176,10 @@ fun ProfileEditMode(
                 }
             }
         }
-        CustomRowEdit(title = "Avatar", placeholder = newAvatarPath, isConfirmMode = {isConfirmMode = true}, isExpanded = {expanded = true})
-        CustomRowEdit(title = "Username", placeholder = userData?.username.toString(), isConfirmMode = {isConfirmMode = true})
-        CustomRowEdit(title = "Email", placeholder = userData?.email.toString(), isConfirmMode = {isConfirmMode = true})
-        CustomRowEdit(title = "Country", placeholder = "", isConfirmMode = {isConfirmMode = true})
+        CustomRowEdit(title = "Avatar", placeholder = "", isConfirmMode = {isConfirmMode = true}, isExpanded = {expanded = true}, onValueChange = {newAvatarPath = it})
+        CustomRowEdit(title = "Username", placeholder = newUsername, isConfirmMode = {isConfirmMode = true}, onValueChange = {newUsername = it})
+        CustomRowEdit(title = "Email", placeholder = newEmail, isConfirmMode = {isConfirmMode = true}, onValueChange = {newEmail = it})
+        CustomRowEdit(title = "Country", placeholder = newCounty, isConfirmMode = {isConfirmMode = true}, onValueChange = {newCounty = it})
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -243,7 +247,7 @@ fun ProfileEditMode(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit, isExpanded: () -> Unit = { }){
+fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit, isExpanded: () -> Unit = { }, onValueChange: (String) -> Unit){
     var textValue by remember { mutableStateOf(placeholder) }
     Row(
         modifier = Modifier
@@ -286,12 +290,12 @@ fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit,
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Start
                     ) {
-                        MenuCountryPicker(isConfirmMode)
+                        MenuCountryPicker(isConfirmMode, onValueChange, placeholder)
                     }
                 else ->
                     OutlinedTextField(
                         value = textValue,
-                        onValueChange = { textValue = it; isConfirmMode() },
+                        onValueChange = { textValue = it; onValueChange(textValue); isConfirmMode() },
                         modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
                         textStyle = LocalTextStyle.current.copy(fontSize = 16.sp, color = Color.White),
@@ -312,6 +316,7 @@ fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit,
             .fillMaxWidth()
     )
 }
+
 
 @Composable
 fun ChangeAvatar(

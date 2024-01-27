@@ -275,12 +275,13 @@ class AuthUIClient(
         ).show()
     }
 
-    suspend fun confirmEdits(userId: String?, newEmail: String?, newProfilePictureUrl: String?, newUsername: String?): Boolean {
+    suspend fun confirmEdits(userId: String?, newEmail: String?, newProfilePictureUrl: String?, newUsername: String?, country: String?): Boolean {
         val userData = UserData(
             id = userId.toString(),
             email = newEmail,
             profilePictureUrl = newProfilePictureUrl,
-            username = newUsername
+            username = newUsername,
+            country = country
         )
         try {
             val data = gson.toJson(userData)
