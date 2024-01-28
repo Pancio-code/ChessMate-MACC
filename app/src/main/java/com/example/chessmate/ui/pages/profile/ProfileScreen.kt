@@ -22,9 +22,7 @@ fun ProfileScreen(
     authViewModel: SignInViewModel? = null,
 ) {
     val userData by authViewModel!!.userData.collectAsStateWithLifecycle()
-    if (userData.data!!.profilePictureUrl == "null"){
 
-    }
     val painter = rememberAsyncImagePainter("${BuildConfig.API_URL}/api/v1/user/avatar/${userData.data!!.id}/${userData.data!!.profilePictureUrl}")
     var isEditMode by remember { mutableStateOf(false) }
     val recentMatches = arrayOf(
@@ -60,6 +58,7 @@ fun ProfileScreen(
             navigationType = navigationType,
             modifier = modifier,
             authHandler = authHandler,
+            authViewModel = authViewModel,
             toggler = { isEditMode = !isEditMode },
             painter = painter
         )

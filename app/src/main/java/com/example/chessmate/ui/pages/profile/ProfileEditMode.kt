@@ -72,6 +72,7 @@ import coil.request.ImageRequest
 import com.example.chessmate.BuildConfig
 import com.example.chessmate.camera.photo_capture.CameraScreen
 import com.example.chessmate.sign_in.AuthUIClient
+import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserData
 import com.example.chessmate.ui.components.MenuCountryPicker
 import com.example.chessmate.ui.theme.light_primary
@@ -92,6 +93,7 @@ fun ProfileEditMode(
     modifier: Modifier = Modifier,
     userData: UserData?,
     authHandler: AuthUIClient? = null,
+    authViewModel: SignInViewModel? = null,
     navigationType: ChessMateNavigationType,
     toggler: () -> Unit,
     painter: AsyncImagePainter
@@ -212,6 +214,17 @@ fun ProfileEditMode(
         if (showDialog) {
             DeleteDialog(
                 onConfirm = {
+                    isLoading = true
+                    lifecycleOwner.lifecycleScope.launch {
+                        authHandler!!.deleteUser(userId = userData?.id)
+                        val signInResult = authHandler?.signOut()
+                        authViewModel?.onSignInResult(
+                            signInResult!!,
+                            context = context
+                        )
+                        delay(1000)
+                        joinAll()
+                    }
                     showDialog = false
                 },
                 onDismiss = {
@@ -444,7 +457,7 @@ fun DeleteDialog(
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
                 Text(
-                    text = "Do you the operation on the account?",
+                    text = "Do you confirm the operation?",
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
                 Row(

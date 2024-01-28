@@ -305,4 +305,13 @@ class AuthUIClient(
         }
         return signInViewModel.setUserData(SignInResult(data = userData, errorMessage = null))
     }
+
+    suspend fun deleteUser(userId: String?) {
+        try{
+            userRemoteService.delete(token=BuildConfig.TOKEN, id= userId.toString())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            if (e is CancellationException) throw e
+        }
+    }
 }
