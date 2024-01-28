@@ -52,6 +52,7 @@ import com.example.chessmate.ui.pages.ScreenUnderConstruction
 import com.example.chessmate.ui.pages.SignInScreen
 import com.example.chessmate.ui.pages.SignUpScreen
 import com.example.chessmate.ui.pages.multiplayer.FindGameScreen
+import com.example.chessmate.ui.pages.multiplayer.SelectColorScreen
 import com.example.chessmate.ui.pages.profile.ProfileScreen
 import com.example.chessmate.ui.utils.ChessMateNavigationContentPosition
 import com.example.chessmate.ui.utils.ChessMateNavigationType
@@ -124,7 +125,6 @@ fun ChessMateApp(
     when (immersivePage) {
         ChessMateRoute.FIND_GAME -> FindGameScreen(
             modifier = Modifier,
-            navigationType = navigationType,
             onlineUIClient = onlineUIClient!!,
             onlineViewModel = onlineViewModel!!,
             togglefullView = togglefullView,
@@ -132,10 +132,14 @@ fun ChessMateApp(
         )
         ChessMateRoute.OFFLINE_GAME -> Surface(color = MaterialTheme.colorScheme.background) {
             Game(
-                importGameFEN = "8/5N2/4p2p/5p1k/1p4rP/1P2Q1P1/P4P1K/5q2 w - - 15 44",
                 gameType = GameType.TWO_OFFLINE,
                 onlineViewModel = onlineViewModel!!,
                 togglefullView = togglefullView
+            )
+        }
+        ChessMateRoute.SELECT_COLOR -> Surface(color = MaterialTheme.colorScheme.background) {
+            SelectColorScreen(
+                onlineViewModel = onlineViewModel!!
             )
         }
         ChessMateRoute.ONLINE_GAME -> Surface(color = MaterialTheme.colorScheme.background) {
@@ -143,10 +147,10 @@ fun ChessMateApp(
         }
         ChessMateRoute.AI_GAME -> Surface(color = MaterialTheme.colorScheme.background) {
             Game(
-                importGameFEN = "",
                 gameType = GameType.ONE_OFFLINE,
                 onlineViewModel = onlineViewModel!!,
-                togglefullView = togglefullView
+                togglefullView = togglefullView,
+                startColor = onlineViewModel.getStartColor()
             )
         }
         else -> ChessMateNavigationWrapper(

@@ -58,7 +58,7 @@ data class GameMetaInfo(
             )
 
         @SuppressLint("SimpleDateFormat")
-        fun createFromPNG(): GameMetaInfo =
+        fun createFromPGN(): GameMetaInfo =
             GameMetaInfo(
                 tags = mapOf(
                     KEY_EVENT to "?",

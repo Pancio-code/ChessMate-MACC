@@ -49,7 +49,8 @@
     <string name="action_game_menu">Game menu</string>
 
     <string name="game_new">New</string>
-    <string name="game_import">Import</string>
+    <string name="game_import_pgn">Import From PGN</string>
+    <string name="game_import_fen">Import From FEN</string>
     <string name="game_export">Export</string>
     <string name="game_exit">Exit</string>
 

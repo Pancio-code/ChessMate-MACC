@@ -2,6 +2,7 @@ package com.example.chessmate.game.model.game.state
 
 import android.os.Parcelable
 import com.example.chessmate.game.model.game.Resolution
+import com.example.chessmate.game.model.game.converter.FenConverter
 import com.example.chessmate.game.model.move.AppliedMove
 import com.example.chessmate.game.model.piece.Set
 import kotlinx.parcelize.Parcelize
@@ -10,7 +11,7 @@ import kotlinx.parcelize.Parcelize
 data class GameState(
     val stringFEN: String? = null,
     val gameMetaInfo: GameMetaInfo,
-    val states: List<GameSnapshotState> = if (stringFEN != null) listOf(GameSnapshotState(stringFEN = stringFEN)) else listOf(GameSnapshotState()),
+    val states: List<GameSnapshotState> = if (stringFEN != null) listOf(GameSnapshotState(stringFEN = stringFEN,toMove = FenConverter.startColor(stringFEN))) else listOf(GameSnapshotState()),
     val currentIndex: Int = 0,
     val lastActiveState: GameSnapshotState = states.first(),
 ) : Parcelable {

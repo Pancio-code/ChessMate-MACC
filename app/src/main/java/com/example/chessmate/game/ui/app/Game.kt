@@ -1,6 +1,5 @@
 package com.example.chessmate.game.ui.app
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -54,7 +53,8 @@ fun Game(
     state: GamePlayState = if (importGameFEN != null) GamePlayState(stringFEN = importGameFEN) else GamePlayState(),
     importGamePGN: String? = null,
     preset: Preset? = null,
-    gameType : GameType = GameType.ONE_OFFLINE,
+    gameType : GameType = GameType.TWO_OFFLINE,
+    startColor : Set? = Set.WHITE,
     togglefullView: () -> Unit = {},
     onlineViewModel: OnlineViewModel
 ) {
@@ -62,8 +62,10 @@ fun Game(
     val gamePlayState = rememberSaveable { mutableStateOf(state) }
     val showChessMateDialog = remember { mutableStateOf(false) }
     val showGameDialog = remember { mutableStateOf(false) }
-    val showImportDialog = remember { mutableStateOf(false) }
+    val showImportPgnDialog = remember { mutableStateOf(false) }
+    val showImportFenDialog = remember { mutableStateOf(false) }
     val pngToImport = remember { mutableStateOf(importGamePGN) }
+    val fenToImport = remember { mutableStateOf(importGameFEN) }
 
     val gameController = remember {
         GameController(
@@ -74,10 +76,6 @@ fun Game(
     }
 
     CompositionLocalProvider(LocalActiveDatasetVisualisation  provides gamePlayState.value.visualisation) {
-        Log.d("LOGS",gamePlayState.value.gameState.gameMetaInfo.black.toString())
-        Log.d("LOGS",gamePlayState.value.gameState.gameMetaInfo.white.toString())
-        Log.d("LOGS",gamePlayState.value.gameState.gameMetaInfo.result.toString())
-        Log.d("LOGS",gamePlayState.value.gameState.gameMetaInfo.termination.toString())
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -160,14 +158,17 @@ fun Game(
             gameController = gameController,
             showChessMateDialog = showChessMateDialog,
             showGameDialog = showGameDialog,
-            showImportDialog = showImportDialog,
+            showImportPgnDialog = showImportPgnDialog,
+            showImportFenDialog = showImportFenDialog,
             pngToImport = pngToImport,
+            fenToImport = fenToImport,
             onlineViewModel = onlineViewModel,
             togglefullView = togglefullView
         )
 
         ManagedImport(
             pngToImport = pngToImport,
+            fenToImport = fenToImport,
             gamePlayState = gamePlayState,
         )
     }

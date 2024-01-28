@@ -39,13 +39,11 @@ import com.example.chessmate.multiplayer.RoomStatus
 import com.example.chessmate.sign_in.UserData
 import com.example.chessmate.ui.components.CardProfileSearch
 import com.example.chessmate.ui.navigation.ChessMateRoute
-import com.example.chessmate.ui.utils.ChessMateNavigationType
 import kotlinx.coroutines.launch
 
 @Composable
 fun FindGameScreen(
     modifier: Modifier = Modifier,
-    navigationType: ChessMateNavigationType,
     onlineUIClient: OnlineUIClient,
     onlineViewModel: OnlineViewModel,
     togglefullView: () -> Unit = {},

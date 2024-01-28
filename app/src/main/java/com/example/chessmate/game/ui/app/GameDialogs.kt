@@ -11,7 +11,8 @@ import com.example.chessmate.game.model.game.converter.PgnConverter
 import com.example.chessmate.game.model.game.state.GamePlayState
 import com.example.chessmate.game.model.game.state.GameState
 import com.example.chessmate.game.ui.dialogs.GameDialog
-import com.example.chessmate.game.ui.dialogs.ImportDialog
+import com.example.chessmate.game.ui.dialogs.ImportFenDialog
+import com.example.chessmate.game.ui.dialogs.ImportPgnDialog
 import com.example.chessmate.game.ui.dialogs.PickActiveVisualisationDialog
 import com.example.chessmate.game.ui.dialogs.PromotionDialog
 import com.example.chessmate.multiplayer.OnlineViewModel
@@ -22,8 +23,10 @@ fun GameDialogs(
     gameController: GameController,
     showChessMateDialog: MutableState<Boolean>,
     showGameDialog: MutableState<Boolean>,
-    showImportDialog: MutableState<Boolean>,
+    showImportPgnDialog: MutableState<Boolean>,
+    showImportFenDialog: MutableState<Boolean>,
     pngToImport: MutableState<String?>,
+    fenToImport: MutableState<String?>,
     togglefullView: () -> Unit = {},
     onlineViewModel: OnlineViewModel
 ) {
@@ -38,16 +41,22 @@ fun GameDialogs(
 
     ManagedGameDialog(
         showGameDialog = showGameDialog,
-        showImportDialog = showImportDialog,
+        showImportPngDialog = showImportPgnDialog,
+        showImportFenDialog = showImportFenDialog,
         gameState = gamePlayState.value.gameState,
         gameController = gameController,
         onlineViewModel = onlineViewModel,
         togglefullView = togglefullView
     )
 
-    ManagedImportDialog(
-        showImportDialog = showImportDialog,
+    ManagedImportPgnDialog(
+        showImportPgnDialog = showImportPgnDialog,
         pngToImport = pngToImport
+    )
+
+    ManagedImportFenDialog(
+        showImportFenDialog = showImportFenDialog,
+        fenToImport = fenToImport
     )
 }
 
@@ -84,7 +93,8 @@ fun ManagedChessMateDialog(
 @Composable
 fun ManagedGameDialog(
     showGameDialog: MutableState<Boolean>,
-    showImportDialog: MutableState<Boolean>,
+    showImportPngDialog: MutableState<Boolean>,
+    showImportFenDialog: MutableState<Boolean>,
     gameState: GameState,
     gameController: GameController,
     togglefullView: () -> Unit = {},
@@ -101,9 +111,13 @@ fun ManagedGameDialog(
                 showGameDialog.value = false
                 gameController.reset()
             },
-            onImportGame = {
+            onImportPgnGame = {
                 showGameDialog.value = false
-                showImportDialog.value = true
+                showImportPngDialog.value = true
+            },
+            onImportFenGame = {
+                showGameDialog.value = false
+                showImportFenDialog.value = true
             },
             onExportGame = {
                 showGameDialog.value = false
@@ -126,20 +140,38 @@ fun ManagedGameDialog(
 }
 
 @Composable
-fun ManagedImportDialog(
-    showImportDialog: MutableState<Boolean>,
+fun ManagedImportPgnDialog(
+    showImportPgnDialog: MutableState<Boolean>,
     pngToImport: MutableState<String?>,
 ) {
-    if (showImportDialog.value) {
-        ImportDialog(
+    if (showImportPgnDialog.value) {
+        ImportPgnDialog(
             onDismiss = {
-                showImportDialog.value = false
+                showImportPgnDialog.value = false
             },
-            onImport = { png ->
-                showImportDialog.value = false
-                pngToImport.value = png
+            onImportPgn = { pgn ->
+                showImportPgnDialog.value = false
+                pngToImport.value = pgn
             }
         )
     }
 }
 
+
+@Composable
+fun ManagedImportFenDialog(
+    showImportFenDialog: MutableState<Boolean>,
+    fenToImport: MutableState<String?>,
+) {
+    if (showImportFenDialog.value) {
+        ImportFenDialog(
+            onDismiss = {
+                showImportFenDialog.value = false
+            },
+            onImportFen = { fen ->
+                showImportFenDialog.value = false
+                fenToImport.value = fen
+            }
+        )
+    }
+}

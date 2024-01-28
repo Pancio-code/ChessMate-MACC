@@ -31,6 +31,7 @@ object ChessMateRoute {
     const val ONLINE_GAME = "Online Game"
     const val OFFLINE_GAME = "Offline Game"
     const val AI_GAME = "AI Game"
+    const val SELECT_COLOR = "Select Color"
 }
 
 data class ChessMateTopLevelDestination(

@@ -72,7 +72,7 @@ object PgnConverter : Converter {
 
         val tagsPattern = """\[(\w+)\s"(.*?)"\]""".toRegex()
         val tagsResults = tagsPattern.findAll(target)
-        val tags = GameMetaInfo.createFromPNG().tags + tagsResults
+        val tags = GameMetaInfo.createFromPGN().tags + tagsResults
             .associate { it.groupValues[1] to it.groupValues[2] }
 
         val moveChars = """[\w-=+#]"""

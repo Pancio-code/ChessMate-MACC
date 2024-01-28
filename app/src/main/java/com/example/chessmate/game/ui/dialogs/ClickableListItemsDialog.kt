@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -42,10 +41,10 @@ private fun VerticalClickableList(items: List<Pair<String, () -> Unit>>) {
                 color = MaterialTheme.colorScheme.surface,
                 shape = MaterialTheme.shapes.medium
             )
-            .padding(8.dp)
+            .padding(5.dp)
     ) {
         Column(
-            modifier = Modifier.width(IntrinsicSize.Min)
+            modifier = Modifier.width(180.dp)
         ) {
             items.forEach { (text, onClick) ->
                 Box(
