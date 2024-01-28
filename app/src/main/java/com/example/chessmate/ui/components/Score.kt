@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -23,23 +23,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.chessmate.sign_in.UserData
 
 @Composable
-@Preview
-fun Score() {
+fun Score(userData: UserData) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        ScoreCard("Singleplayer", 2)
+        ScoreCard("Matches", userData.matchesPlayed)
         Spacer(modifier = Modifier.width(16.dp))
-        ScoreCard("Multiplayer", 10)
+        ScoreCard("Win", userData.matchesWon)
         Spacer(modifier = Modifier.width(16.dp))
-        ScoreCard("Total Wins", 5)
+        ScoreCard("Rank", userData.eloRank)
     }
 }
 
@@ -47,7 +46,7 @@ fun Score() {
 @Composable
 fun ScoreCard(
     name: String,
-    count: Int = 0
+    count: Number = 0
 ) {
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
@@ -83,28 +82,28 @@ fun ScoreCard(
                 horizontalArrangement = Arrangement.Center
             ){
                 when (name){
-                "Singleplayer" ->
+                "Matches" ->
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = "User Icon",
                         modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.inversePrimary
                     )
-                "Multiplayer" ->
-                    Icon(
-                        imageVector = Icons.Default.Group,
-                        contentDescription = "Two People Icon",
-                        modifier = Modifier
-                            .size(24.dp),
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                else ->
+                "Win" ->
                     Icon(
                         imageVector = Icons.Default.EmojiEvents,
                         contentDescription = "Win",
                         modifier = Modifier
                             .size(24.dp),
                         tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                else ->
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "Win",
+                        modifier = Modifier
+                            .size(24.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }

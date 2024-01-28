@@ -64,7 +64,7 @@ fun ProfileReadMode(
         Row(
             modifier = Modifier.padding(start = 8.dp, top = 16.dp, end = 8.dp, bottom = 16.dp)
         ) {
-            Score()
+            Score(userData = userData!!)
         }
         Row{
             RecentMatches(matchList = recentMatches)

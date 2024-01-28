@@ -280,13 +280,16 @@ class AuthUIClient(
         ).show()
     }
 
-    suspend fun confirmEdits(userId: String?, newEmail: String?, profilePictureUrl: String?, newUsername: String?, country: String?, newAvatarFile: File?): Boolean {
+    suspend fun confirmEdits(userId: String?, newEmail: String?, profilePictureUrl: String?, newUsername: String?, country: String?, newAvatarFile: File?, userData: UserData): Boolean {
         val userData = UserData(
             id = userId.toString(),
             email = newEmail,
             profilePictureUrl = profilePictureUrl,
             username = newUsername,
-            country = country
+            country = country,
+            matchesPlayed = userData.matchesPlayed,
+            matchesWon = userData.matchesWon,
+            eloRank = userData.eloRank
         )
         try {
             val data = gson.toJson(userData)
@@ -313,5 +316,22 @@ class AuthUIClient(
             e.printStackTrace()
             if (e is CancellationException) throw e
         }
+    }
+
+    suspend fun resetScore(userData: UserData): Boolean {
+        val userData = UserData(
+            id = userData.id,
+            email = userData.email,
+            profilePictureUrl = userData.profilePictureUrl,
+            username = userData.username,
+            country = userData.country,
+        )
+        try{
+            userRemoteService.resetScore(token=BuildConfig.TOKEN, id= userData.id)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            if (e is CancellationException) throw e
+        }
+        return signInViewModel.setUserData(SignInResult(data = userData, errorMessage = null))
     }
 }

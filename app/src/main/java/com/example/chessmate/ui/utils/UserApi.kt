@@ -32,6 +32,9 @@ interface UserAPI {
     @PUT("/api/v1/user/{id}")
     suspend fun update(@Header("Authorization") token: String, @Path("id") id: String, @Body body: RequestBody): retrofit2.Response<JsonObject>
 
+    @PUT("/api/v1/user/score/{id}")
+    suspend fun resetScore(@Header("Authorization") token: String, @Path("id") id: String): retrofit2.Response<JsonObject>
+
     @DELETE("/api/v1/user/{id}")
     suspend fun delete(@Header("Authorization") token: String, @Path("id") id: String): retrofit2.Response<JsonObject>
 }

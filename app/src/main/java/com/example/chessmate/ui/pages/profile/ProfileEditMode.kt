@@ -101,6 +101,7 @@ fun ProfileEditMode(
     var isConfirmMode by remember { mutableStateOf(false) }
     var showCamera by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
+    var showDialogScore by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     val cameraPermissionState: PermissionState = rememberPermissionState(Manifest.permission.CAMERA)
@@ -155,7 +156,7 @@ fun ProfileEditMode(
                         onClick = {
                             isLoading = true
                             lifecycleOwner.lifecycleScope.launch {
-                                authHandler!!.confirmEdits(userId = userData?.id, newEmail = newEmail, profilePictureUrl = newAvatarPath , newUsername = newUsername, country = newCounty, newAvatarFile = newAvatarFile)
+                                authHandler!!.confirmEdits(userId = userData?.id, newEmail = newEmail, profilePictureUrl = newAvatarPath , newUsername = newUsername, country = newCounty, newAvatarFile = newAvatarFile, userData = userData!!)
                                 delay(1000)
                                 joinAll()
                                 toggler()
@@ -207,7 +208,7 @@ fun ProfileEditMode(
                     contentColor = Color.White,
                     disabledContainerColor = Color.Green,
                     disabledContentColor = Color.Green),
-                onClick = {showDialog = true}) {
+                onClick = {showDialogScore = true}) {
                 Text("Reset Score", fontSize = 16.sp)
             }
         }
@@ -217,9 +218,9 @@ fun ProfileEditMode(
                     isLoading = true
                     lifecycleOwner.lifecycleScope.launch {
                         authHandler!!.deleteUser(userId = userData?.id)
-                        val signInResult = authHandler?.signOut()
+                        val signInResult = authHandler.signOut()
                         authViewModel?.onSignInResult(
-                            signInResult!!,
+                            signInResult,
                             context = context
                         )
                         delay(1000)
@@ -229,6 +230,23 @@ fun ProfileEditMode(
                 },
                 onDismiss = {
                     showDialog = false
+                }
+            )
+        }
+        if (showDialogScore){
+            DeleteDialog(
+                onConfirm = {
+                    isLoading = true
+                    lifecycleOwner.lifecycleScope.launch {
+                        authHandler!!.resetScore(userData = userData!!)
+                        delay(1000)
+                        joinAll()
+                        toggler()
+                    }
+                    showDialogScore = false
+                },
+                onDismiss = {
+                    showDialogScore = false
                 }
             )
         }
@@ -263,6 +281,7 @@ fun ProfileEditMode(
         if (isLoading) {
             LoadingDialog()
         }
+
     }
 }
 
