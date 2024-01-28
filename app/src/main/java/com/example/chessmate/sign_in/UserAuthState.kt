@@ -9,5 +9,6 @@ data class UserAuthState(
 enum class UserAuthStateType {
     UNAUTHENTICATED,
     AUTHENTICATED,
-    UNDEFINED
+    UNDEFINED,
+    GUEST
 }

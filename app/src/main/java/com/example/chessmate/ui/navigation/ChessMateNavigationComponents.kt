@@ -4,12 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -17,10 +14,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuOpen
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,7 +35,6 @@ import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import com.example.chessmate.R
@@ -78,25 +70,6 @@ fun ChessMateNavigationRail(
                             )
                         }
                     )
-                    FloatingActionButton(
-                        onClick = { navigateToTopLevelDestination(
-                            ChessMateTopLevelDestination(
-                                route = ChessMateRoute.SETTINGS,
-                                selectedIcon = Icons.Default.Settings,
-                                unselectedIcon = Icons.Outlined.Settings,
-                                iconTextId = R.string.tab_settings
-                            )) },
-                        modifier = Modifier.padding(top = 8.dp, bottom = 32.dp),
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = stringResource(id = R.string.edit),
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                    Spacer(Modifier.height(12.dp))
                 }
                 Column(
                     modifier = Modifier.layoutId(LayoutType.CONTENT),
@@ -104,40 +77,40 @@ fun ChessMateNavigationRail(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     if (isAuthenticate) {
-                        TOP_LEVEL_DESTINATIONS.forEach { ChessMateDestination ->
-                            val selected = selectedDestination == ChessMateDestination.route
+                        TOP_LEVEL_DESTINATIONS.forEach { chessMateDestination ->
+                            val selected = selectedDestination == chessMateDestination.route
                             NavigationRailItem(
                                 selected = selected,
-                                onClick = { navigateToTopLevelDestination(ChessMateDestination) },
+                                onClick = { navigateToTopLevelDestination(chessMateDestination) },
                                 icon = {
                                     Icon(
-                                        imageVector = if(selected) ChessMateDestination.selectedIcon else ChessMateDestination.unselectedIcon,
+                                        imageVector = if(selected) chessMateDestination.selectedIcon else chessMateDestination.unselectedIcon,
                                         contentDescription = stringResource(
-                                            id = ChessMateDestination.iconTextId
+                                            id = chessMateDestination.iconTextId
                                         )
                                     )
                                 },
                                 label = {
-                                    Text(text = stringResource(id = ChessMateDestination.iconTextId))
+                                    Text(text = stringResource(id = chessMateDestination.iconTextId))
                                 }
                             )
                         }
                     } else {
-                        LOGIN_LEVEL_DESTINATIONS.forEach { ChessMateDestination ->
-                            val selected = selectedDestination == ChessMateDestination.route
+                        LOGIN_LEVEL_DESTINATIONS.forEach { chessMateDestination ->
+                            val selected = selectedDestination == chessMateDestination.route
                             NavigationRailItem(
-                                selected = selectedDestination == ChessMateDestination.route,
-                                onClick = { navigateToTopLevelDestination(ChessMateDestination) },
+                                selected = selectedDestination == chessMateDestination.route,
+                                onClick = { navigateToTopLevelDestination(chessMateDestination) },
                                 icon = {
                                     Icon(
-                                        imageVector = if(selected) ChessMateDestination.selectedIcon else ChessMateDestination.unselectedIcon,
+                                        imageVector = if(selected) chessMateDestination.selectedIcon else chessMateDestination.unselectedIcon,
                                         contentDescription = stringResource(
-                                            id = ChessMateDestination.iconTextId
+                                            id = chessMateDestination.iconTextId
                                         )
                                     )
                                 },
                                 label = {
-                                    Text(text = stringResource(id = ChessMateDestination.iconTextId))
+                                    Text(text = stringResource(id = chessMateDestination.iconTextId))
                                 }
                             )
                         }
@@ -157,36 +130,36 @@ fun ChessMateBottomNavigationBar(
 ) {
     NavigationBar(modifier = Modifier.fillMaxWidth()) {
         if (isAuthenticated) {
-            TOP_LEVEL_DESTINATIONS.forEach { ChessMateDestination ->
-                val selected = selectedDestination == ChessMateDestination.route
+            TOP_LEVEL_DESTINATIONS.forEach { chessMateDestination ->
+                val selected = selectedDestination == chessMateDestination.route
                 NavigationBarItem(
                     selected = selected,
-                    onClick = { navigateToTopLevelDestination(ChessMateDestination) },
+                    onClick = { navigateToTopLevelDestination(chessMateDestination) },
                     icon = {
                         Icon(
-                            imageVector = if(selected) ChessMateDestination.selectedIcon else ChessMateDestination.unselectedIcon,
-                            contentDescription = stringResource(id = ChessMateDestination.iconTextId)
+                            imageVector = if(selected) chessMateDestination.selectedIcon else chessMateDestination.unselectedIcon,
+                            contentDescription = stringResource(id = chessMateDestination.iconTextId)
                         )
                     },
                     label = {
-                        Text(text = stringResource(id = ChessMateDestination.iconTextId))
+                        Text(text = stringResource(id = chessMateDestination.iconTextId))
                     }
                 )
             }
         } else {
-            LOGIN_LEVEL_DESTINATIONS.forEach { ChessMateDestination ->
-                val selected = selectedDestination == ChessMateDestination.route
+            LOGIN_LEVEL_DESTINATIONS.forEach { chessMateDestination ->
+                val selected = selectedDestination == chessMateDestination.route
                 NavigationBarItem(
                     selected = selected,
-                    onClick = { navigateToTopLevelDestination(ChessMateDestination) },
+                    onClick = { navigateToTopLevelDestination(chessMateDestination) },
                     icon = {
                         Icon(
-                            imageVector = if(selected) ChessMateDestination.selectedIcon else ChessMateDestination.unselectedIcon,
-                            contentDescription = stringResource(id = ChessMateDestination.iconTextId)
+                            imageVector = if(selected) chessMateDestination.selectedIcon else chessMateDestination.unselectedIcon,
+                            contentDescription = stringResource(id = chessMateDestination.iconTextId)
                         )
                     },
                     label = {
-                        Text(text = stringResource(id = ChessMateDestination.iconTextId))
+                        Text(text = stringResource(id = chessMateDestination.iconTextId))
                     }
                 )
             }
@@ -219,31 +192,6 @@ fun PermanentNavigationDrawerContent(
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    ExtendedFloatingActionButton(
-                        onClick = { navigateToTopLevelDestination(
-                            ChessMateTopLevelDestination(
-                                route = ChessMateRoute.SETTINGS,
-                                selectedIcon = Icons.Default.Settings,
-                                unselectedIcon = Icons.Outlined.Settings,
-                                iconTextId = R.string.tab_settings
-                            )) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp, bottom = 40.dp),
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = stringResource(id = R.string.edit),
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Text(
-                            text = stringResource(id = R.string.tab_settings),
-                            modifier = Modifier.weight(1f),
-                            textAlign = TextAlign.Center
-                        )
-                    }
                 }
                 Column(
                     modifier = Modifier
@@ -252,53 +200,53 @@ fun PermanentNavigationDrawerContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     if (isAuthenticate) {
-                        TOP_LEVEL_DESTINATIONS.forEach { ChessMateDestination ->
-                            val selected = selectedDestination == ChessMateDestination.route
+                        TOP_LEVEL_DESTINATIONS.forEach { chessMateDestination ->
+                            val selected = selectedDestination == chessMateDestination.route
                             NavigationDrawerItem(
                                 selected = selected,
                                 label = {
                                     Text(
-                                        text = stringResource(id = ChessMateDestination.iconTextId),
+                                        text = stringResource(id = chessMateDestination.iconTextId),
                                         modifier = Modifier.padding(horizontal = 16.dp)
                                     )
                                 },
                                 icon = {
                                     Icon(
-                                        imageVector = if(selected) ChessMateDestination.selectedIcon else ChessMateDestination.unselectedIcon,
+                                        imageVector = if(selected) chessMateDestination.selectedIcon else chessMateDestination.unselectedIcon,
                                         contentDescription = stringResource(
-                                            id = ChessMateDestination.iconTextId
+                                            id = chessMateDestination.iconTextId
                                         )
                                     )
                                 },
                                 colors = NavigationDrawerItemDefaults.colors(
                                     unselectedContainerColor = Color.Transparent
                                 ),
-                                onClick = { navigateToTopLevelDestination(ChessMateDestination) }
+                                onClick = { navigateToTopLevelDestination(chessMateDestination) }
                             )
                         }
                     } else {
-                        LOGIN_LEVEL_DESTINATIONS.forEach { ChessMateDestination ->
-                            val selected = selectedDestination == ChessMateDestination.route
+                        LOGIN_LEVEL_DESTINATIONS.forEach { chessMateDestination ->
+                            val selected = selectedDestination == chessMateDestination.route
                             NavigationDrawerItem(
                                 selected = selected,
                                 label = {
                                     Text(
-                                        text = stringResource(id = ChessMateDestination.iconTextId),
+                                        text = stringResource(id = chessMateDestination.iconTextId),
                                         modifier = Modifier.padding(horizontal = 16.dp)
                                     )
                                 },
                                 icon = {
                                     Icon(
-                                        imageVector = if(selected) ChessMateDestination.selectedIcon else ChessMateDestination.unselectedIcon,
+                                        imageVector = if(selected) chessMateDestination.selectedIcon else chessMateDestination.unselectedIcon,
                                         contentDescription = stringResource(
-                                            id = ChessMateDestination.iconTextId
+                                            id = chessMateDestination.iconTextId
                                         )
                                     )
                                 },
                                 colors = NavigationDrawerItemDefaults.colors(
                                     unselectedContainerColor = Color.Transparent
                                 ),
-                                onClick = { navigateToTopLevelDestination(ChessMateDestination) }
+                                onClick = { navigateToTopLevelDestination(chessMateDestination) }
                             )
                         }
                     }
@@ -347,32 +295,6 @@ fun ModalNavigationDrawerContent(
                             )
                         }
                     }
-
-                    ExtendedFloatingActionButton(
-                        onClick = { navigateToTopLevelDestination(
-                            ChessMateTopLevelDestination(
-                                route = ChessMateRoute.SETTINGS,
-                                selectedIcon = Icons.Default.Settings,
-                                unselectedIcon = Icons.Outlined.Settings,
-                                iconTextId = R.string.tab_settings
-                            )) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp, bottom = 40.dp),
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = stringResource(id = R.string.tab_settings),
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Text(
-                            text = stringResource(id = R.string.tab_settings),
-                            modifier = Modifier.weight(1f),
-                            textAlign = TextAlign.Center
-                        )
-                    }
                 }
 
                 Column(
@@ -382,53 +304,53 @@ fun ModalNavigationDrawerContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     if (isAuthenticate) {
-                        TOP_LEVEL_DESTINATIONS.forEach { ChessMateDestination ->
-                            val selected = selectedDestination == ChessMateDestination.route
+                        TOP_LEVEL_DESTINATIONS.forEach { chessMateDestination ->
+                            val selected = selectedDestination == chessMateDestination.route
                             NavigationDrawerItem(
                                 selected = selected,
                                 label = {
                                     Text(
-                                        text = stringResource(id = ChessMateDestination.iconTextId),
+                                        text = stringResource(id = chessMateDestination.iconTextId),
                                         modifier = Modifier.padding(horizontal = 16.dp)
                                     )
                                 },
                                 icon = {
                                     Icon(
-                                        imageVector = if(selected) ChessMateDestination.selectedIcon else ChessMateDestination.unselectedIcon,
+                                        imageVector = if(selected) chessMateDestination.selectedIcon else chessMateDestination.unselectedIcon,
                                         contentDescription = stringResource(
-                                            id = ChessMateDestination.iconTextId
+                                            id = chessMateDestination.iconTextId
                                         )
                                     )
                                 },
                                 colors = NavigationDrawerItemDefaults.colors(
                                     unselectedContainerColor = Color.Transparent
                                 ),
-                                onClick = { navigateToTopLevelDestination(ChessMateDestination) }
+                                onClick = { navigateToTopLevelDestination(chessMateDestination) }
                             )
                         }
                     } else {
-                        LOGIN_LEVEL_DESTINATIONS.forEach { ChessMateDestination ->
-                            val selected = selectedDestination == ChessMateDestination.route
+                        LOGIN_LEVEL_DESTINATIONS.forEach { chessMateDestination ->
+                            val selected = selectedDestination == chessMateDestination.route
                             NavigationDrawerItem(
                                 selected = selected,
                                 label = {
                                     Text(
-                                        text = stringResource(id = ChessMateDestination.iconTextId),
+                                        text = stringResource(id = chessMateDestination.iconTextId),
                                         modifier = Modifier.padding(horizontal = 16.dp)
                                     )
                                 },
                                 icon = {
                                     Icon(
-                                        imageVector = if(selected) ChessMateDestination.selectedIcon else ChessMateDestination.unselectedIcon,
+                                        imageVector = if(selected) chessMateDestination.selectedIcon else chessMateDestination.unselectedIcon,
                                         contentDescription = stringResource(
-                                            id = ChessMateDestination.iconTextId
+                                            id = chessMateDestination.iconTextId
                                         )
                                     )
                                 },
                                 colors = NavigationDrawerItemDefaults.colors(
                                     unselectedContainerColor = Color.Transparent
                                 ),
-                                onClick = { navigateToTopLevelDestination(ChessMateDestination) }
+                                onClick = { navigateToTopLevelDestination(chessMateDestination) }
                             )
                         }
                     }

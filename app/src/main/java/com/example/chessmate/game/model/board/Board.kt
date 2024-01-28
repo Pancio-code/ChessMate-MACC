@@ -34,6 +34,7 @@ import com.example.chessmate.game.model.board.Position.h1
 import com.example.chessmate.game.model.board.Position.h2
 import com.example.chessmate.game.model.board.Position.h7
 import com.example.chessmate.game.model.board.Position.h8
+import com.example.chessmate.game.model.game.converter.FenConverter
 import com.example.chessmate.game.model.move.PieceEffect
 import com.example.chessmate.game.model.piece.Bishop
 import com.example.chessmate.game.model.piece.King
@@ -58,7 +59,7 @@ data class Board(
         pieces = initialPieces
     )
     constructor(stringFEN: String) : this(
-        pieces = fenToMap(stringFEN)
+        pieces = FenConverter.fenToMap(stringFEN)
     )
 
 
@@ -136,34 +137,3 @@ private val initialPieces = mapOf(
     g1 to Knight(WHITE),
     h1 to Rook(WHITE),
 )
-
-private fun fenToMap(fen: String): Map<Position, Piece> {
-    val parts = fen.split(" ")
-    val rows = parts[0].split("/")
-    val pieceMap = mutableMapOf<Position, Piece>()
-
-    for ((rowIndex, row) in rows.withIndex()) {
-        var columnIndex = 0
-        for (char in row) {
-            val position = enumValueOf<Position>("${('a' + columnIndex)}${8 - rowIndex}")
-            when (char) {
-                'r' -> pieceMap[position] = Rook(BLACK)
-                'n' -> pieceMap[position] = Knight(BLACK)
-                'b' -> pieceMap[position] = Bishop(BLACK)
-                'q' -> pieceMap[position] = Queen(BLACK)
-                'k' -> pieceMap[position] = King(BLACK)
-                'p' -> pieceMap[position] = Pawn(BLACK)
-                'R' -> pieceMap[position] = Rook(WHITE)
-                'N' -> pieceMap[position] = Knight(WHITE)
-                'B' -> pieceMap[position] = Bishop(WHITE)
-                'Q' -> pieceMap[position] = Queen(WHITE)
-                'K' -> pieceMap[position] = King(WHITE)
-                'P' -> pieceMap[position] = Pawn(WHITE)
-                else -> columnIndex += char.toString().toInt() - 1
-            }
-            columnIndex++
-        }
-    }
-
-    return pieceMap
-}

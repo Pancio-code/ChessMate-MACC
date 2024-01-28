@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.NoAccounts
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -155,6 +156,19 @@ fun SignInScreen(
                 Text(text = "Sign In")
             }
             Spacer(modifier = Modifier.size(8.dp))
+            Button(onClick = {
+                authViewModel?.signInAsGuest()
+            }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.NoAccounts,
+                    modifier = Modifier.size(16.dp),
+                    contentDescription = "Guest icon"
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "Guest")
+            }
+            Spacer(modifier = Modifier.size(8.dp))
                 Text(
                     modifier = Modifier.clickable {
                         navController?.navigate(ChessMateRoute.CONTACT) {
@@ -275,6 +289,19 @@ fun SignInScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(text = "Sign In")
+                }
+                Spacer(modifier = Modifier.size(8.dp))
+                Button(onClick = {
+                    authViewModel?.signInAsGuest()
+                }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.NoAccounts,
+                        modifier = Modifier.size(16.dp),
+                        contentDescription = "Guest icon"
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Guest")
                 }
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(

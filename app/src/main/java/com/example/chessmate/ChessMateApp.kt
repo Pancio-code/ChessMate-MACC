@@ -48,12 +48,14 @@ import com.example.chessmate.ui.navigation.ModalNavigationDrawerContent
 import com.example.chessmate.ui.navigation.PermanentNavigationDrawerContent
 import com.example.chessmate.ui.pages.ContactUsScreen
 import com.example.chessmate.ui.pages.HomePage
+import com.example.chessmate.ui.pages.HomePageGuest
 import com.example.chessmate.ui.pages.ScreenUnderConstruction
 import com.example.chessmate.ui.pages.SignInScreen
 import com.example.chessmate.ui.pages.SignUpScreen
 import com.example.chessmate.ui.pages.multiplayer.FindGameScreen
 import com.example.chessmate.ui.pages.multiplayer.SelectColorScreen
 import com.example.chessmate.ui.pages.profile.ProfileScreen
+import com.example.chessmate.ui.pages.profile.ProfileScreenGuest
 import com.example.chessmate.ui.utils.ChessMateNavigationContentPosition
 import com.example.chessmate.ui.utils.ChessMateNavigationType
 import com.example.chessmate.ui.utils.DevicePosture
@@ -71,7 +73,7 @@ fun ChessMateApp(
     authViewModel:  SignInViewModel? = null,
     onlineViewModel: OnlineViewModel? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
-    togglefullView: () -> Unit = {},
+    toggleFullView: () -> Unit = {},
     onlineUIClient: OnlineUIClient? = null,
     immersivePage: String? = null,
     userData: UserData? = null,
@@ -127,14 +129,14 @@ fun ChessMateApp(
             modifier = Modifier,
             onlineUIClient = onlineUIClient!!,
             onlineViewModel = onlineViewModel!!,
-            togglefullView = togglefullView,
+            toggleFullView = toggleFullView,
             userData = userData
         )
         ChessMateRoute.OFFLINE_GAME -> Surface(color = MaterialTheme.colorScheme.background) {
             Game(
                 gameType = GameType.TWO_OFFLINE,
                 onlineViewModel = onlineViewModel!!,
-                togglefullView = togglefullView
+                toggleFullView = toggleFullView
             )
         }
         ChessMateRoute.SELECT_COLOR -> Surface(color = MaterialTheme.colorScheme.background) {
@@ -149,8 +151,9 @@ fun ChessMateApp(
             Game(
                 gameType = GameType.ONE_OFFLINE,
                 onlineViewModel = onlineViewModel!!,
-                togglefullView = togglefullView,
-                startColor = onlineViewModel.getStartColor()
+                toggleFullView = toggleFullView,
+                startColor = onlineViewModel.getStartColor(),
+                userData = userData
             )
         }
         else -> ChessMateNavigationWrapper(
@@ -163,7 +166,7 @@ fun ChessMateApp(
             onlineViewModel= onlineViewModel,
             onlineUIClient = onlineUIClient,
             googleIntentLaucher = googleIntentLaucher,
-            togglefullView = togglefullView,
+            toggleFullView = toggleFullView,
             userData = userData,
             context = context
         )
@@ -181,7 +184,7 @@ private fun ChessMateNavigationWrapper(
     onlineViewModel: OnlineViewModel? = null,
     onlineUIClient: OnlineUIClient? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
-    togglefullView: () -> Unit = {},
+    toggleFullView: () -> Unit = {},
     userData: UserData? = null,
     context: Context? = null
 ) {
@@ -218,7 +221,7 @@ private fun ChessMateNavigationWrapper(
                 onlineUIClient = onlineUIClient,
                 authViewModel = authViewModel,
                 googleIntentLaucher = googleIntentLaucher,
-                togglefullView = togglefullView,
+                toggleFullView = toggleFullView,
                 userData = userData,
                 context = context
             )
@@ -258,7 +261,7 @@ private fun ChessMateNavigationWrapper(
                 onlineViewModel = onlineViewModel,
                 onlineUIClient = onlineUIClient,
                 googleIntentLaucher = googleIntentLaucher,
-                togglefullView = togglefullView,
+                toggleFullView = toggleFullView,
                 userData = userData,
                 context = context
             )
@@ -282,7 +285,7 @@ fun ChessMateAppContent(
     onlineUIClient: OnlineUIClient? = null,
     authHandler: AuthUIClient? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
-    togglefullView: () -> Unit = {},
+    toggleFullView: () -> Unit = {},
     userData: UserData? = null,
     context: Context? = null
 ) {
@@ -312,7 +315,7 @@ fun ChessMateAppContent(
                 onlineViewModel = onlineViewModel,
                 onlineUIClient = onlineUIClient,
                 googleIntentLaucher = googleIntentLaucher,
-                togglefullView = togglefullView,
+                toggleFullView = toggleFullView,
                 userData = userData,
                 context = context
             )
@@ -339,11 +342,11 @@ private fun ChessMateNavHost(
     onlineViewModel: OnlineViewModel? = null,
     onlineUIClient: OnlineUIClient? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
-    togglefullView: () -> Unit = {},
+    toggleFullView: () -> Unit = {},
     userData: UserData? = null,
     context: Context? = null
 ) {
-    if (isAuthenticated) {
+    if (isAuthenticated && authViewModel?.isGuest() != true) {
         NavHost(
             modifier = modifier,
             navController = navController,
@@ -353,7 +356,7 @@ private fun ChessMateNavHost(
                 HomePage(
                     modifier = modifier,
                     onlineViewModel = onlineViewModel!!,
-                    togglefullView = togglefullView,
+                    toggleFullView = toggleFullView,
                     onlineUIClient = onlineUIClient!!
                 )
             }
@@ -368,7 +371,7 @@ private fun ChessMateNavHost(
                     navigationType = navigationType)
             }
         }
-    } else {
+    } else if (authViewModel?.isGuest() != true) {
         NavHost(
             modifier = modifier,
             navController = navController,
@@ -403,6 +406,29 @@ private fun ChessMateNavHost(
                     authHandler = authHandler,
                     authViewModel = authViewModel,
                     navigationType = navigationType
+                )
+            }
+        }
+    } else {
+        NavHost(
+            modifier = modifier,
+            navController = navController,
+            startDestination = ChessMateRoute.HOME,
+        ) {
+            composable(ChessMateRoute.HOME) {
+                HomePageGuest(
+                    modifier = modifier,
+                    toggleFullView = toggleFullView,
+                    onlineViewModel = onlineViewModel!!
+                )
+            }
+            composable(ChessMateRoute.SCAN) {
+                ScreenUnderConstruction()
+            }
+            composable(ChessMateRoute.PROFILE) {
+                ProfileScreenGuest(
+                    modifier= modifier,
+                    authViewModel = authViewModel
                 )
             }
         }

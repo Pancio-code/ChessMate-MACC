@@ -23,7 +23,6 @@ object ChessMateRoute {
     const val HOME = "Home"
     const val PROFILE = "Profile"
     const val SCAN = "Scan"
-    const val SETTINGS = "Settings"
     const val SIGN_IN = "Sign In"
     const val SIGN_UP = "Sign Up"
     const val CONTACT = "Contact Us"

@@ -1,5 +1,6 @@
 package com.example.chessmate.game.ui.app
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.example.chessmate.R
 import com.example.chessmate.game.model.data_chessmate.LocalActiveDatasetVisualisation
 import com.example.chessmate.game.model.game.controller.GameController
+import com.example.chessmate.game.model.game.converter.FenConverter
 import com.example.chessmate.game.model.game.preset.Preset
 import com.example.chessmate.game.model.game.state.GamePlayState
 import com.example.chessmate.game.model.game.state.GameState
@@ -46,6 +48,7 @@ import com.example.chessmate.game.ui.chess.Moves
 import com.example.chessmate.game.ui.chess.resolutionText
 import com.example.chessmate.multiplayer.GameType
 import com.example.chessmate.multiplayer.OnlineViewModel
+import com.example.chessmate.sign_in.UserData
 
 @Composable
 fun Game(
@@ -55,9 +58,11 @@ fun Game(
     preset: Preset? = null,
     gameType : GameType = GameType.TWO_OFFLINE,
     startColor : Set? = Set.WHITE,
-    togglefullView: () -> Unit = {},
-    onlineViewModel: OnlineViewModel
+    toggleFullView: () -> Unit = {},
+    onlineViewModel: OnlineViewModel,
+    userData: UserData? = null
 ) {
+    Log.d("FENNNN", FenConverter.getFenFromSnapshot(state.gameState.currentSnapshotState))
     var isFlipped by rememberSaveable { mutableStateOf(false) }
     val gamePlayState = rememberSaveable { mutableStateOf(state) }
     val showChessMateDialog = remember { mutableStateOf(false) }
@@ -71,9 +76,12 @@ fun Game(
         GameController(
             getGamePlayState = { gamePlayState.value },
             setGamePlayState = { gamePlayState.value = it },
-            preset = preset
+            preset = preset,
+            startColor = startColor,
+            gameType = gameType
         )
     }
+
 
     CompositionLocalProvider(LocalActiveDatasetVisualisation  provides gamePlayState.value.visualisation) {
         Column(
@@ -81,6 +89,7 @@ fun Game(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
+            GamePlayers(gameType = gameType,roomData = null,userData = userData,startColor = startColor)
             Status(gamePlayState.value.gameState)
             Moves(
                 moves = gamePlayState.value.gameState.moves(),
@@ -138,7 +147,7 @@ fun Game(
                     Button(
                         onClick = {
                             onlineViewModel.setFullViewPage("")
-                            togglefullView()
+                            toggleFullView()
                         }
                     ) {
                         Icon(
@@ -163,7 +172,7 @@ fun Game(
             pngToImport = pngToImport,
             fenToImport = fenToImport,
             onlineViewModel = onlineViewModel,
-            togglefullView = togglefullView
+            toggleFullView = toggleFullView
         )
 
         ManagedImport(

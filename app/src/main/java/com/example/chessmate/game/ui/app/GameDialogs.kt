@@ -27,7 +27,7 @@ fun GameDialogs(
     showImportFenDialog: MutableState<Boolean>,
     pngToImport: MutableState<String?>,
     fenToImport: MutableState<String?>,
-    togglefullView: () -> Unit = {},
+    toggleFullView: () -> Unit = {},
     onlineViewModel: OnlineViewModel
 ) {
     ManagedPromotionDialog(
@@ -46,7 +46,7 @@ fun GameDialogs(
         gameState = gamePlayState.value.gameState,
         gameController = gameController,
         onlineViewModel = onlineViewModel,
-        togglefullView = togglefullView
+        toggleFullView = toggleFullView
     )
 
     ManagedImportPgnDialog(
@@ -97,7 +97,7 @@ fun ManagedGameDialog(
     showImportFenDialog: MutableState<Boolean>,
     gameState: GameState,
     gameController: GameController,
-    togglefullView: () -> Unit = {},
+    toggleFullView: () -> Unit = {},
     onlineViewModel: OnlineViewModel
 ) {
     if (showGameDialog.value) {
@@ -133,7 +133,7 @@ fun ManagedGameDialog(
             },
             onExitGame = {
                 onlineViewModel.setFullViewPage("")
-                togglefullView()
+                toggleFullView()
             }
         )
     }

@@ -60,6 +60,22 @@ class SignInViewModel: ViewModel() {
         }
     }
 
+    fun signInAsGuest() {
+        viewModelScope.launch {
+            _isAuthenticated.value = UserAuthState(state = UserAuthStateType.GUEST, loading = false)
+        }
+    }
+
+    fun signOutFromGuest() {
+        viewModelScope.launch {
+            _isAuthenticated.value = UserAuthState(state = UserAuthStateType.UNAUTHENTICATED, loading = false)
+        }
+    }
+
+    fun isGuest(): Boolean {
+        return _isAuthenticated.value.state == UserAuthStateType.GUEST
+    }
+
     fun setUserData(newValue : SignInResult) : Boolean {
         _userData.update { newValue }
         return true

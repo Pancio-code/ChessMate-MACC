@@ -152,7 +152,6 @@ class MainActivity : ComponentActivity() {
                     }
 
                     UserAuthStateType.AUTHENTICATED -> {
-
                         var isInfullView by remember { mutableStateOf(false) }
                         val immersivePage by onlineViewModel.fullViewPage.collectAsState()
                         val onlineUIClient by lazy {
@@ -173,11 +172,32 @@ class MainActivity : ComponentActivity() {
                             isAuthenticated = true,
                             authHandler = authUIClient,
                             onlineUIClient = onlineUIClient,
-                            togglefullView = {
+                            toggleFullView = {
                                 isInfullView = !isInfullView
-
                              },
                             userData = userData.data!!,
+                            immersivePage = immersivePage
+                        )
+                    }
+
+                    UserAuthStateType.GUEST -> {
+                        var isInfullView by remember { mutableStateOf(false) }
+                        val immersivePage by onlineViewModel.fullViewPage.collectAsState()
+
+                        ChessMateApp(
+                            windowSize = windowSize,
+                            authState= authState,
+                            displayFeatures = displayFeatures,
+                            authViewModel = signInViewModel,
+                            onlineViewModel = onlineViewModel,
+                            isAuthenticated = true,
+                            authHandler = authUIClient,
+                            onlineUIClient = null,
+                            toggleFullView = {
+                                isInfullView = !isInfullView
+
+                            },
+                            userData = null,
                             immersivePage = immersivePage
                         )
                     }

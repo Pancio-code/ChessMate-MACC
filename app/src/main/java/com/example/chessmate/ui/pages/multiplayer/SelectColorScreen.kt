@@ -27,7 +27,7 @@ import com.example.chessmate.ui.navigation.ChessMateRoute
 fun SelectColorScreen(
     modifier: Modifier = Modifier,
     onlineViewModel: OnlineViewModel,
-    togglefullView: () -> Unit = {},
+    toggleFullView: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -63,7 +63,7 @@ fun SelectColorScreen(
         Button(
             onClick = {
                 onlineViewModel.setFullViewPage("")
-                togglefullView()
+                toggleFullView()
             },
             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)) {
             Icon(

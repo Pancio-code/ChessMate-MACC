@@ -121,7 +121,7 @@ fun GameOnline(
             showImportDialog = showImportDialog,
             pngToImport = remember { mutableStateOf("") },
             onlineViewModel = onlineViewModel,
-            togglefullView = {}
+            toggleFullView = {}
         )
     }*/
 }
@@ -252,7 +252,7 @@ fun GamePreview() {
         Game(
             state = gamePlayState,
             onlineViewModel = OnlineViewModel(),
-            togglefullView = {}
+            toggleFullView = {}
         )
     }
 }

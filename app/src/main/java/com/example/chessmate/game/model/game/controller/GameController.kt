@@ -16,11 +16,14 @@ import com.example.chessmate.game.model.move.targetPositions
 import com.example.chessmate.game.model.piece.Piece
 import com.example.chessmate.game.model.piece.Queen
 import com.example.chessmate.game.model.piece.Set
+import com.example.chessmate.multiplayer.GameType
 
 class GameController(
     val getGamePlayState: () -> GamePlayState,
     private val setGamePlayState: ((GamePlayState) -> Unit)? = null,
-    preset: Preset? = null
+    preset: Preset? = null,
+    private val startColor: Set? = null,
+    private val gameType : GameType? = null,
 ) {
     init {
         preset?.let { applyPreset(it) }
@@ -57,6 +60,7 @@ class GameController(
 
     fun onClick(position: Position) {
         if (gameSnapshotState.resolution != Resolution.IN_PROGRESS) return
+        if (gameType == GameType.ONE_OFFLINE && startColor != gameSnapshotState.toMove) return
         if (position.hasOwnPiece()) {
             toggleSelectPosition(position)
         } else if (canMoveTo(position)) {

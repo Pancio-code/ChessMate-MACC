@@ -48,7 +48,7 @@ fun FindGameScreen(
     modifier: Modifier = Modifier,
     onlineUIClient: OnlineUIClient,
     onlineViewModel: OnlineViewModel,
-    togglefullView: () -> Unit = {},
+    toggleFullView: () -> Unit = {},
     userData: UserData?
 ) {
     val roomData by onlineViewModel.roomData.collectAsState()
@@ -99,7 +99,7 @@ fun FindGameScreen(
                 Button(
                     onClick = {
                         onlineViewModel.setFullViewPage("")
-                        togglefullView()
+                        toggleFullView()
                     },
                     colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary)) {
                     Icon(
@@ -149,7 +149,7 @@ fun FindGameScreen(
                     onClick = {
                         onlineUIClient.updateRoomData(roomData.copy(gameState = RoomStatus.INPROGRESS))
                         onlineViewModel.setFullViewPage(ChessMateRoute.ONLINE_GAME)
-                        togglefullView()
+                        toggleFullView()
                     },
                     colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)) {
                     Text(text = "Start Game", color = MaterialTheme.colorScheme.onPrimary)
