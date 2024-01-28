@@ -363,7 +363,6 @@ private fun ChessMateNavHost(
             composable(ChessMateRoute.PROFILE) {
                 ProfileScreen(
                     modifier= modifier,
-                    userData = userData,
                     authViewModel = authViewModel,
                     authHandler = authHandler,
                     navigationType = navigationType)

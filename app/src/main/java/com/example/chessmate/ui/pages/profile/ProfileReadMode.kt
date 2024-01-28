@@ -23,6 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
+import com.example.chessmate.BuildConfig
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserData
@@ -42,7 +45,8 @@ fun ProfileReadMode(
     authHandler: AuthUIClient? = null,
     navigationType: ChessMateNavigationType,
     authViewModel: SignInViewModel? = null,
-    toggler: () -> Unit
+    toggler: () -> Unit,
+    painter: AsyncImagePainter
 ) {
     val lyfescope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -54,7 +58,7 @@ fun ProfileReadMode(
     ) {
         Row{
             if(userData?.username != null) {
-                CardProfile(userData = userData, toggler)
+                CardProfile(userData = userData, toggler, painter)
             }
         }
         Row(
@@ -98,15 +102,16 @@ fun ProfileReadMode(
 @Preview
 @Composable
 fun ProfileReadModePreview() {
+    val userData = UserData(
+        id = "1",
+        profilePictureUrl = null,
+        username = "Nome Cognome",
+        email = "andrea.pancio00@gmail.com",
+        emailVerified = false,
+        provider = null
+    )
     ProfileReadMode(
-        userData = UserData(
-            id = "1",
-            profilePictureUrl = null,
-            username = "Nome Cognome",
-            email = "andrea.pancio00@gmail.com",
-            emailVerified = false,
-            provider = null
-        ),
+        userData = userData,
         modifier = Modifier,
         authHandler = null,
         navigationType = ChessMateNavigationType.BOTTOM_NAVIGATION,
@@ -123,22 +128,24 @@ fun ProfileReadModePreview() {
             Match(1,"avatar","Nome Cognome",1),
             Match(1,"avatar","Nome Cognome",1),
             Match(1,"avatar","Nome Cognome",1),
-            )
+            ),
+        painter = rememberAsyncImagePainter("${BuildConfig.API_URL}/api/v1/user/avatar/${userData.id}/${userData.profilePictureUrl}")
     )
 }
 
 @Preview
 @Composable
 fun ProfileReadModeTabletPreview() {
+    val userData = UserData(
+        id = "1",
+        profilePictureUrl = null,
+        username = "Nome Cognome",
+        email = "andrea.pancio00@gmail.com",
+        emailVerified = false,
+        provider = null
+    )
     ProfileReadMode(
-        userData = UserData(
-            id = "1",
-            profilePictureUrl = null,
-            username = "Nome Cognome",
-            email = "andrea.pancio00@gmail.com",
-            emailVerified = false,
-            provider = null
-        ),
+        userData = userData,
         modifier = Modifier,
         authHandler = null,
         navigationType = ChessMateNavigationType.NAVIGATION_RAIL,
@@ -154,6 +161,7 @@ fun ProfileReadModeTabletPreview() {
             Match(1,"avatar","Nome Cognome",1),
             Match(1,"avatar","Nome Cognome",1),
             Match(1,"avatar","Nome Cognome",1),
-            )
+            ),
+        painter = rememberAsyncImagePainter("${BuildConfig.API_URL}/api/v1/user/avatar/${userData.id}/${userData.profilePictureUrl}")
     )
 }

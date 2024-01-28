@@ -7,22 +7,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.rememberAsyncImagePainter
+import com.example.chessmate.BuildConfig
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInViewModel
-import com.example.chessmate.sign_in.UserData
 import com.example.chessmate.ui.components.Match
 import com.example.chessmate.ui.utils.ChessMateNavigationType
 
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
-    userData: UserData?,
     authHandler: AuthUIClient? = null,
     navigationType: ChessMateNavigationType,
     authViewModel: SignInViewModel? = null,
 ) {
     val userData by authViewModel!!.userData.collectAsStateWithLifecycle()
+    if (userData.data!!.profilePictureUrl == "null"){
 
+    }
+    val painter = rememberAsyncImagePainter("${BuildConfig.API_URL}/api/v1/user/avatar/${userData.data!!.id}/${userData.data!!.profilePictureUrl}")
     var isEditMode by remember { mutableStateOf(false) }
     val recentMatches = arrayOf(
         Match(0,"avatar","Awenega",1),
@@ -48,7 +51,8 @@ fun ProfileScreen(
             authHandler = authHandler,
             authViewModel = authViewModel,
             toggler = { isEditMode = !isEditMode },
-            recentMatches = recentMatches
+            recentMatches = recentMatches,
+            painter = painter
         )
     } else {
         ProfileEditMode(
@@ -56,7 +60,8 @@ fun ProfileScreen(
             navigationType = navigationType,
             modifier = modifier,
             authHandler = authHandler,
-            toggler = { isEditMode = !isEditMode }
+            toggler = { isEditMode = !isEditMode },
+            painter = painter
         )
     }
 }
@@ -65,16 +70,6 @@ fun ProfileScreen(
 @Composable
 fun ProfilePagePreview() {
     ProfileScreen(
-        userData = UserData(
-            id = "1",
-            profilePictureUrl = null,
-            username = "Nome Cognome",
-            email = "andrea.pancio00@gmail.com",
-            emailVerified = false,
-            provider = null,
-            country = "it",
-            signupDate = "26 Jan 2024"
-        ),
         modifier = Modifier,
         authHandler = null,
         navigationType = ChessMateNavigationType.BOTTOM_NAVIGATION
@@ -85,16 +80,6 @@ fun ProfilePagePreview() {
 @Composable
 fun ProfilePageTabletPreview() {
     ProfileScreen(
-        userData = UserData(
-            id = "1",
-            profilePictureUrl = null,
-            username = "Andrea",
-            email = "andrea.pancio00@gmail.com",
-            emailVerified = false,
-            provider = null,
-            country = "it",
-            signupDate = "26 Jan 2024"
-        ),
         modifier = Modifier,
         authHandler = null,
         navigationType = ChessMateNavigationType.NAVIGATION_RAIL

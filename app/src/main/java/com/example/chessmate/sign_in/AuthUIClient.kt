@@ -21,6 +21,11 @@ import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 
 class AuthUIClient(
     private val context: Context,
@@ -275,21 +280,28 @@ class AuthUIClient(
         ).show()
     }
 
-    suspend fun confirmEdits(userId: String?, newEmail: String?, newProfilePictureUrl: String?, newUsername: String?, country: String?): Boolean {
+    suspend fun confirmEdits(userId: String?, newEmail: String?, profilePictureUrl: String?, newUsername: String?, country: String?, newAvatarFile: File?): Boolean {
         val userData = UserData(
             id = userId.toString(),
             email = newEmail,
-            profilePictureUrl = newProfilePictureUrl,
+            profilePictureUrl = profilePictureUrl,
             username = newUsername,
             country = country
         )
         try {
             val data = gson.toJson(userData)
-            val userResponse =  userRemoteService.update(token=BuildConfig.TOKEN, id= userId.toString(), body = data)
+            val jsonRequestBody = data.toRequestBody("application/json".toMediaTypeOrNull())
+
+            if (newAvatarFile.toString() != "") {
+                val fileRequestBody = newAvatarFile!!.asRequestBody("image/*".toMediaTypeOrNull())
+                val filePart = MultipartBody.Part.createFormData("file", newAvatarFile.name, fileRequestBody)
+                userRemoteService.updateWithAvatar(token=BuildConfig.TOKEN, id= userId.toString(), body = jsonRequestBody, image= filePart)
+            } else {
+                userRemoteService.update(token=BuildConfig.TOKEN, id= userId.toString(), body = jsonRequestBody)
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             if (e is CancellationException) throw e
-            null
         }
         return signInViewModel.setUserData(SignInResult(data = userData, errorMessage = null))
     }

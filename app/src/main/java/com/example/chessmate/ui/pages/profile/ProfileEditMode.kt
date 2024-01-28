@@ -1,6 +1,7 @@
 package com.example.chessmate.ui.pages.profile
 
 import android.Manifest
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -56,7 +57,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -66,9 +66,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import com.example.chessmate.R
+import com.example.chessmate.BuildConfig
 import com.example.chessmate.camera.photo_capture.CameraScreen
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.UserData
@@ -83,7 +84,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import java.io.File
-
+import java.io.InputStream
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -92,7 +93,8 @@ fun ProfileEditMode(
     userData: UserData?,
     authHandler: AuthUIClient? = null,
     navigationType: ChessMateNavigationType,
-    toggler: () -> Unit
+    toggler: () -> Unit,
+    painter: AsyncImagePainter
 ) {
     var isConfirmMode by remember { mutableStateOf(false) }
     var showCamera by remember { mutableStateOf(false) }
@@ -104,8 +106,10 @@ fun ProfileEditMode(
     var newUsername by remember { mutableStateOf(userData!!.username.toString()) }
     var newEmail by remember { mutableStateOf(userData!!.email.toString()) }
     var newCounty by remember { mutableStateOf(userData!!.country.toString()) }
-    var newAvatarPath by remember { mutableStateOf("") }
-
+    var newAvatarPath by remember { mutableStateOf(userData!!.profilePictureUrl) }
+    var tmpAvatarPath by remember { mutableStateOf("") }
+    var newAvatarFile by remember { mutableStateOf(File(""))}
+    val context: Context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -149,7 +153,7 @@ fun ProfileEditMode(
                         onClick = {
                             isLoading = true
                             lifecycleOwner.lifecycleScope.launch {
-                                authHandler!!.confirmEdits(userId = userData?.id, newEmail = newEmail, newProfilePictureUrl = null, newUsername = newUsername, country = newCounty)
+                                authHandler!!.confirmEdits(userId = userData?.id, newEmail = newEmail, profilePictureUrl = newAvatarPath , newUsername = newUsername, country = newCounty, newAvatarFile = newAvatarFile)
                                 delay(1000)
                                 joinAll()
                                 toggler()
@@ -176,7 +180,7 @@ fun ProfileEditMode(
                 }
             }
         }
-        CustomRowEdit(title = "Avatar", placeholder = "", isConfirmMode = {isConfirmMode = true}, isExpanded = {expanded = true}, onValueChange = {newAvatarPath = it})
+        CustomRowEdit(title = "Avatar", placeholder = newAvatarPath!!, isConfirmMode = {isConfirmMode = true}, isExpanded = {expanded = true}, onValueChange = {newAvatarPath = it}, tmpAvatarPath = tmpAvatarPath, painter = painter)
         CustomRowEdit(title = "Username", placeholder = newUsername, isConfirmMode = {isConfirmMode = true}, onValueChange = {newUsername = it})
         CustomRowEdit(title = "Email", placeholder = newEmail, isConfirmMode = {isConfirmMode = true}, onValueChange = {newEmail = it})
         CustomRowEdit(title = "Country", placeholder = newCounty, isConfirmMode = {isConfirmMode = true}, onValueChange = {newCounty = it})
@@ -218,10 +222,8 @@ fun ProfileEditMode(
         if (expanded) {
             ChangeAvatar(
                 onDismiss = {expanded = false},
-                showCamera = {showCamera = true},
-                onUpload = {
-                    newValue:String -> newAvatarPath = newValue
-                }
+                showCamera = {showCamera = true}, //called when user click on take a picture
+                onUpload = {newValue:String -> newAvatarPath = newValue} //called when user click on upload image from gallery
             )
         }
         if (showCamera){
@@ -234,8 +236,19 @@ fun ProfileEditMode(
                     expanded = false
                 },
                 onNewAvatar = {
-                    newValue:String -> newAvatarPath = newValue
+                    newValue:Uri -> val imageStream: InputStream? = context.contentResolver.openInputStream(newValue)
+                    newAvatarPath = "${generateRandomString(10)}.jpg" //path to send to backend
+                    tmpAvatarPath = newValue.toString() //local path for the preview of the image in the avatar field
                     isConfirmMode = true
+
+                    val imageFile = File(context.cacheDir, newAvatarPath!!)
+                    imageStream?.use { inputStream ->
+                        imageFile.outputStream().use { outputStream ->
+                            inputStream.copyTo(outputStream)
+                            newAvatarFile = imageFile  //newAvatarFile contains the File to send and store in the backend
+                        }
+                    }
+
                 }
             )
         }
@@ -247,7 +260,7 @@ fun ProfileEditMode(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit, isExpanded: () -> Unit = { }, onValueChange: (String) -> Unit){
+fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit, isExpanded: () -> Unit = { }, onValueChange: (String) -> Unit, tmpAvatarPath: String = "", painter: AsyncImagePainter? = null){
     var textValue by remember { mutableStateOf(placeholder) }
     Row(
         modifier = Modifier
@@ -283,7 +296,7 @@ fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit,
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Start
                     ) {
-                        Avatar(imageResourceId = R.drawable.profile_picture, isExpanded, uploadedImagePath = placeholder)
+                        Avatar(painter = painter!!, isExpanded, uploadedImagePath = tmpAvatarPath)
                     }
                 "Country" ->
                     Row(
@@ -386,7 +399,7 @@ fun ShowAskPermissionAndCamera(
     cameraPermissionState: PermissionState,
     lifecycleOwner: LifecycleOwner,
     onDismiss: () -> Unit,
-    onNewAvatar: (String) -> Unit
+    onNewAvatar: (Uri) -> Unit
     ) {
     if (hasPermission) {
         Dialog(onDismissRequest = { onDismiss() }) {
@@ -500,7 +513,7 @@ fun LoadingDialog(
 
 // to delete
 @Composable
-fun Avatar(imageResourceId: Int = R.drawable.profile_picture, isExpanded: () -> Unit, uploadedImagePath: String = "") {
+fun Avatar(painter: AsyncImagePainter, isExpanded: () -> Unit, uploadedImagePath: String?) {
     Surface(
         modifier = Modifier
             .size(80.dp)
@@ -508,7 +521,7 @@ fun Avatar(imageResourceId: Int = R.drawable.profile_picture, isExpanded: () -> 
             .clickable { isExpanded() },
         color = Color.Transparent
     ) {
-        if(uploadedImagePath.startsWith("content://")){
+        if(uploadedImagePath!!.startsWith("content://")){
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(uploadedImagePath)
@@ -523,7 +536,7 @@ fun Avatar(imageResourceId: Int = R.drawable.profile_picture, isExpanded: () -> 
         } else {
             if(uploadedImagePath == ""){
                 Image(
-                    painter = painterResource(id = imageResourceId),
+                    painter = painter,
                     contentDescription = "Default Image",
                     modifier = Modifier
                         .size(80.dp)
@@ -531,7 +544,7 @@ fun Avatar(imageResourceId: Int = R.drawable.profile_picture, isExpanded: () -> 
                 )
             } else {
                 Image(
-                    rememberAsyncImagePainter(File(uploadedImagePath)),
+                    rememberAsyncImagePainter(uploadedImagePath),
                     contentDescription = "Image from camera",
                     modifier = Modifier
                         .size(80.dp)
@@ -543,42 +556,51 @@ fun Avatar(imageResourceId: Int = R.drawable.profile_picture, isExpanded: () -> 
     }
 }
 
-
+fun generateRandomString(length: Int): String {
+    val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+    return (1..length)
+        .map { allowedChars.random() }
+        .joinToString("")
+}
 
 @Preview
 @Composable
 fun ProfileEditModePreview() {
+    val userData = UserData(
+        id = "1",
+        profilePictureUrl = null,
+        username = "Nome Cognome",
+        email = "andrea.pancio00@gmail.com",
+        emailVerified = false,
+        provider = null
+    )
     ProfileEditMode(
-        userData = UserData(
-            id = "1",
-            profilePictureUrl = null,
-            username = "Andrea",
-            email = "andrea.pancio00@gmail.com",
-            emailVerified = false,
-            provider = null
-        ),
+        userData = userData,
         modifier = Modifier,
         authHandler = null,
         navigationType = ChessMateNavigationType.BOTTOM_NAVIGATION,
-        toggler = {}
+        toggler = {},
+        painter = rememberAsyncImagePainter("${BuildConfig.API_URL}/api/v1/user/avatar/${userData.id}/${userData.profilePictureUrl}")
     )
 }
 
 @Preview
 @Composable
 fun ProfileEditModeTabletPreview() {
+    val userData = UserData(
+        id = "1",
+        profilePictureUrl = null,
+        username = "Nome Cognome",
+        email = "andrea.pancio00@gmail.com",
+        emailVerified = false,
+        provider = null
+    )
     ProfileEditMode(
-        userData = UserData(
-            id = "1",
-            profilePictureUrl = null,
-            username = "Andrea",
-            email = "andrea.pancio00@gmail.com",
-            emailVerified = false,
-            provider = null
-        ),
+        userData = userData,
         modifier = Modifier,
         authHandler = null,
         navigationType = ChessMateNavigationType.NAVIGATION_RAIL,
-        toggler = {}
+        toggler = {},
+        painter = rememberAsyncImagePainter("${BuildConfig.API_URL}/api/v1/user/avatar/${userData.id}/${userData.profilePictureUrl}")
     )
 }

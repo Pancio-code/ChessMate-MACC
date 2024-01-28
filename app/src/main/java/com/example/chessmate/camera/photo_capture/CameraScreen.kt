@@ -54,7 +54,7 @@ import java.util.concurrent.Executor
 fun CameraScreen(
     viewModel: CameraViewModel = koinViewModel(),
     onImageTaken: () -> Unit,
-    onNewAvatar: (String) -> Unit,
+    onNewAvatar: (Uri) -> Unit,
 ) {
     val cameraState: CameraState by viewModel.state.collectAsStateWithLifecycle()
 
@@ -71,7 +71,7 @@ private fun CameraContent(
     onPhotoCaptured: (Bitmap) -> Unit,
     lastCapturedPhoto: Bitmap? = null,
     onImageTaken: () -> Unit,
-    onNewAvatar: (String) -> Unit
+    onNewAvatar: (Uri) -> Unit
 ) {
 
     val context: Context = LocalContext.current
@@ -122,7 +122,7 @@ private fun capturePhoto(
     cameraController: LifecycleCameraController,
     onPhotoCaptured: (Bitmap) -> Unit,
     onImageTaken: () -> Unit,
-    onNewAvatar: (String) -> Unit
+    onNewAvatar: (Uri) -> Unit
 ) {
 
     val mainExecutor: Executor = ContextCompat.getMainExecutor(context)
@@ -145,7 +145,7 @@ private fun capturePhoto(
                     Log.e("CameraContent", "Error saving image to MediaStore", e)
                 }
 
-                onNewAvatar(uri.toString())
+                onNewAvatar(uri)
                 onPhotoCaptured(correctedBitmap)
                 image.close()
                 cameraController.unbind()

@@ -18,13 +18,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.chessmate.R
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
+import com.example.chessmate.BuildConfig
 import com.example.chessmate.sign_in.UserData
 
 @Composable
 fun CardProfileSearch(
     userData: UserData,
-    modifier : Modifier = Modifier){
+    modifier : Modifier = Modifier,
+    painter: AsyncImagePainter){
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
@@ -46,7 +49,7 @@ fun CardProfileSearch(
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Center,
             ){
-                ProfileImage(imageResourceId = R.drawable.profile_picture)
+                ProfileImage(painter = painter)
             }
             Column(
                 horizontalAlignment = Alignment.Start,
@@ -93,5 +96,6 @@ fun CardProfileSearchPreview() {
         emailVerified = false,
         provider = null
     )
-    CardProfile(userData, toggler = {})
+    val painter = rememberAsyncImagePainter("${BuildConfig.API_URL}/api/v1/user/avatar/${userData.id}")
+    CardProfile(userData, toggler = {}, painter = painter)
 }

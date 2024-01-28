@@ -30,13 +30,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.chessmate.R
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
+import com.example.chessmate.BuildConfig
 import com.example.chessmate.sign_in.UserData
 
 @Composable
 fun CardProfile(
     userData: UserData?,
-    toggler: () -> Unit
+    toggler: () -> Unit,
+    painter: AsyncImagePainter
 ){
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
@@ -60,7 +63,7 @@ fun CardProfile(
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Center,
             ){
-                ProfileImage(imageResourceId = R.drawable.profile_picture)
+                ProfileImage(painter = painter)
             }
             Column(
                 horizontalAlignment = Alignment.Start,
@@ -145,7 +148,7 @@ fun CardProfile(
 
 
 @Composable
-fun ProfileImage(imageResourceId: Int) {
+fun ProfileImage(painter: AsyncImagePainter) {
     Surface(
         modifier = Modifier
             .size(80.dp)
@@ -153,7 +156,7 @@ fun ProfileImage(imageResourceId: Int) {
         color = Color.Transparent
     ) {
         Image(
-            painter = painterResource(id = imageResourceId),
+            painter = painter,
             contentDescription = null,
             modifier = Modifier
                 .size(80.dp)
@@ -167,7 +170,7 @@ fun ProfileImage(imageResourceId: Int) {
 fun CardProfilePreview() {
     val userData = UserData(
         id = "1",
-        profilePictureUrl = null,
+        profilePictureUrl = "",
         username = "Username",
         email = "andrea.pancio00@gmail.com",
         emailVerified = false,
@@ -175,5 +178,6 @@ fun CardProfilePreview() {
         country = "it",
         signupDate = "26 Jan 2024"
     )
-    CardProfile(userData, toggler = {})
+    val painter = rememberAsyncImagePainter("${BuildConfig.API_URL}/api/v1/user/avatar/${userData.id}")
+    CardProfile(userData, toggler = {}, painter)
 }

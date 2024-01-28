@@ -32,6 +32,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
+import com.example.chessmate.BuildConfig
 import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
 import com.example.chessmate.multiplayer.RoomData
@@ -52,6 +54,7 @@ fun FindGameScreen(
     val roomData by onlineViewModel.roomData.collectAsState()
     val lyfescope = rememberCoroutineScope()
     var isFindingGame by remember { mutableStateOf(false) }
+    val painter = rememberAsyncImagePainter("${BuildConfig.API_URL}/api/v1/user/avatar/${userData!!.id}/${userData!!.profilePictureUrl}")
 
     LaunchedEffect(isFindingGame) {
         if (isFindingGame) {
@@ -76,7 +79,7 @@ fun FindGameScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             if (userData != null) {
-                CardProfileSearch(userData = userData,modifier=modifier)
+                CardProfileSearch(userData = userData,modifier=modifier, painter = painter)
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
@@ -140,7 +143,7 @@ fun FindGameScreen(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(20.dp))
-                CardProfileSearch(userData = UserData(username = roomData.playerTwoUsername), modifier = modifier)
+                CardProfileSearch(userData = UserData(username = roomData.playerTwoUsername), modifier = modifier, painter = painter)
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
                     onClick = {
