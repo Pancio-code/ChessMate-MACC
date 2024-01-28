@@ -223,7 +223,13 @@ fun ProfileEditMode(
             ChangeAvatar(
                 onDismiss = {expanded = false},
                 showCamera = {showCamera = true}, //called when user click on take a picture
-                onUpload = {newValue:String -> newAvatarPath = newValue} //called when user click on upload image from gallery
+                onUpload = { //called when user click on upload image from gallery
+                    newValue:Uri -> val imageStream: InputStream? = context.contentResolver.openInputStream(newValue) //the uri of the new image
+                    newAvatarPath = "${generateRandomString(10)}.jpg" //path to send to backend
+                    tmpAvatarPath = newValue.toString() //local path for the preview of the image in the avatar field
+                    newAvatarFile = getImageFile(context = context, path = newAvatarPath!!, imageStream = imageStream) //the File to send and store in the backend
+                    isConfirmMode = true
+                }
             )
         }
         if (showCamera){
@@ -231,24 +237,13 @@ fun ProfileEditMode(
                 hasPermission = cameraPermissionState.status.isGranted,
                 cameraPermissionState = cameraPermissionState,
                 lifecycleOwner = lifecycleOwner,
-                onDismiss = {
-                    showCamera = false
-                    expanded = false
-                },
-                onNewAvatar = {
-                    newValue:Uri -> val imageStream: InputStream? = context.contentResolver.openInputStream(newValue)
+                onDismiss = {showCamera = false;expanded = false},
+                onNewAvatar = { //called when user after taking a picture with the camera
+                    newValue:Uri -> val imageStream: InputStream? = context.contentResolver.openInputStream(newValue) //the uri of the new image
                     newAvatarPath = "${generateRandomString(10)}.jpg" //path to send to backend
                     tmpAvatarPath = newValue.toString() //local path for the preview of the image in the avatar field
+                    newAvatarFile = getImageFile(context = context, path = newAvatarPath!!, imageStream = imageStream) //the File to send and store in the backend
                     isConfirmMode = true
-
-                    val imageFile = File(context.cacheDir, newAvatarPath!!)
-                    imageStream?.use { inputStream ->
-                        imageFile.outputStream().use { outputStream ->
-                            inputStream.copyTo(outputStream)
-                            newAvatarFile = imageFile  //newAvatarFile contains the File to send and store in the backend
-                        }
-                    }
-
                 }
             )
         }
@@ -335,12 +330,10 @@ fun CustomRowEdit(title: String, placeholder: String, isConfirmMode: () -> Unit,
 fun ChangeAvatar(
     onDismiss: () -> Unit,
     showCamera: () -> Unit,
-    onUpload: (String) -> Unit
+    onUpload: (Uri) -> Unit
 ) {
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
     val getContent = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
-        imageUri = uri
-        onUpload(imageUri.toString())
+        onUpload(uri!!)
         onDismiss()
     }
     Dialog(onDismissRequest = { onDismiss() }) {
@@ -554,6 +547,16 @@ fun Avatar(painter: AsyncImagePainter, isExpanded: () -> Unit, uploadedImagePath
             }
         }
     }
+}
+
+fun getImageFile(context: Context, path: String, imageStream: InputStream?): File{
+    val imageFile = File(context.cacheDir, path)
+    imageStream?.use { inputStream ->
+        imageFile.outputStream().use { outputStream ->
+            inputStream.copyTo(outputStream)
+        }
+    }
+    return imageFile
 }
 
 fun generateRandomString(length: Int): String {
