@@ -45,10 +45,10 @@ import com.example.chessmate.ui.navigation.ChessMateRoute
 import com.example.chessmate.ui.navigation.ChessMateTopLevelDestination
 import com.example.chessmate.ui.navigation.ModalNavigationDrawerContent
 import com.example.chessmate.ui.navigation.PermanentNavigationDrawerContent
+import com.example.chessmate.ui.pages.ChessboardParser
 import com.example.chessmate.ui.pages.ContactUsScreen
 import com.example.chessmate.ui.pages.HomePage
 import com.example.chessmate.ui.pages.HomePageGuest
-import com.example.chessmate.ui.pages.ScreenUnderConstruction
 import com.example.chessmate.ui.pages.SignInScreen
 import com.example.chessmate.ui.pages.SignUpScreen
 import com.example.chessmate.ui.pages.multiplayer.FindGameScreen
@@ -363,7 +363,7 @@ private fun ChessMateNavHost(
                 )
             }
             composable(ChessMateRoute.SCAN) {
-                ScreenUnderConstruction()
+                ChessboardParser()
             }
             composable(ChessMateRoute.PROFILE) {
                 ProfileScreen(
@@ -425,7 +425,7 @@ private fun ChessMateNavHost(
                 )
             }
             composable(ChessMateRoute.SCAN) {
-                ScreenUnderConstruction()
+                ChessboardParser()
             }
             composable(ChessMateRoute.PROFILE) {
                 ProfileScreenGuest(
