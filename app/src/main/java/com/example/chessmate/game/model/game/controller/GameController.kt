@@ -20,6 +20,9 @@ import com.example.chessmate.game.model.piece.Piece
 import com.example.chessmate.game.model.piece.Queen
 import com.example.chessmate.game.model.piece.Set
 import com.example.chessmate.multiplayer.GameType
+import com.example.chessmate.multiplayer.OnlineUIClient
+import com.example.chessmate.multiplayer.RoomData
+import com.example.chessmate.multiplayer.RoomStatus
 import com.example.chessmate.ui.utils.HelperClassStockFish
 import com.example.chessmate.ui.utils.StockFishAPI
 import com.example.chessmate.ui.utils.StockFishData
@@ -33,7 +36,9 @@ class GameController(
     private val setGamePlayState: ((GamePlayState) -> Unit)? = null,
     preset: Preset? = null,
     private val startColor: Set? = null,
-    private val gameType : GameType? = null
+    private val gameType : GameType? = null,
+    private val onlineUIClient: OnlineUIClient? = null,
+    private val roomData: RoomData? = null
 ) {
     private val stockFishService : StockFishAPI = HelperClassStockFish.getIstance()
     private val mode : String = "bestmove"
@@ -73,13 +78,39 @@ class GameController(
 
     fun onClick(position: Position) {
         if (gameSnapshotState.resolution != Resolution.IN_PROGRESS) return
-        if (gameType == GameType.ONE_OFFLINE && startColor != gameSnapshotState.toMove) return
+        if (gameType != GameType.TWO_OFFLINE && startColor != gameSnapshotState.toMove) return
         if (position.hasOwnPiece()) {
             toggleSelectPosition(position)
         } else if (canMoveTo(position)) {
             val selectedPosition = gamePlayState.uiState.selectedPosition
             requireNotNull(selectedPosition)
             applyMove(selectedPosition, position)
+            if (gameType == GameType.ONLINE) {
+                roomData?.let {
+                    onlineUIClient!!.updateRoomData(
+                        model = it.copy(
+                            gameState = if (gameSnapshotState.resolution != Resolution.IN_PROGRESS) RoomStatus.FINISHED else RoomStatus.INPROGRESS,
+                            currentTurn =  if (gameSnapshotState.toMove == Set.WHITE) "w" else "b",
+                            lastMove = "${gameSnapshotState.lastMove?.from} ${gameSnapshotState.lastMove?.to}",
+                            winner =  if (!gamePlayState.gameState.gameMetaInfo.result.isNullOrEmpty()) gamePlayState.gameState.gameMetaInfo.result!!  else "",
+                            termination =  if (!gamePlayState.gameState.gameMetaInfo.termination.isNullOrEmpty()) gamePlayState.gameState.gameMetaInfo.termination!! else ""
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    fun onResponse(lastMove :String) {
+        val moves = lastMove.split(" ")
+        val toPosition = enumValueOf<Position>(moves[1])
+        val fromPosition = enumValueOf<Position>(moves[0])
+
+        toggleSelectPosition(fromPosition)
+        if (canMoveTo(toPosition)) {
+            val selectedPosition = gamePlayState.uiState.selectedPosition
+            requireNotNull(selectedPosition)
+            applyMove(selectedPosition, toPosition)
         }
     }
 

@@ -9,10 +9,8 @@ import com.example.chessmate.R
 import com.example.chessmate.sign_in.UserData
 import com.example.chessmate.ui.utils.HelperClassOnline
 import com.example.chessmate.ui.utils.OnlineAPI
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import kotlin.coroutines.cancellation.CancellationException
@@ -23,7 +21,6 @@ class OnlineUIClient(
     private val onlineViewModel: OnlineViewModel,
     private val userData : UserData
 ) {
-    private val auth = Firebase.auth
     private val roomRemoteService : OnlineAPI = HelperClassOnline.getIstance()
     private val token = BuildConfig.TOKEN
     private val gson = Gson()
@@ -98,7 +95,8 @@ class OnlineUIClient(
                     playerOneId = userData.id,
                     playerOneUsername = userData.username!!,
                     gameState = RoomStatus.CREATED,
-                    rankPlayerOne = userData.eloRank
+                    rankPlayerOne = userData.eloRank,
+                    pictureUrlOne = userData.profilePictureUrl ?: "default.jpg"
                 )
             )
             val roomResponse = roomRemoteService.create(token = token, id = userData.id, body = data)

@@ -34,6 +34,7 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import com.example.chessmate.BuildConfig
 import com.example.chessmate.sign_in.UserData
+import com.example.chessmate.sign_in.UserDataHelper
 
 @Composable
 fun CardProfile(
@@ -178,6 +179,6 @@ fun CardProfilePreview() {
         country = "it",
         signupDate = "26 Jan 2024"
     )
-    val painter = rememberAsyncImagePainter("${BuildConfig.API_URL}/api/v1/user/avatar/${userData.id}")
+    val painter = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userData.id}")
     CardProfile(userData, toggler = {}, painter)
 }

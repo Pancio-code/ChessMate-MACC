@@ -23,6 +23,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +48,7 @@ import com.example.chessmate.game.ui.chess.CapturedPieces
 import com.example.chessmate.game.ui.chess.Moves
 import com.example.chessmate.game.ui.chess.resolutionText
 import com.example.chessmate.multiplayer.GameType
+import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
 import com.example.chessmate.sign_in.UserData
 
@@ -60,6 +63,7 @@ fun Game(
     depth : Int = 5,
     toggleFullView: () -> Unit = {},
     onlineViewModel: OnlineViewModel,
+    onlineUIClient: OnlineUIClient? = null,
     userData: UserData? = null
 ) {
     var isFlipped by rememberSaveable { mutableStateOf(false) }
@@ -71,6 +75,7 @@ fun Game(
     val pngToImport = remember { mutableStateOf(importGamePGN) }
     val fenToImport = remember { mutableStateOf(importGameFEN) }
     val lifecycleOwner = LocalLifecycleOwner.current
+    val roomData = onlineViewModel.roomData.collectAsState()
 
     val gameController = remember {
         GameController(
@@ -78,8 +83,16 @@ fun Game(
             setGamePlayState = { gamePlayState.value = it },
             preset = preset,
             startColor = startColor,
-            gameType = gameType
+            gameType = gameType,
+            roomData= roomData.value,
+            onlineUIClient = onlineUIClient
         )
+    }
+
+    if (gameType == GameType.ONLINE) {
+        LaunchedEffect(roomData.value) {
+            roomData.value.lastMove?.let { gameController.onResponse(it) }
+        }
     }
 
 
@@ -90,7 +103,7 @@ fun Game(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            GamePlayers(gameType = gameType,roomData = null,userData = userData,startColor = startColor)
+            GamePlayers(gameType = gameType,userData=userData,roomData = onlineViewModel.getRoomData(),startColor = startColor)
             Status(gamePlayState.value.gameState)
             Moves(
                 moves = gamePlayState.value.gameState.moves(),

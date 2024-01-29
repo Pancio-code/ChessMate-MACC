@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
-import com.example.chessmate.BuildConfig
 import com.example.chessmate.sign_in.UserData
+import com.example.chessmate.sign_in.UserDataHelper
 
 @Composable
 fun CardProfileSearch(
@@ -96,6 +96,6 @@ fun CardProfileSearchPreview() {
         emailVerified = false,
         provider = null
     )
-    val painter = rememberAsyncImagePainter("${BuildConfig.API_URL}/api/v1/user/avatar/${userData.id}")
+    val painter = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userData.id}")
     CardProfile(userData, toggler = {}, painter = painter)
 }

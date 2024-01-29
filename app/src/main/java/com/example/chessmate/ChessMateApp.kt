@@ -31,7 +31,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.window.layout.DisplayFeature
 import androidx.window.layout.FoldingFeature
 import com.example.chessmate.game.ui.app.Game
-import com.example.chessmate.game.ui.app.GameOnline
 import com.example.chessmate.multiplayer.GameType
 import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
@@ -145,7 +144,16 @@ fun ChessMateApp(
             )
         }
         ChessMateRoute.ONLINE_GAME -> Surface(color = MaterialTheme.colorScheme.background) {
-            GameOnline(onlineViewModel = onlineViewModel!!, onlineUIClient = onlineUIClient!!)
+            val roomData = onlineViewModel!!.getRoomData()
+            Game(
+                gameType = GameType.ONLINE,
+                onlineViewModel = onlineViewModel,
+                onlineUIClient = onlineUIClient,
+                importGamePGN = roomData.boardState,
+                toggleFullView = toggleFullView,
+                userData = userData,
+                startColor = if (roomData.playerOneId == userData!!.id) com.example.chessmate.game.model.piece.Set.WHITE else com.example.chessmate.game.model.piece.Set.BLACK
+            )
         }
         ChessMateRoute.AI_GAME -> Surface(color = MaterialTheme.colorScheme.background) {
             Game(

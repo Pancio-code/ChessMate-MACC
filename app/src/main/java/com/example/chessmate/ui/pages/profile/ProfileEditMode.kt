@@ -69,14 +69,13 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import com.example.chessmate.BuildConfig
 import com.example.chessmate.camera.photo_capture.CameraScreen
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserData
+import com.example.chessmate.sign_in.UserDataHelper
 import com.example.chessmate.ui.components.MenuCountryPicker
 import com.example.chessmate.ui.theme.light_primary
-import com.example.chessmate.ui.utils.ChessMateNavigationType
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
@@ -94,7 +93,6 @@ fun ProfileEditMode(
     userData: UserData?,
     authHandler: AuthUIClient? = null,
     authViewModel: SignInViewModel? = null,
-    navigationType: ChessMateNavigationType,
     toggler: () -> Unit,
     painter: AsyncImagePainter
 ) {
@@ -115,7 +113,7 @@ fun ProfileEditMode(
     val context: Context = LocalContext.current
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.inverseOnSurface)
     ) {
@@ -613,9 +611,8 @@ fun ProfileEditModePreview() {
         userData = userData,
         modifier = Modifier,
         authHandler = null,
-        navigationType = ChessMateNavigationType.BOTTOM_NAVIGATION,
         toggler = {},
-        painter = rememberAsyncImagePainter("${BuildConfig.API_URL}/api/v1/user/avatar/${userData.id}/${userData.profilePictureUrl}")
+        painter = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userData.id}/${userData.profilePictureUrl}")
     )
 }
 
@@ -634,8 +631,7 @@ fun ProfileEditModeTabletPreview() {
         userData = userData,
         modifier = Modifier,
         authHandler = null,
-        navigationType = ChessMateNavigationType.NAVIGATION_RAIL,
         toggler = {},
-        painter = rememberAsyncImagePainter("${BuildConfig.API_URL}/api/v1/user/avatar/${userData.id}/${userData.profilePictureUrl}")
+        painter = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userData.id}/${userData.profilePictureUrl}")
     )
 }

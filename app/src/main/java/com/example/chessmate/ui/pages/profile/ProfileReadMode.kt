@@ -25,15 +25,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
-import com.example.chessmate.BuildConfig
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserData
+import com.example.chessmate.sign_in.UserDataHelper
 import com.example.chessmate.ui.components.CardProfile
 import com.example.chessmate.ui.components.Match
 import com.example.chessmate.ui.components.RecentMatches
 import com.example.chessmate.ui.components.Score
-import com.example.chessmate.ui.utils.ChessMateNavigationType
 import kotlinx.coroutines.launch
 
 
@@ -43,7 +42,6 @@ fun ProfileReadMode(
     userData: UserData?,
     recentMatches: Array<Match>,
     authHandler: AuthUIClient? = null,
-    navigationType: ChessMateNavigationType,
     authViewModel: SignInViewModel? = null,
     toggler: () -> Unit,
     painter: AsyncImagePainter
@@ -114,7 +112,6 @@ fun ProfileReadModePreview() {
         userData = userData,
         modifier = Modifier,
         authHandler = null,
-        navigationType = ChessMateNavigationType.BOTTOM_NAVIGATION,
         toggler = {  },
         recentMatches = arrayOf(
             Match(0,"avatar","Awenega",1),
@@ -129,7 +126,7 @@ fun ProfileReadModePreview() {
             Match(1,"avatar","Nome Cognome",1),
             Match(1,"avatar","Nome Cognome",1),
             ),
-        painter = rememberAsyncImagePainter("${BuildConfig.API_URL}/api/v1/user/avatar/${userData.id}/${userData.profilePictureUrl}")
+        painter = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userData.id}/${userData.profilePictureUrl}")
     )
 }
 
@@ -148,7 +145,6 @@ fun ProfileReadModeTabletPreview() {
         userData = userData,
         modifier = Modifier,
         authHandler = null,
-        navigationType = ChessMateNavigationType.NAVIGATION_RAIL,
         toggler = { },
         recentMatches = arrayOf(
             Match(0,"avatar","Awenega",1),
@@ -162,6 +158,6 @@ fun ProfileReadModeTabletPreview() {
             Match(1,"avatar","Nome Cognome",1),
             Match(1,"avatar","Nome Cognome",1),
             ),
-        painter = rememberAsyncImagePainter("${BuildConfig.API_URL}/api/v1/user/avatar/${userData.id}/${userData.profilePictureUrl}")
+        painter = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userData.id}/${userData.profilePictureUrl}")
     )
 }

@@ -33,12 +33,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import com.example.chessmate.BuildConfig
 import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
 import com.example.chessmate.multiplayer.RoomData
 import com.example.chessmate.multiplayer.RoomStatus
 import com.example.chessmate.sign_in.UserData
+import com.example.chessmate.sign_in.UserDataHelper
 import com.example.chessmate.ui.components.CardProfileSearch
 import com.example.chessmate.ui.navigation.ChessMateRoute
 import kotlinx.coroutines.launch
@@ -52,13 +52,13 @@ fun FindGameScreen(
     userData: UserData?
 ) {
     val roomData by onlineViewModel.roomData.collectAsState()
-    val lyfescope = rememberCoroutineScope()
+    val lifeScope = rememberCoroutineScope()
     var isFindingGame by remember { mutableStateOf(false) }
-    val painter = rememberAsyncImagePainter("${BuildConfig.API_URL}/api/v1/user/avatar/${userData!!.id}/${userData!!.profilePictureUrl}")
+    val painter = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userData!!.id}/${userData.profilePictureUrl}")
 
     LaunchedEffect(isFindingGame) {
         if (isFindingGame) {
-            lyfescope.launch {
+            lifeScope.launch {
                 onlineUIClient.startGame().run {
                     isFindingGame = !isFindingGame
                 }
@@ -78,9 +78,7 @@ fun FindGameScreen(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()
         ) {
-            if (userData != null) {
-                CardProfileSearch(userData = userData,modifier=modifier, painter = painter)
-            }
+            CardProfileSearch(userData = userData,modifier=modifier, painter = painter)
         }
         Spacer(modifier = Modifier.height(20.dp))
         when(roomData.gameState) {
@@ -137,13 +135,14 @@ fun FindGameScreen(
                 }
             }
             RoomStatus.JOINED -> {
+                val painterTwo = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${roomData.playerTwoId}/${roomData.pictureUrlTwo}")
                 Text(
                     "VS",
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(20.dp))
-                CardProfileSearch(userData = UserData(username = roomData.playerTwoUsername), modifier = modifier, painter = painter)
+                CardProfileSearch(userData = UserData(username = roomData.playerTwoUsername), modifier = modifier, painter = painterTwo)
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
                     onClick = {
@@ -179,9 +178,7 @@ fun FindGameScreen(
                     Text(text = "Exit Game", color = MaterialTheme.colorScheme.onErrorContainer)
                 }
             }
-            else -> {
-
-            }
+            else -> {}
         }
     }
 }

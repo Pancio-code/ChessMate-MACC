@@ -1,5 +1,7 @@
 package com.example.chessmate.sign_in
 
+import com.example.chessmate.BuildConfig
+
 data class SignInResult(
     val data: UserData?,
     val errorMessage: String?
@@ -18,3 +20,7 @@ data class UserData(
     val country: String? = null,
     val signupDate: String? = null,
 )
+
+object UserDataHelper {
+    const val AVATAR_URL : String = "${BuildConfig.API_URL}/api/v1/user/avatar"
+}

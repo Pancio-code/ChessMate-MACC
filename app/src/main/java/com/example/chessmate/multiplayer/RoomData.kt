@@ -6,6 +6,8 @@ data class RoomData(
     val playerTwoId: String? = null,
     val playerOneUsername: String = "",
     val playerTwoUsername: String? = null,
+    val pictureUrlOne : String = "",
+    val pictureUrlTwo : String? = null,
     val gameState: RoomStatus = RoomStatus.WAITING,
     val rankPlayerOne: Float = 0.0f,
     val rankPlayerTwo: Float? = null,
@@ -13,10 +15,10 @@ data class RoomData(
     val boardState: String = RoomDataHelper.PNG_START, // We use PNG notation to represent current board situation.
     val lastMove: String? = null,
     val winner: String = "",
-    val termination: String= ""
+    val termination: String= "",
 )
 {
-    constructor() : this("-1", "", null,"",null,RoomStatus.WAITING,0.0f,null,null,RoomDataHelper.PNG_START,null,"","") {}
+    constructor() : this("-1", "", null,"",null,"",null,RoomStatus.WAITING,0.0f,null,null,RoomDataHelper.PNG_START,null,"","") {}
 }
 
 object RoomDataHelper {
