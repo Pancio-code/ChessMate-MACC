@@ -1,7 +1,5 @@
 package com.example.chessmate.multiplayer
 
-import com.google.firebase.firestore.Exclude
-
 data class RoomData(
     val roomId: String = "-1",
     val playerOneId: String = "",
@@ -19,24 +17,6 @@ data class RoomData(
 )
 {
     constructor() : this("-1", "", null,"",null,RoomStatus.WAITING,0.0f,null,null,RoomDataHelper.PNG_START,null,"","") {}
-    @Exclude
-    fun toMap(): Map<String, Any?> {
-        return mapOf(
-            "roomId" to roomId,
-            "playerOneId" to playerOneId,
-            "playerTwoId" to playerTwoId,
-            "playerOneUsername" to playerOneUsername,
-            "playerTwoUsername" to playerTwoUsername,
-            "gameState" to gameState,
-            "rankPlayerOne" to rankPlayerOne,
-            "rankPlayerTwo" to rankPlayerTwo,
-            "currentTurn" to currentTurn,
-            "boardState" to boardState,
-            "lastMove" to lastMove,
-            "winner" to winner,
-            "termination" to termination
-        )
-    }
 }
 
 object RoomDataHelper {
@@ -55,4 +35,12 @@ enum class GameType {
     ONLINE,
     TWO_OFFLINE,
     ONE_OFFLINE
+}
+
+enum class GameDifficulty {
+    EASY,
+    MEDIUM,
+    HARD,
+    EXTREME,
+    IMPOSSIBLE
 }

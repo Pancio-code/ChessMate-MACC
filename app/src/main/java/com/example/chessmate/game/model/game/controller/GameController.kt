@@ -1,10 +1,13 @@
 package com.example.chessmate.game.model.game.controller
 
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.example.chessmate.game.model.board.Position
 import com.example.chessmate.game.model.board.Square
 import com.example.chessmate.game.model.data_chessmate.DatasetVisualisation
 import com.example.chessmate.game.model.game.Resolution
 import com.example.chessmate.game.model.game.controller.Reducer.Action
+import com.example.chessmate.game.model.game.converter.FenConverter
 import com.example.chessmate.game.model.game.preset.Preset
 import com.example.chessmate.game.model.game.state.GameMetaInfo
 import com.example.chessmate.game.model.game.state.GamePlayState
@@ -17,14 +20,24 @@ import com.example.chessmate.game.model.piece.Piece
 import com.example.chessmate.game.model.piece.Queen
 import com.example.chessmate.game.model.piece.Set
 import com.example.chessmate.multiplayer.GameType
+import com.example.chessmate.ui.utils.HelperClassStockFish
+import com.example.chessmate.ui.utils.StockFishAPI
+import com.example.chessmate.ui.utils.StockFishData
+import kotlinx.coroutines.launch
+import retrofit2.Response
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.random.Random
 
 class GameController(
     val getGamePlayState: () -> GamePlayState,
     private val setGamePlayState: ((GamePlayState) -> Unit)? = null,
     preset: Preset? = null,
     private val startColor: Set? = null,
-    private val gameType : GameType? = null,
+    private val gameType : GameType? = null
 ) {
+    private val stockFishService : StockFishAPI = HelperClassStockFish.getIstance()
+    private val mode : String = "bestmove"
+
     init {
         preset?.let { applyPreset(it) }
     }
@@ -67,6 +80,48 @@ class GameController(
             val selectedPosition = gamePlayState.uiState.selectedPosition
             requireNotNull(selectedPosition)
             applyMove(selectedPosition, position)
+        }
+    }
+
+     fun onPcTurn(lifecycleOwner: LifecycleOwner, depth: Int = 5) {
+        lifecycleOwner.lifecycleScope.launch {
+            makePcMove(depth = depth)
+        }
+    }
+
+    private suspend fun makePcMove(depth: Int = 5) {
+        try {
+            val stockFishResponse : Response<StockFishData> = stockFishService.get(fen = FenConverter.getFenFromSnapshot(gameSnapshotState,gamePlayState), depth = depth, mode= mode)
+            val responseBody : StockFishData = stockFishResponse.body() ?: throw Exception("No reply from API")
+            val bestMove = responseBody.data?.substringAfter("bestmove ")?.substringBefore(" ponder") ?: throw Exception("Invalid move format")
+
+            val fromPosition =  enumValueOf<Position>(bestMove.substring(0,2))
+            val toPosition = enumValueOf<Position>(bestMove.substring(2,4))
+            toggleSelectPosition(fromPosition)
+            if (canMoveTo(toPosition)) {
+                val selectedPosition = gamePlayState.uiState.selectedPosition
+                requireNotNull(selectedPosition)
+                applyMove(selectedPosition, toPosition)
+            } else {
+                throw Exception("Illegal Move")
+            }
+        } catch (e : Exception) {
+            e.printStackTrace()
+            if (e is CancellationException) throw e
+            val availablePieces = gameSnapshotState.board.pieces.filter { x ->
+                gameSnapshotState.legalMovesFrom(
+                    x.key
+                ).isNotEmpty()
+            }
+            val fromPosition = availablePieces.keys.elementAt(Random.nextInt(availablePieces.size))
+            val toPosition = gameSnapshotState.legalMovesFrom(fromPosition)[0].to
+
+            toggleSelectPosition(fromPosition)
+            if (canMoveTo(toPosition)) {
+                val selectedPosition = gamePlayState.uiState.selectedPosition
+                requireNotNull(selectedPosition)
+                applyMove(selectedPosition, toPosition)
+            }
         }
     }
 

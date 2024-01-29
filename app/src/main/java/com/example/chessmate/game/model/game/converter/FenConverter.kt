@@ -98,7 +98,7 @@ object FenConverter : Converter{
         return pieceMap
     }
 
-    fun getFenFromSnapshot(gameSnapshotState: GameSnapshotState,gamePlayState: GamePlayState): String {
+    fun getFenFromSnapshot(gameSnapshotState: GameSnapshotState, gamePlayState: GamePlayState): String {
         val pieces: Map<Position, Piece> = gameSnapshotState.board.pieces
         val toMove: Char = if (gameSnapshotState.toMove == Set.WHITE) 'w' else 'b'
 
@@ -108,17 +108,17 @@ object FenConverter : Converter{
         blackCastling += if (gameSnapshotState.castlingInfo.holders[Set.BLACK]?.canCastleQueenSide == true) "q" else ""
         val castlingAvailability = if (whiteCastling.isEmpty() && blackCastling.isEmpty()) "-" else "$whiteCastling$blackCastling"
 
-        val enPassantTarget : String = "-" //DEFAULT VALUE
-        val halfMoveClock : Int = 0 //WE NOT USE 50 MOVES RULES
-        val fullMoveNumber : Int = gamePlayState.gameState.moves().filter { appliedMove -> appliedMove.piece.set == Set.BLACK }.size + 1
+        val enPassantTarget = "-" //DEFAULT VALUE
+        val halfMoveClock = 0 //WE NOT USE 50 MOVES RULES
+        val fullMoveNumber: Int = gamePlayState.gameState.moves().filter { appliedMove -> appliedMove.piece.set == Set.BLACK }.size + 1
 
         val board = Array(8) { CharArray(8) { ' ' } }
 
         for ((position, piece) in pieces) {
-            board[position.rank - 1 ][position.file - 1] = piece.toFenChar()
+            board[position.rank - 1][position.file - 1] = piece.toFenChar()
         }
 
-        val piecePlacement = board.joinToString("/") { row ->
+        val piecePlacement = board.reversed().joinToString("/") { row ->
             row.joinToString("").replace(Regex(" +")) { match -> match.value.length.toString() }
         }
 

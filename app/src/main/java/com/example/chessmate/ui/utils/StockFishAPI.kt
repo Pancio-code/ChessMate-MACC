@@ -3,15 +3,19 @@ package com.example.chessmate.ui.utils
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
-import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface StockFishAPI {
-    @GET("/{fen}")
-    suspend fun get(@Path("fen") fen: String): retrofit2.Response<StockFishData>
+    @GET("/api/stockfish.php")
+    suspend fun get(
+        @Query("fen") fen: String,
+        @Query("depth") depth: Int,
+        @Query("mode") mode: String
+    ): retrofit2.Response<StockFishData>
 }
 
-object HelperClassStockFISH {
-    private const val stockFishURL : String  = "https://stockfish.online/api/stockfish.php"
+object HelperClassStockFish {
+    private const val stockFishURL : String  = "https://stockfish.online/"
     fun getIstance() : StockFishAPI {
         return Retrofit.Builder()
             .baseUrl(stockFishURL)

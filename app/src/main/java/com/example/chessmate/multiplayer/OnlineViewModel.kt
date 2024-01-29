@@ -14,10 +14,13 @@ class OnlineViewModel: ViewModel() {
     private val _startColor = MutableStateFlow(Set.WHITE)
     private val startColor : StateFlow<Set> = _startColor.asStateFlow()
 
+    private val _depth = MutableStateFlow(5)
+    private val depth : StateFlow<Int> = _depth.asStateFlow()
+
     private val _fullViewPage = MutableStateFlow("")
     val fullViewPage = _fullViewPage.asStateFlow()
 
-    fun setFullViewPage(newValue : String) : Unit {
+    fun setFullViewPage(newValue : String) {
         _fullViewPage.update { newValue }
     }
 
@@ -25,7 +28,7 @@ class OnlineViewModel: ViewModel() {
         return roomData.value
     }
 
-    fun setRoomData(newValue : RoomData) : Unit {
+    fun setRoomData(newValue : RoomData) {
         _roomData.update { newValue }
     }
 
@@ -33,8 +36,18 @@ class OnlineViewModel: ViewModel() {
         return startColor.value
     }
 
-    fun setStartColor(newValue : Set) : Unit {
+    fun setStartColor(newValue : Set) {
         _startColor.update { newValue }
+    }
+
+    fun getDepth(): Int {
+        return depth.value
+    }
+
+    fun setDepth(newValue : Int) {
+        if (newValue in 5..13) {
+            _depth.update { newValue }
+        }
     }
 
 }

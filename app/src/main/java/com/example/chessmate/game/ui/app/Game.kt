@@ -1,6 +1,5 @@
 package com.example.chessmate.game.ui.app
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,13 +30,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.chessmate.R
 import com.example.chessmate.game.model.data_chessmate.LocalActiveDatasetVisualisation
 import com.example.chessmate.game.model.game.controller.GameController
-import com.example.chessmate.game.model.game.converter.FenConverter
 import com.example.chessmate.game.model.game.preset.Preset
 import com.example.chessmate.game.model.game.state.GamePlayState
 import com.example.chessmate.game.model.game.state.GameState
@@ -58,6 +57,7 @@ fun Game(
     preset: Preset? = null,
     gameType : GameType = GameType.TWO_OFFLINE,
     startColor : Set? = Set.WHITE,
+    depth : Int = 5,
     toggleFullView: () -> Unit = {},
     onlineViewModel: OnlineViewModel,
     userData: UserData? = null
@@ -70,6 +70,7 @@ fun Game(
     val showImportFenDialog = remember { mutableStateOf(false) }
     val pngToImport = remember { mutableStateOf(importGamePGN) }
     val fenToImport = remember { mutableStateOf(importGameFEN) }
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     val gameController = remember {
         GameController(
@@ -83,7 +84,7 @@ fun Game(
 
 
     CompositionLocalProvider(LocalActiveDatasetVisualisation  provides gamePlayState.value.visualisation) {
-        Log.d("FENNNN", FenConverter.getFenFromSnapshot(gamePlayState.value.gameState.currentSnapshotState,gamePlayState.value))
+        if (gameType == GameType.ONE_OFFLINE && startColor != gamePlayState.value.gameState.toMove) gameController.onPcTurn(  lifecycleOwner = lifecycleOwner, depth = depth )
         Column(
             modifier = Modifier
                 .fillMaxSize()
