@@ -157,6 +157,15 @@ fun Game(
                         style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Center
                     )
+                    if(gameType == GameType.ONLINE) {
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "Updated elo rank: ${userData!!.eloRank} --> ",
+                            color = MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                     Spacer(modifier = Modifier.height(15.dp))
                     Button(
                         onClick = {

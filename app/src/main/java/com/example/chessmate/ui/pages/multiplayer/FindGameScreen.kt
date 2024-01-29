@@ -135,14 +135,14 @@ fun FindGameScreen(
                 }
             }
             RoomStatus.JOINED -> {
-                val painterTwo = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${roomData.playerTwoId}/${roomData.pictureUrlTwo}")
+                val painterTwo = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${if(userData.id == roomData.playerOneId) roomData.playerTwoId else roomData.playerOneId}/${if(userData.id == roomData.playerOneId) roomData.pictureUrlTwo else roomData.pictureUrlOne}")
                 Text(
                     "VS",
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(20.dp))
-                CardProfileSearch(userData = UserData(username = roomData.playerTwoUsername), modifier = modifier, painter = painterTwo)
+                CardProfileSearch(userData = UserData(username = if(userData.id == roomData.playerOneId) roomData.playerTwoUsername else roomData.playerOneUsername), modifier = modifier, painter = painterTwo)
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
                     onClick = {
@@ -178,7 +178,10 @@ fun FindGameScreen(
                     Text(text = "Exit Game", color = MaterialTheme.colorScheme.onErrorContainer)
                 }
             }
-            else -> {}
+            else -> {
+                onlineViewModel.setFullViewPage(ChessMateRoute.ONLINE_GAME)
+                toggleFullView()
+            }
         }
     }
 }
