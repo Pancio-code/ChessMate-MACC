@@ -44,8 +44,8 @@ object FenConverter : Converter{
                     stringFEN = text,
                     gameState = GameState(
                         stringFEN = text,
-                        gameMetaInfo = GameMetaInfo.createWithDefaults()
-                    )
+                        gameMetaInfo = GameMetaInfo.createWithDefaults(),
+                    ),
         )
 
         return ImportResult.ImportedGame(gamePlayState.gameState)
@@ -98,32 +98,26 @@ object FenConverter : Converter{
         return pieceMap
     }
 
-    fun getFenFromSnapshot(gameSnapshotState: GameSnapshotState): String {
+    fun getFenFromSnapshot(gameSnapshotState: GameSnapshotState,gamePlayState: GamePlayState): String {
         val pieces: Map<Position, Piece> = gameSnapshotState.board.pieces
         val toMove: Char = if (gameSnapshotState.toMove == Set.WHITE) 'w' else 'b'
 
-        val whiteCastling = gameSnapshotState.castlingInfo[Set.WHITE].let {
-            "${if (it.canCastleKingSide) "K" else ""}${if (it.canCastleQueenSide) "Q" else ""}"
-        }
-        val blackCastling = gameSnapshotState.castlingInfo[Set.BLACK].let {
-            "${if (it.canCastleKingSide) "k" else ""}${if (it.canCastleQueenSide) "q" else ""}"
-        }
+        var whiteCastling = if (gameSnapshotState.castlingInfo.holders[Set.WHITE]?.canCastleKingSide == true) "K" else ""
+        whiteCastling += if (gameSnapshotState.castlingInfo.holders[Set.WHITE]?.canCastleQueenSide == true) "Q" else ""
+        var blackCastling = if (gameSnapshotState.castlingInfo.holders[Set.BLACK]?.canCastleKingSide == true) "k" else ""
+        blackCastling += if (gameSnapshotState.castlingInfo.holders[Set.BLACK]?.canCastleQueenSide == true) "q" else ""
         val castlingAvailability = if (whiteCastling.isEmpty() && blackCastling.isEmpty()) "-" else "$whiteCastling$blackCastling"
 
-        val enPassantTarget = "-"
-        val halfMoveClock = 0
-        val fullMoveNumber = 1
+        val enPassantTarget : String = "-" //DEFAULT VALUE
+        val halfMoveClock : Int = 0 //WE NOT USE 50 MOVES RULES
+        val fullMoveNumber : Int = gamePlayState.gameState.moves().filter { appliedMove -> appliedMove.piece.set == Set.BLACK }.size + 1
 
         val board = Array(8) { CharArray(8) { ' ' } }
 
-        // Place pieces on the board
         for ((position, piece) in pieces) {
-            val rank = 7 - (position.ordinal / 8) // Convert to 0-based index, with rank 8 at the top
-            val file = position.ordinal % 8
-            board[rank][file] = piece.toFenChar()
+            board[position.rank - 1 ][position.file - 1] = piece.toFenChar()
         }
 
-        // Convert the board to FEN piece placement
         val piecePlacement = board.joinToString("/") { row ->
             row.joinToString("").replace(Regex(" +")) { match -> match.value.length.toString() }
         }

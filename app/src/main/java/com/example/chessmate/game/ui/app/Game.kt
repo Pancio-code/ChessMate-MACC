@@ -62,7 +62,6 @@ fun Game(
     onlineViewModel: OnlineViewModel,
     userData: UserData? = null
 ) {
-    Log.d("FENNNN", FenConverter.getFenFromSnapshot(state.gameState.currentSnapshotState))
     var isFlipped by rememberSaveable { mutableStateOf(false) }
     val gamePlayState = rememberSaveable { mutableStateOf(state) }
     val showChessMateDialog = remember { mutableStateOf(false) }
@@ -84,6 +83,7 @@ fun Game(
 
 
     CompositionLocalProvider(LocalActiveDatasetVisualisation  provides gamePlayState.value.visualisation) {
+        Log.d("FENNNN", FenConverter.getFenFromSnapshot(gamePlayState.value.gameState.currentSnapshotState,gamePlayState.value))
         Column(
             modifier = Modifier
                 .fillMaxSize()

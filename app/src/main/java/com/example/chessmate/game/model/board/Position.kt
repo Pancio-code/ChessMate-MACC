@@ -24,7 +24,7 @@ enum class Position {
 
             val idx = idx(file, rank)
 
-            return values()[idx]
+            return entries[idx]
         }
     }
 }
