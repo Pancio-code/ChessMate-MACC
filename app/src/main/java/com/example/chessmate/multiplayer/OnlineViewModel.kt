@@ -20,6 +20,9 @@ class OnlineViewModel: ViewModel() {
     private val _fullViewPage = MutableStateFlow("")
     val fullViewPage = _fullViewPage.asStateFlow()
 
+    private val _importedFen = MutableStateFlow("")
+    val importedFen = _importedFen.asStateFlow()
+
     fun setFullViewPage(newValue : String) {
         _fullViewPage.update { newValue }
     }
@@ -48,6 +51,14 @@ class OnlineViewModel: ViewModel() {
         if (newValue in 5..13) {
             _depth.update { newValue }
         }
+    }
+
+    fun getImportedFen(): String {
+        return importedFen.value
+    }
+
+    fun setImportedFen(newValue : String) {
+        _importedFen.update {newValue}
     }
 
 }

@@ -68,7 +68,7 @@ object FenConverter : Converter{
     }
 
     fun fenToMap(fen: String): Map<Position, Piece> {
-        val parts = fen.split(" ")
+        val parts = fen.replace('"'.toString(), "").split(" ")
         val rows = parts[0].split("/")
         val pieceMap = mutableMapOf<Position, Piece>()
 

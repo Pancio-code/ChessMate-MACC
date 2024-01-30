@@ -32,10 +32,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import com.example.chessmate.multiplayer.OnlineViewModel
 import com.example.chessmate.multiplayer.ParseChessBoardUIClient
+import com.example.chessmate.ui.navigation.ChessMateRoute
 import com.example.chessmate.ui.pages.profile.LoadingDialog
 import com.example.chessmate.ui.pages.profile.generateRandomString
 import com.example.chessmate.ui.pages.profile.getImageFile
@@ -47,10 +48,13 @@ import java.io.InputStream
 @Composable
 fun ChessboardParser(
     modifier: Modifier = Modifier,
+    onlineViewModel: OnlineViewModel,
+    toggleFullView: () -> Unit = {},
     ) {
     val context: Context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var isUploaded by remember { mutableStateOf(false) }
+    var fen by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var screenshotFile by remember { mutableStateOf(File("","")) }
     val getContent = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) {
@@ -85,9 +89,12 @@ fun ChessboardParser(
                 onClick = {
                     lifecycleOwner.lifecycleScope.launch {
                         isLoading = true
-                        ParseChessBoardUIClient().uploadScreenshot(screenshotFile)
+                        fen = ParseChessBoardUIClient().uploadScreenshot(screenshotFile)
                         joinAll()
                         isLoading = false
+                        onlineViewModel.setImportedFen(fen)
+                        onlineViewModel.setFullViewPage(ChessMateRoute.OFFLINE_GAME)
+                        toggleFullView()
                     }
                 }
             ) {
@@ -101,7 +108,7 @@ fun ChessboardParser(
             }
             Text(
                 modifier = Modifier.padding(bottom = 16.dp),
-                text = "${screenshotFile.name}",
+                text = screenshotFile.name,
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.tertiary
@@ -110,7 +117,7 @@ fun ChessboardParser(
             Button(
                 modifier = Modifier.padding(bottom = 24.dp).fillMaxWidth(fraction = 0.6f)
                     .height(65.dp),
-                onClick = { getContent.launch("image/*") }
+                onClick = {getContent.launch("image/*") }
             ) {
                 Icon(
                     imageVector = Icons.Default.Upload,
@@ -132,13 +139,4 @@ fun ChessboardParser(
             LoadingDialog()
         }
     }
-}
-
-@Preview
-@Composable
-fun ChessboardParserPreview() {
-    ChessboardParser()
-}
-
-fun onClickUploadScreenshot(){
 }

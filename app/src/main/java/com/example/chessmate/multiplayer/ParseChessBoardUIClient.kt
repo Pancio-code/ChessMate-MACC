@@ -12,17 +12,20 @@ import kotlin.coroutines.cancellation.CancellationException
 class ParseChessBoardUIClient {
     private val parseChessBoardAPI : ParseChessBoardAPI = HelperClassParseChessBoard.getIstance()
 
-    suspend fun uploadScreenshot(newAvatarFile: File?): Boolean {
-
+    suspend fun uploadScreenshot(newAvatarFile: File?): String {
+        var fen = ""
         try {
             val fileRequestBody = newAvatarFile!!.asRequestBody("image/*".toMediaTypeOrNull())
             val filePart = MultipartBody.Part.createFormData("file", newAvatarFile.name, fileRequestBody)
             val ret = parseChessBoardAPI.parseChessBoard(token= BuildConfig.TOKEN, image= filePart)
+            if (ret.isSuccessful){
+                fen = "${ret.body()!!.get("msg")}"
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             if (e is CancellationException) throw e
         }
-        return true
+        return fen
     }
 
 }

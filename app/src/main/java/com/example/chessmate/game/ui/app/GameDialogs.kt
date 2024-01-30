@@ -133,6 +133,7 @@ fun ManagedGameDialog(
             },
             onExitGame = {
                 onlineViewModel.setFullViewPage("")
+                onlineViewModel.setImportedFen("")
                 toggleFullView()
             }
         )

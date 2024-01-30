@@ -132,11 +132,21 @@ fun ChessMateApp(
             userData = userData
         )
         ChessMateRoute.OFFLINE_GAME -> Surface(color = MaterialTheme.colorScheme.background) {
-            Game(
-                gameType = GameType.TWO_OFFLINE,
-                onlineViewModel = onlineViewModel!!,
-                toggleFullView = toggleFullView
-            )
+            val importedFen = onlineViewModel!!.getImportedFen()
+            if (importedFen == "") {
+                Game(
+                    gameType = GameType.TWO_OFFLINE,
+                    onlineViewModel = onlineViewModel!!,
+                    toggleFullView = toggleFullView,
+                )
+            } else {
+                Game(
+                    gameType = GameType.TWO_OFFLINE,
+                    onlineViewModel = onlineViewModel!!,
+                    toggleFullView = toggleFullView,
+                    importGameFEN = onlineViewModel!!.getImportedFen()
+                )
+            }
         }
         ChessMateRoute.SELECT_COLOR -> Surface(color = MaterialTheme.colorScheme.background) {
             SelectOptionsScreen(
@@ -363,7 +373,10 @@ private fun ChessMateNavHost(
                 )
             }
             composable(ChessMateRoute.SCAN) {
-                ChessboardParser()
+                ChessboardParser(
+                    onlineViewModel = onlineViewModel!!,
+                    toggleFullView = toggleFullView
+                )
             }
             composable(ChessMateRoute.PROFILE) {
                 ProfileScreen(
@@ -425,7 +438,10 @@ private fun ChessMateNavHost(
                 )
             }
             composable(ChessMateRoute.SCAN) {
-                ChessboardParser()
+                ChessboardParser(
+                    onlineViewModel = onlineViewModel!!,
+                    toggleFullView = toggleFullView
+                )
             }
             composable(ChessMateRoute.PROFILE) {
                 ProfileScreenGuest(
