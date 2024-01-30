@@ -232,6 +232,8 @@ private fun GameControls(
     onFlipBoard: () -> Unit,
     onGameClicked: () -> Unit,
 ) {
+    var textSpoken by remember { mutableStateOf("") }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
@@ -287,6 +289,22 @@ private fun GameControls(
                 imageVector = Icons.Default.Menu,
                 tint = MaterialTheme.colorScheme.onPrimary,
                 contentDescription = stringResource(R.string.action_game_menu)
+            )
+        }
+    }
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        ButtonSpeechToText(setSpokenText = {textSpoken = it})
+        if (textSpoken != "") {
+            Text(
+                modifier = Modifier.padding(top = 8.dp),
+                text = textSpoken,
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.secondary
             )
         }
     }

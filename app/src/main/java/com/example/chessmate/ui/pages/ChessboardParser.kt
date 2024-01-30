@@ -63,6 +63,7 @@ fun ChessboardParser(
         isUploaded = true
     }
 
+
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -83,7 +84,9 @@ fun ChessboardParser(
         )
         if (isUploaded && screenshotFile.path != ""){
             Button(
-                modifier = Modifier.padding(bottom = 8.dp).fillMaxWidth(fraction = 0.6f)
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .fillMaxWidth(fraction = 0.6f)
                     .height(65.dp),
                 colors = ButtonDefaults.buttonColors(Color(android.graphics.Color.parseColor("#008b00"))),
                 onClick = {
@@ -115,7 +118,9 @@ fun ChessboardParser(
             )
         } else {
             Button(
-                modifier = Modifier.padding(bottom = 24.dp).fillMaxWidth(fraction = 0.6f)
+                modifier = Modifier
+                    .padding(bottom = 24.dp)
+                    .fillMaxWidth(fraction = 0.6f)
                     .height(65.dp),
                 onClick = {getContent.launch("image/*") }
             ) {
