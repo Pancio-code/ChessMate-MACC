@@ -81,7 +81,7 @@ class VoiceToTextParser(
         results
             ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
             ?.getOrNull(0)?.let{ result ->
-                _state.update { it.copy( spokenText = result) }
+                _state.update { it.copy( spokenText = result, canDoMove = true) }
             }
     }
 
@@ -93,5 +93,6 @@ class VoiceToTextParser(
 data class VoiceToTextParserState(
     val spokenText: String = "",
     val isSpeaking: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val canDoMove: Boolean = false
 )

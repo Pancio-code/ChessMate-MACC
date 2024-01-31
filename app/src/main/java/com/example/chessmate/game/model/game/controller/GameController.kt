@@ -77,8 +77,8 @@ class GameController(
         square(this).hasPiece(gameSnapshotState.toMove)
 
     fun onClick(position: Position) {
-        if (gameSnapshotState.resolution != Resolution.IN_PROGRESS) return
-        if (gameType != GameType.TWO_OFFLINE && startColor != gameSnapshotState.toMove) return
+        if (gameSnapshotState.resolution != Resolution.IN_PROGRESS) { return}
+        if (gameType != GameType.TWO_OFFLINE && startColor != gameSnapshotState.toMove)  { return}
         if (position.hasOwnPiece()) {
             toggleSelectPosition(position)
         } else if (canMoveTo(position)) {
@@ -257,5 +257,31 @@ class GameController(
             Reducer(gamePlayState, Action.GoToMove(index))
         )
     }
+
+    fun selectBySpeech(position: Position, onFinish: (Boolean) -> Unit, onError: () -> Unit){
+        if (position.hasOwnPiece()) {
+            toggleSelectPosition(position)
+            if (gamePlayState.uiState.possibleMoves().isEmpty()){
+                toggleSelectPosition(position)
+                onError()
+                return
+            }
+            onFinish(true)
+        } else {
+            onError()
+        }
+    }
+
+    fun moveBySpeech(position: Position, onFinish: (Boolean) -> Unit, onError: () -> Unit){
+        if (canMoveTo(position)) {
+            val selectedPosition = gamePlayState.uiState.selectedPosition
+            requireNotNull(selectedPosition)
+            applyMove(selectedPosition, position)
+            onFinish(false)
+        } else {
+            onError()
+        }
+    }
+
 }
 

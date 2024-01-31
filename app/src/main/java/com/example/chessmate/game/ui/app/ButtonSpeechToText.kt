@@ -1,9 +1,9 @@
 package com.example.chessmate.game.ui.app
 
 import android.Manifest
+import android.annotation.SuppressLint
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.Stop
@@ -19,10 +19,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.example.chessmate.ui.utils.VoiceToTextParser
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
-fun ButtonSpeechToText(setSpokenText: (String) -> Unit){
+fun ButtonSpeechToText(setSpokenText: (String) -> Unit, setCanMove: (Boolean) -> Unit){
     val voiceToTextParser = VoiceToTextParser(LocalContext.current)
-
     val state by voiceToTextParser.state.collectAsState()
     var canRecord by remember { mutableStateOf(false) }
     val recordAudioLauncher = rememberLauncherForActivityResult(
@@ -42,15 +42,13 @@ fun ButtonSpeechToText(setSpokenText: (String) -> Unit){
             }
         }
     ) {
-        AnimatedContent(targetState = state.isSpeaking, label = "") { isSpeaking ->
-            if (isSpeaking){
-                Icon(imageVector = Icons.Rounded.Stop, contentDescription = null)
-            } else {
-                Icon(imageVector = Icons.Rounded.Mic, contentDescription = null)
-                if (state.spokenText.isNotEmpty()){
-                    setSpokenText(state.spokenText)
-                }
-            }
+        if(state.isSpeaking){
+            Icon(imageVector = Icons.Rounded.Stop, contentDescription = null)
+        } else {
+            Icon(imageVector = Icons.Rounded.Mic, contentDescription = null)
+            if(state.spokenText.isNotEmpty())
+                setSpokenText(state.spokenText)
+                setCanMove(state.canDoMove)
         }
     }
 }

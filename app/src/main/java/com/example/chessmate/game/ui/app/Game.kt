@@ -1,6 +1,5 @@
 package com.example.chessmate.game.ui.app
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,19 +11,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Loop
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,15 +37,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.example.chessmate.R
-import com.example.chessmate.game.model.board.Position
 import com.example.chessmate.game.model.data_chessmate.LocalActiveDatasetVisualisation
 import com.example.chessmate.game.model.game.controller.GameController
 import com.example.chessmate.game.model.game.preset.Preset
+import com.example.chessmate.game.model.game.speechParser.SpeechParser
 import com.example.chessmate.game.model.game.state.GamePlayState
 import com.example.chessmate.game.model.game.state.GameState
 import com.example.chessmate.game.model.piece.Set
@@ -53,7 +59,6 @@ import com.example.chessmate.multiplayer.GameType
 import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
 import com.example.chessmate.sign_in.UserData
-import java.util.Locale
 
 @Composable
 fun Game(
@@ -142,50 +147,7 @@ fun Game(
             )
 
             if (gamePlayState.value.gameState.gameMetaInfo.result != null && gamePlayState.value.gameState.gameMetaInfo.termination != null) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = gamePlayState.value.gameState.gameMetaInfo.result!!,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = gamePlayState.value.gameState.gameMetaInfo.termination!!,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center
-                    )
-                    if(gameType == GameType.ONLINE) {
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = "Updated elo rank: ${userData!!.eloRank} --> ",
-                            color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.bodyLarge,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(15.dp))
-                    Button(
-                        onClick = {
-                            onlineViewModel.setFullViewPage("")
-                            toggleFullView()
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ChevronLeft,
-                            modifier = Modifier.size(8.dp),
-                            contentDescription = "Left icon"
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Back to Home", style = MaterialTheme.typography.bodySmall)
-                    }
-                }
+                OnFinishedGameDialog(gamePlayState = gamePlayState, gameType = gameType, userData = userData, onlineViewModel = onlineViewModel, toggleFullView = toggleFullView)
             }
         }
 
@@ -238,12 +200,14 @@ private fun GameControls(
     gameController: GameController
 ) {
     var textSpoken by remember { mutableStateOf("") }
+    var canMove by remember { mutableStateOf(false)}
+    var alreadySelected by remember { mutableStateOf(false) }
+    var showErrorDialog by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
     ) {
-
         Button(
             onClick = onStepBack,
             enabled = gamePlayState.gameState.hasPrevIndex && gamePlayState.gameState.gameMetaInfo.result == null
@@ -302,10 +266,10 @@ private fun GameControls(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        ButtonSpeechToText(setSpokenText = {textSpoken = it})
+        ButtonSpeechToText(setSpokenText = {textSpoken = it}, setCanMove = {canMove = it})
         if (textSpoken != "") {
-            Log.d("SpeechToText", textSpoken)
-            val position = parseSpeechToMove(textSpoken)
+
+            val position = SpeechParser.parseSpeechToMove(textSpoken)
             Text(
                 modifier = Modifier.padding(top = 8.dp),
                 text = position?.toString() ?: "Retry",
@@ -313,72 +277,126 @@ private fun GameControls(
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.secondary
             )
-            //if (position != null){
-                //gameController.onClick(position)
-            //}
+            if (canMove && position != null) {
+                canMove = false
+                if (!alreadySelected) {
+                    gameController.selectBySpeech(position = position, onFinish = { alreadySelected = it }, onError = {showErrorDialog = true})
+                } else {
+                    gameController.moveBySpeech(position = position, onFinish = { alreadySelected = it }, onError = {showErrorDialog = true})
+                }
+            }
+        }
+    }
+    if(showErrorDialog){
+        OnErrorDialog { showErrorDialog = false }
+    }
+}
+
+
+@Composable
+fun OnErrorDialog(
+    onDismiss: () -> Unit,
+) {
+    Dialog(onDismissRequest = { onDismiss() }){
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Delete",
+                    tint = Color.LightGray,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+                Text(
+                    text = "Coordinates not valid. Retry.",
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    TextButton(
+                        onClick = { onDismiss() },
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                    ) {
+                        Text("Close")
+                    }
+                }
+            }
         }
     }
 }
 
-private fun parseSpeechToMove(textSpoken: String): Position? {
-
-    val textSpokenParsed = parseString(textSpoken)
-    if (textSpokenParsed.isNullOrEmpty()){
-        return null
-    }
-
-    val position: Position? = try {
-        Position.valueOf(textSpokenParsed)
-    } catch (e: IllegalArgumentException) {
-        return null
-    }
-
-    return position
-}
-
-private fun parseString(textSpoken: String): String? {
-    val row: String
-    val column: String
-    if (textSpoken.length > 2 && textSpoken.contains(' ')){
-        if(textSpoken.split(" ")[0].length != 1) {
-            return null
-        } else {
-            row = textSpoken.split(" ")[0]
-            column = convertNumericWordsToDigits(textSpoken.split(" ")[1])
+@Composable
+fun OnFinishedGameDialog(
+    gamePlayState: MutableState<GamePlayState>,
+    gameType : GameType,
+    userData: UserData?,
+    onlineViewModel: OnlineViewModel,
+    toggleFullView: () -> Unit
+) {
+    Dialog(onDismissRequest = { null }) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = gamePlayState.value.gameState.gameMetaInfo.result!!,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = gamePlayState.value.gameState.gameMetaInfo.termination!!,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center
+                )
+                if(gameType == GameType.ONLINE) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Updated elo rank: ${userData?.eloRank} --> ",
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Spacer(modifier = Modifier.height(15.dp))
+                Button(
+                    onClick = {
+                        onlineViewModel.setFullViewPage("")
+                        toggleFullView()
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ChevronLeft,
+                        modifier = Modifier.size(8.dp),
+                        contentDescription = "Left icon"
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Back to Home", style = MaterialTheme.typography.bodySmall)
+                }
+            }
         }
-    } else if (textSpoken.length > 2 && !textSpoken.contains(' ')){
-        row = textSpoken[0].toString()
-        column = convertNumericWordsToDigits(textSpoken.substring(1))
-    } else if (textSpoken.length == 2) {
-        row = textSpoken[0].toString()
-        column = textSpoken[1].toString()
-    } else {
-        return null
-    }
-    return "${row}${column}".lowercase()
-}
-private fun convertNumericWordsToDigits(textSpoken: String): String {
-
-    val wordToDigitMap = mapOf(
-        "one" to "1",
-        "two" to "2",
-        "three" to "3",
-        "four" to "4",
-        "five" to "5",
-        "six" to "6",
-        "seven" to "7",
-        "eight" to "8",
-        "uno" to "1",
-        "due" to "2",
-        "tre" to "3",
-        "quattro" to "4",
-        "cinque" to "5",
-        "sei" to "6",
-        "sette" to "7",
-        "otto" to "8",
-    )
-
-    return textSpoken.split(" ").joinToString(" ") { word ->
-        wordToDigitMap[word.lowercase(Locale.getDefault())] ?: word
     }
 }

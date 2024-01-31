@@ -44,13 +44,16 @@ object Reducer {
                 )
             }
             is Action.ToggleSelectPosition -> {
+                Log.d("Ciao","")
                 if (gamePlayState.uiState.selectedPosition == action.position) {
+                    Log.d("Ciao2","")
                     gamePlayState.copy(
                         uiState = gamePlayState.uiState.copy(
                             selectedPosition = null
                         )
                     )
                 } else {
+                    Log.d("Ciao3","")
                     gamePlayState.copy(
                         uiState = gamePlayState.uiState.copy(
                             selectedPosition = action.position
