@@ -166,14 +166,27 @@ fun ChessMateApp(
             )
         }
         ChessMateRoute.AI_GAME -> Surface(color = MaterialTheme.colorScheme.background) {
-            Game(
-                gameType = GameType.ONE_OFFLINE,
-                onlineViewModel = onlineViewModel!!,
-                toggleFullView = toggleFullView,
-                startColor = onlineViewModel.getStartColor(),
-                depth = onlineViewModel.getDepth(),
-                userData = userData
-            )
+            val importedFen = onlineViewModel!!.getImportedFen()
+            if (importedFen == "") {
+                Game(
+                    gameType = GameType.ONE_OFFLINE,
+                    onlineViewModel = onlineViewModel!!,
+                    toggleFullView = toggleFullView,
+                    startColor = onlineViewModel.getStartColor(),
+                    depth = onlineViewModel.getDepth(),
+                    userData = userData
+                )
+            } else {
+                Game(
+                    gameType = GameType.ONE_OFFLINE,
+                    onlineViewModel = onlineViewModel!!,
+                    toggleFullView = toggleFullView,
+                    startColor = onlineViewModel.getStartColor(),
+                    depth = onlineViewModel.getDepth(),
+                    userData = userData,
+                    importGameFEN = onlineViewModel!!.getImportedFen()
+                )
+            }
         }
         else -> ChessMateNavigationWrapper(
             navigationType = navigationType,
