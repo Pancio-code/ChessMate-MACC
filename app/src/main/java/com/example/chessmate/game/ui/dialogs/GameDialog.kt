@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.chessmate.R
+import com.example.chessmate.multiplayer.GameType
 
 @Composable
 fun GameDialog(
@@ -12,18 +13,24 @@ fun GameDialog(
     onExitGame: () -> Unit,
     onImportPgnGame: () -> Unit,
     onImportFenGame: () -> Unit,
-    onExportGame: () -> Unit,
+    onExportGamePgn: () -> Unit,
+    onExportGameFen: () -> Unit,
+    gameType: GameType
 ) {
-    ClickableListItemsDialog(
-        onDismiss = onDismiss,
-        items = listOf(
+    val offlineContents = if (gameType != GameType.ONLINE) listOf(
             stringResource(R.string.game_new) to onNewGame,
             stringResource(R.string.game_import_pgn) to onImportPgnGame,
-            stringResource(R.string.game_import_fen) to onImportFenGame,
-            stringResource(R.string.game_export) to onExportGame,
-            stringResource(R.string.game_exit) to onExitGame,
+            stringResource(R.string.game_import_fen) to onImportFenGame
+        ) else listOf()
+    ClickableListItemsDialog(
+        onDismiss = onDismiss,
+        items =
+            offlineContents +
+            listOf(
+                stringResource(R.string.game_export_pgn) to onExportGamePgn,
+                stringResource(R.string.game_export_fen) to onExportGameFen,
+                stringResource(R.string.game_exit) to onExitGame),
         )
-    )
 }
 
 @Preview
@@ -34,7 +41,9 @@ private fun GameDialogContent() {
         onNewGame = {},
         onImportPgnGame = {},
         onImportFenGame = {},
-        onExportGame = {},
-        onExitGame = {}
+        onExportGamePgn = {},
+        onExportGameFen = {},
+        onExitGame = {},
+        gameType = GameType.TWO_OFFLINE
     )
 }

@@ -1,7 +1,5 @@
 package com.example.chessmate.game.ui.dialogs
 
-import com.example.chessmate.game.model.piece.Queen
-import com.example.chessmate.game.model.piece.Rook
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -16,6 +14,8 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.chessmate.game.model.piece.Bishop
 import com.example.chessmate.game.model.piece.Knight
 import com.example.chessmate.game.model.piece.Piece
+import com.example.chessmate.game.model.piece.Queen
+import com.example.chessmate.game.model.piece.Rook
 import com.example.chessmate.game.model.piece.Set
 import com.example.chessmate.game.model.piece.Set.WHITE
 import com.example.chessmate.game.ui.chess.pieces.Piece

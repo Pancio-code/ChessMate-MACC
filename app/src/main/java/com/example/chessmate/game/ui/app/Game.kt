@@ -138,7 +138,8 @@ fun Game(
                 onChessMateClicked = { showChessMateDialog.value = true },
                 onFlipBoard = { isFlipped = !isFlipped },
                 onGameClicked = { showGameDialog.value = true },
-                gameController = gameController
+                gameController = gameController,
+                gameType = gameType
             )
 
             if (gamePlayState.value.gameState.gameMetaInfo.result != null && gamePlayState.value.gameState.gameMetaInfo.termination != null) {
@@ -199,7 +200,9 @@ fun Game(
             pngToImport = pngToImport,
             fenToImport = fenToImport,
             onlineViewModel = onlineViewModel,
-            toggleFullView = toggleFullView
+            toggleFullView = toggleFullView,
+            gameType = gameType,
+            onlineUIClient = onlineUIClient
         )
 
         ManagedImport(
@@ -235,7 +238,8 @@ private fun GameControls(
     onChessMateClicked: () -> Unit,
     onFlipBoard: () -> Unit,
     onGameClicked: () -> Unit,
-    gameController: GameController
+    gameController: GameController,
+    gameType: GameType
 ) {
     var textSpoken by remember { mutableStateOf("") }
 
@@ -244,28 +248,30 @@ private fun GameControls(
         horizontalArrangement = Arrangement.Center
     ) {
 
-        Button(
-            onClick = onStepBack,
-            enabled = gamePlayState.gameState.hasPrevIndex && gamePlayState.gameState.gameMetaInfo.result == null
-        ) {
-            Icon(
-                imageVector = Icons.Default.ChevronLeft,
-                tint = MaterialTheme.colorScheme.onPrimary,
-                contentDescription = stringResource(R.string.action_previous_move)
-            )
+        if (gameType == GameType.TWO_OFFLINE) {
+            Button(
+                onClick = onStepBack,
+                enabled = gamePlayState.gameState.hasPrevIndex && gamePlayState.gameState.gameMetaInfo.result == null
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ChevronLeft,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    contentDescription = stringResource(R.string.action_previous_move)
+                )
+            }
+            Spacer(Modifier.size(4.dp))
+            Button(
+                onClick = onStepForward,
+                enabled = gamePlayState.gameState.hasNextIndex && gamePlayState.gameState.gameMetaInfo.result == null
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    contentDescription = stringResource(R.string.action_next_move)
+                )
+            }
+            Spacer(Modifier.size(4.dp))
         }
-        Spacer(Modifier.size(4.dp))
-        Button(
-            onClick = onStepForward,
-            enabled = gamePlayState.gameState.hasNextIndex && gamePlayState.gameState.gameMetaInfo.result == null
-        ) {
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                tint = MaterialTheme.colorScheme.onPrimary,
-                contentDescription = stringResource(R.string.action_next_move)
-            )
-        }
-        Spacer(Modifier.size(4.dp))
         Button(
             onClick = onChessMateClicked,
             enabled = gamePlayState.gameState.gameMetaInfo.result == null

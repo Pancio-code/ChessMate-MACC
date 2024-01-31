@@ -8,7 +8,7 @@ class RankingManager(eloRanking: Float, matchesPlayed : Int) {
     private fun getDevelopmentCoefficient(ranking: Float, matches : Int) :Int {
         return when{
             matches <= 30 -> 40
-            matches >= 30 && ranking <= 2400f -> 20
+            ranking <= 2400f -> 20
             else -> 10
         }
     }
@@ -20,12 +20,10 @@ class RankingManager(eloRanking: Float, matchesPlayed : Int) {
         val Pb : Float = probability(Ra, Rb)
         val Pa : Float = probability(Rb, Ra)
 
-        //Player One wins
-        if (d) {
-            return Pair(Ra + k * (1 - Pa), Rb + k * (0 - Pb))
-        }
-        else {
-            return Pair(Ra + k * (0 - Pa), Rb + k * (1 - Pb))
+        return if (d) {
+            Pair(Ra + k * (1 - Pa), Rb + k * (0 - Pb))
+        } else {
+            Pair(Ra + k * (0 - Pa), Rb + k * (1 - Pb))
         }
     }
 }

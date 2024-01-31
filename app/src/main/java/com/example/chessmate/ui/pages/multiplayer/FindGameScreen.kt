@@ -1,5 +1,6 @@
 package com.example.chessmate.ui.pages.multiplayer
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -81,6 +82,7 @@ fun FindGameScreen(
             CardProfileSearch(userData = userData,modifier=modifier, painter = painter)
         }
         Spacer(modifier = Modifier.height(20.dp))
+        Log.d("ROOM", roomData.toString())
         when(roomData.gameState) {
             RoomStatus.WAITING -> {
                 Button(
@@ -97,6 +99,7 @@ fun FindGameScreen(
                 Button(
                     onClick = {
                         onlineViewModel.setFullViewPage("")
+                        onlineViewModel.setRoomData(RoomData())
                         toggleFullView()
                     },
                     colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary)) {
@@ -124,6 +127,7 @@ fun FindGameScreen(
                         onlineUIClient.deleteRoomData(roomData)
                         onlineViewModel.setRoomData(RoomData())
                         isFindingGame = false
+                        onlineUIClient.stopListeningToRoomData()
                     }) {
                     Icon(
                         imageVector = Icons.Default.StopCircle,
@@ -166,21 +170,27 @@ fun FindGameScreen(
                         onlineUIClient.deleteRoomData(roomData)
                         onlineViewModel.setRoomData(RoomData())
                         isFindingGame = false
+                        onlineUIClient.stopListeningToRoomData()
                     },
                     colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.errorContainer)) {
                     Icon(
                         imageVector = Icons.Default.ChevronLeft,
                         modifier = Modifier.size(16.dp),
-                        contentDescription = "Enter icon",
+                        contentDescription = "Exit icon",
                         tint = MaterialTheme.colorScheme.onErrorContainer
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(text = "Exit Game", color = MaterialTheme.colorScheme.onErrorContainer)
                 }
             }
-            else -> {
+            RoomStatus.INPROGRESS -> {
                 onlineViewModel.setFullViewPage(ChessMateRoute.ONLINE_GAME)
                 toggleFullView()
+            }
+            RoomStatus.FINISHED -> {
+                onlineUIClient.deleteRoomData(roomData)
+                onlineViewModel.setRoomData(RoomData())
+                isFindingGame = false
             }
         }
     }

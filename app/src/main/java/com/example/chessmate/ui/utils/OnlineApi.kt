@@ -16,7 +16,7 @@ import retrofit2.http.Path
 
 interface OnlineAPI {
     @GET("/api/online/{id}")
-    suspend fun get(@Header("Authorization") token: String, @Path("id") userId: String): retrofit2.Response<RoomData>
+    suspend fun get(@Header("Authorization") token: String, @Path("id") id: String): retrofit2.Response<RoomData>
 
     @POST("/api/v1/online/{id}")
     suspend fun create(@Header("Authorization") token: String, @Path("id") id: String, @Body body: String): retrofit2.Response<JsonObject>

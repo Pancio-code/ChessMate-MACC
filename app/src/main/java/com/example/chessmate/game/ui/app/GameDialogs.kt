@@ -7,15 +7,20 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.example.chessmate.game.model.game.controller.GameController
+import com.example.chessmate.game.model.game.converter.FenConverter
 import com.example.chessmate.game.model.game.converter.PgnConverter
 import com.example.chessmate.game.model.game.state.GamePlayState
 import com.example.chessmate.game.model.game.state.GameState
+import com.example.chessmate.game.model.piece.Set
 import com.example.chessmate.game.ui.dialogs.GameDialog
 import com.example.chessmate.game.ui.dialogs.ImportFenDialog
 import com.example.chessmate.game.ui.dialogs.ImportPgnDialog
 import com.example.chessmate.game.ui.dialogs.PickActiveVisualisationDialog
 import com.example.chessmate.game.ui.dialogs.PromotionDialog
+import com.example.chessmate.multiplayer.GameType
+import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
+import com.example.chessmate.multiplayer.RoomData
 
 @Composable
 fun GameDialogs(
@@ -28,7 +33,9 @@ fun GameDialogs(
     pngToImport: MutableState<String?>,
     fenToImport: MutableState<String?>,
     toggleFullView: () -> Unit = {},
-    onlineViewModel: OnlineViewModel
+    onlineViewModel: OnlineViewModel,
+    gameType: GameType,
+    onlineUIClient: OnlineUIClient?= null
 ) {
     ManagedPromotionDialog(
         showPromotionDialog = gamePlayState.value.uiState.showPromotionDialog,
@@ -43,10 +50,13 @@ fun GameDialogs(
         showGameDialog = showGameDialog,
         showImportPngDialog = showImportPgnDialog,
         showImportFenDialog = showImportFenDialog,
+        gamePlayState = gamePlayState.value,
         gameState = gamePlayState.value.gameState,
         gameController = gameController,
         onlineViewModel = onlineViewModel,
-        toggleFullView = toggleFullView
+        toggleFullView = toggleFullView,
+        gameType = gameType,
+        onlineUIClient = onlineUIClient
     )
 
     ManagedImportPgnDialog(
@@ -64,8 +74,10 @@ fun GameDialogs(
 fun ManagedPromotionDialog(
     showPromotionDialog: Boolean,
     gameController: GameController,
+    startColor: Set? = null,
+    gameType : GameType? = null,
 ) {
-    if (showPromotionDialog) {
+    if (showPromotionDialog && (gameType == GameType.TWO_OFFLINE || startColor == gameController.toMove)) {
         PromotionDialog(gameController.toMove) {
             gameController.onPromotionPieceSelected(it)
         }
@@ -96,9 +108,12 @@ fun ManagedGameDialog(
     showImportPngDialog: MutableState<Boolean>,
     showImportFenDialog: MutableState<Boolean>,
     gameState: GameState,
+    gamePlayState : GamePlayState,
     gameController: GameController,
     toggleFullView: () -> Unit = {},
-    onlineViewModel: OnlineViewModel
+    onlineViewModel: OnlineViewModel,
+    gameType: GameType,
+    onlineUIClient: OnlineUIClient? = null
 ) {
     if (showGameDialog.value) {
         val context = LocalContext.current
@@ -119,7 +134,7 @@ fun ManagedGameDialog(
                 showGameDialog.value = false
                 showImportFenDialog.value = true
             },
-            onExportGame = {
+            onExportGamePgn = {
                 showGameDialog.value = false
                 val pgn = PgnConverter.export(gameState)
                 val sendIntent: Intent = Intent().apply {
@@ -131,11 +146,30 @@ fun ManagedGameDialog(
                 val shareIntent = Intent.createChooser(sendIntent, null)
                 ContextCompat.startActivity(context, shareIntent, Bundle())
             },
+            onExportGameFen = {
+                showGameDialog.value = false
+                val fen = FenConverter.getFenFromSnapshot(gameState.currentSnapshotState,gamePlayState)
+                val sendIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, fen)
+                    type = "text/plain"
+                }
+
+                val shareIntent = Intent.createChooser(sendIntent, null)
+                ContextCompat.startActivity(context, shareIntent, Bundle())
+            },
             onExitGame = {
-                onlineViewModel.setFullViewPage("")
-                onlineViewModel.setImportedFen("")
-                toggleFullView()
-            }
+                if( gameType == GameType.ONLINE) {
+                    onlineUIClient?.deleteRoomData(onlineViewModel.getRoomData())
+                    onlineUIClient?.stopListeningToRoomData()
+                } else {
+                    onlineViewModel.setFullViewPage("")
+                    onlineViewModel.setRoomData(RoomData())
+                    onlineViewModel.setImportedFen("")
+                    toggleFullView()
+                }
+            },
+            gameType = gameType
         )
     }
 }
