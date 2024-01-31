@@ -2,15 +2,22 @@ package com.example.chessmate.game.ui.app
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import com.example.chessmate.game.model.game.Resolution
 import com.example.chessmate.game.model.game.controller.GameController
 import com.example.chessmate.game.model.game.converter.FenConverter
 import com.example.chessmate.game.model.game.converter.PgnConverter
 import com.example.chessmate.game.model.game.state.GamePlayState
 import com.example.chessmate.game.model.game.state.GameState
+import com.example.chessmate.game.model.piece.Bishop
+import com.example.chessmate.game.model.piece.Knight
+import com.example.chessmate.game.model.piece.Piece
+import com.example.chessmate.game.model.piece.Queen
+import com.example.chessmate.game.model.piece.Rook
 import com.example.chessmate.game.model.piece.Set
 import com.example.chessmate.game.ui.dialogs.GameDialog
 import com.example.chessmate.game.ui.dialogs.ImportFenDialog
@@ -21,6 +28,8 @@ import com.example.chessmate.multiplayer.GameType
 import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
 import com.example.chessmate.multiplayer.RoomData
+import com.example.chessmate.multiplayer.RoomStatus
+import java.util.Locale
 
 @Composable
 fun GameDialogs(
@@ -35,11 +44,15 @@ fun GameDialogs(
     toggleFullView: () -> Unit = {},
     onlineViewModel: OnlineViewModel,
     gameType: GameType,
+    startColor : Set? = null,
     onlineUIClient: OnlineUIClient?= null
 ) {
     ManagedPromotionDialog(
         showPromotionDialog = gamePlayState.value.uiState.showPromotionDialog,
-        gameController = gameController
+        gameController = gameController,
+        gameType = gameType,
+        gameState = gamePlayState.value.gameState,
+        startColor = startColor
     )
     ManagedChessMateDialog(
         showChessMateDialog = showChessMateDialog,
@@ -76,11 +89,42 @@ fun ManagedPromotionDialog(
     gameController: GameController,
     startColor: Set? = null,
     gameType : GameType? = null,
+    gameState : GameState,
+    roomData : RoomData? = null,
+    onlineUIClient: OnlineUIClient? = null
 ) {
-    if (showPromotionDialog && (gameType == GameType.TWO_OFFLINE || startColor == gameController.toMove)) {
-        PromotionDialog(gameController.toMove) {
-            gameController.onPromotionPieceSelected(it)
+    val set = gameController.toMove
+    if (showPromotionDialog) {
+        if (gameType == GameType.TWO_OFFLINE || startColor == set) {
+            PromotionDialog(set) { piece ->
+                if (gameType == GameType.ONLINE) {
+                   roomData?.let {
+                        onlineUIClient!!.updateRoomData(
+                            model = it.copy(
+                                gameState = if (gameState.resolution != Resolution.IN_PROGRESS) RoomStatus.FINISHED else RoomStatus.INPROGRESS,
+                                currentTurn =  if (gameState.toMove == Set.WHITE) "w" else "b",
+                                lastMove = piece.textSymbol.lowercase(Locale.ROOT)
+                            )
+                        )
+                    }
+                }
+                gameController.onPromotionPieceSelected(piece)
+            }
+        } else if (gameType == GameType.ONE_OFFLINE) {
+            val piece: Piece = convertToPiece(set, gameController)
+            Log.d("TAG",piece.toString())
+            gameController.onPromotionPieceSelected(piece)
         }
+    }
+}
+
+fun convertToPiece(set : Set,gameController : GameController) : Piece{
+    return when(gameController.getPcPromotionPiece()) {
+        "q" -> Queen(set)
+        "r" -> Rook(set)
+        "b" -> Bishop(set)
+        "n" -> Knight(set)
+        else -> throw IllegalStateException()
     }
 }
 

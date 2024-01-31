@@ -19,6 +19,7 @@ import com.example.chessmate.game.model.move.targetPositions
 import com.example.chessmate.game.model.piece.Piece
 import com.example.chessmate.game.model.piece.Queen
 import com.example.chessmate.game.model.piece.Set
+import com.example.chessmate.game.ui.app.convertToPiece
 import com.example.chessmate.multiplayer.GameType
 import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.RoomData
@@ -42,6 +43,7 @@ class GameController(
 ) {
     private val stockFishService : StockFishAPI = HelperClassStockFish.getIstance()
     private val mode : String = "bestmove"
+    private var promotionPiece : String = "q"
 
     init {
         preset?.let { applyPreset(it) }
@@ -101,18 +103,25 @@ class GameController(
         }
     }
 
-    fun onResponse(lastMove :String) {
-        val moves = lastMove.split(" ")
-        val toPosition = enumValueOf<Position>(moves[1])
-        val fromPosition = enumValueOf<Position>(moves[0])
+    fun onResponse(lastMove : String) {
+        if(lastMove.length > 1) {
+            val moves = lastMove.split(" ")
+            val toPosition = enumValueOf<Position>(moves[1])
+            val fromPosition = enumValueOf<Position>(moves[0])
 
-        toggleSelectPosition(fromPosition)
-        if (canMoveTo(toPosition)) {
-            val selectedPosition = gamePlayState.uiState.selectedPosition
-            requireNotNull(selectedPosition)
-            applyMove(selectedPosition, toPosition)
+            toggleSelectPosition(fromPosition)
+            if (canMoveTo(toPosition)) {
+                val selectedPosition = gamePlayState.uiState.selectedPosition
+                requireNotNull(selectedPosition)
+                applyMove(selectedPosition, toPosition)
+            }
+        } else {
+            val piece: Piece = convertToPiece(gameSnapshotState.toMove, this)
+            onPromotionPieceSelected(piece)
         }
     }
+
+
 
      fun onPcTurn(lifecycleOwner: LifecycleOwner, depth: Int = 5) {
         lifecycleOwner.lifecycleScope.launch {
@@ -124,10 +133,15 @@ class GameController(
         try {
             val stockFishResponse : Response<StockFishData> = stockFishService.get(fen = FenConverter.getFenFromSnapshot(gameSnapshotState,gamePlayState), depth = depth, mode= mode)
             val responseBody : StockFishData = stockFishResponse.body() ?: throw Exception("No reply from API")
-            val bestMove = responseBody.data?.substringAfter("bestmove ")?.substringBefore(" ponder") ?: throw Exception("Invalid move format")
+            val bestMove = responseBody.data?.substringAfter("bestmove ")?.substringBefore("ponder") ?: throw Exception("Invalid move format")
 
             val fromPosition =  enumValueOf<Position>(bestMove.substring(0,2))
             val toPosition = enumValueOf<Position>(bestMove.substring(2,4))
+            val promotion = bestMove.substring(4,5)
+            if (promotion != " ") {
+                promotionPiece = promotion
+            }
+
             toggleSelectPosition(fromPosition)
             if (canMoveTo(toPosition)) {
                 val selectedPosition = gamePlayState.uiState.selectedPosition
@@ -160,6 +174,10 @@ class GameController(
         setGamePlayState?.invoke(
             Reducer(gamePlayState, Action.ToggleSelectPosition(position))
         )
+    }
+
+    fun getPcPromotionPiece() : String {
+        return promotionPiece;
     }
 
     private fun canMoveTo(position: Position) =
@@ -220,7 +238,6 @@ class GameController(
                 }
             }
         }
-
         return null
     }
 
@@ -231,7 +248,13 @@ class GameController(
         setGamePlayState?.invoke(
             Reducer(gamePlayState, Action.PromoteTo(piece))
         )
-        onClick(position)
+        if(gameType == GameType.TWO_OFFLINE || startColor == gameSnapshotState.toMove) {
+            onClick(position)
+        } else {
+            val selectedPosition = gamePlayState.uiState.selectedPosition
+            requireNotNull(selectedPosition)
+            applyMove(selectedPosition, position)
+        }
     }
 
     fun setVisualisation(visualisation: DatasetVisualisation) {

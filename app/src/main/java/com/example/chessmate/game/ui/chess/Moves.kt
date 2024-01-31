@@ -1,6 +1,5 @@
 package com.example.chessmate.game.ui.chess
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -88,7 +87,6 @@ fun Moves(
 
         LaunchedEffect(moves, selectedItemIndex) {
             if (moves.isNotEmpty() && selectedItemIndex > -1) {
-                Log.d("Moves",selectedItemIndex.toString())
                 listState.animateScrollToItem(selectedItemIndex * 2)
             }
         }

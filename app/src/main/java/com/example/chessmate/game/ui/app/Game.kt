@@ -103,9 +103,16 @@ fun Game(
         }
     }
 
+    if (gameType == GameType.ONE_OFFLINE) {
+        LaunchedEffect(gamePlayState.value.gameState.toMove) {
+            if (startColor != gamePlayState.value.gameState.toMove) {
+                gameController.onPcTurn(  lifecycleOwner = lifecycleOwner, depth = depth )
+            }
+        }
+    }
+
 
     CompositionLocalProvider(LocalActiveDatasetVisualisation  provides gamePlayState.value.visualisation) {
-        if (gameType == GameType.ONE_OFFLINE && startColor != gamePlayState.value.gameState.toMove) gameController.onPcTurn(  lifecycleOwner = lifecycleOwner, depth = depth )
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -164,6 +171,7 @@ fun Game(
             onlineViewModel = onlineViewModel,
             toggleFullView = toggleFullView,
             gameType = gameType,
+            startColor = startColor,
             onlineUIClient = onlineUIClient
         )
 

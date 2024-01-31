@@ -1,6 +1,5 @@
 package com.example.chessmate.ui.pages.multiplayer
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -82,7 +81,6 @@ fun FindGameScreen(
             CardProfileSearch(userData = userData,modifier=modifier, painter = painter)
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Log.d("ROOM", roomData.toString())
         when(roomData.gameState) {
             RoomStatus.WAITING -> {
                 Button(

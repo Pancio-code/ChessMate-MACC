@@ -136,15 +136,15 @@ fun ChessMateApp(
             if (importedFen == "") {
                 Game(
                     gameType = GameType.TWO_OFFLINE,
-                    onlineViewModel = onlineViewModel!!,
+                    onlineViewModel = onlineViewModel,
                     toggleFullView = toggleFullView,
                 )
             } else {
                 Game(
                     gameType = GameType.TWO_OFFLINE,
-                    onlineViewModel = onlineViewModel!!,
+                    onlineViewModel = onlineViewModel,
                     toggleFullView = toggleFullView,
-                    importGameFEN = onlineViewModel!!.getImportedFen()
+                    importGameFEN = onlineViewModel.getImportedFen()
                 )
             }
         }

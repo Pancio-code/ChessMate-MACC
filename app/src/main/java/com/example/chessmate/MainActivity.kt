@@ -117,7 +117,6 @@ class MainActivity : ComponentActivity() {
 
                             IndeterminateLoaderIndicator(loadingText = loadingText, drawing = glSurfaceView!!)
                         } else {
-                            Log.d("OPENGL", "OpenGL ES 3.0 not supported on device")
                             finish()
                         }
                     }
