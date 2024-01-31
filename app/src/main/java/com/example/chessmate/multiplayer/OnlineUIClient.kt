@@ -11,6 +11,7 @@ import com.example.chessmate.ui.utils.HelperClassOnline
 import com.example.chessmate.ui.utils.OnlineAPI
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import kotlin.coroutines.cancellation.CancellationException
@@ -26,6 +27,7 @@ class OnlineUIClient(
     private val gson = Gson()
     private val roomDbReference = getString(context,R.string.roomDbReference)
     private val dbRooms: CollectionReference = db.collection(roomDbReference)
+    private var roomDataListener: ListenerRegistration? = null
 
     private fun saveRoomData(model : RoomData) {
         onlineViewModel.setRoomData(model)
@@ -52,7 +54,8 @@ class OnlineUIClient(
     private fun fetchRoomData() {
         onlineViewModel.roomData.value.apply {
             if (roomId != "-1") {
-                dbRooms.document(roomId).addSnapshotListener { value, e ->
+                stopListeningToRoomData()
+                roomDataListener = dbRooms.document(roomId).addSnapshotListener { value, e ->
                     if (e != null) {
                         Log.w("Game fetch", "Listen failed.", e)
                         return@addSnapshotListener
@@ -75,10 +78,13 @@ class OnlineUIClient(
             }
         }
     }
+    fun stopListeningToRoomData() {
+        roomDataListener?.remove()
+    }
 
     suspend fun getRoom() : RoomData? {
         return try {
-            val roomResponse =  roomRemoteService.get(token=token, userId = userData.id)
+            val roomResponse =  roomRemoteService.get(token=token, id = userData.id)
             roomResponse.body()
         } catch(e: Exception) {
             e.printStackTrace()

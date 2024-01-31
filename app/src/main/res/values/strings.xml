@@ -51,7 +51,8 @@
     <string name="game_new">New</string>
     <string name="game_import_pgn">Import From PGN</string>
     <string name="game_import_fen">Import From FEN</string>
-    <string name="game_export">Export</string>
+    <string name="game_export_pgn">Export PGN</string>
+    <string name="game_export_fen">Export FEN</string>
     <string name="game_exit">Exit</string>
 
     <string name="resolution_white_to_move">WHITE to move</string>
