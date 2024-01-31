@@ -45,14 +45,17 @@ fun GameDialogs(
     onlineViewModel: OnlineViewModel,
     gameType: GameType,
     startColor : Set? = null,
-    onlineUIClient: OnlineUIClient?= null
+    roomData : RoomData? = null,
+    onlineUIClient: OnlineUIClient? = null
 ) {
     ManagedPromotionDialog(
         showPromotionDialog = gamePlayState.value.uiState.showPromotionDialog,
         gameController = gameController,
         gameType = gameType,
         gameState = gamePlayState.value.gameState,
-        startColor = startColor
+        startColor = startColor,
+        roomData = roomData,
+        onlineUIClient = onlineUIClient
     )
     ManagedChessMateDialog(
         showChessMateDialog = showChessMateDialog,

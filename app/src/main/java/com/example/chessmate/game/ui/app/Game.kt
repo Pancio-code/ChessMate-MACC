@@ -172,6 +172,7 @@ fun Game(
             toggleFullView = toggleFullView,
             gameType = gameType,
             startColor = startColor,
+            roomData = roomData.value,
             onlineUIClient = onlineUIClient
         )
 
