@@ -1,5 +1,6 @@
 package com.example.chessmate.game.model.game.controller
 
+import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.example.chessmate.game.model.board.Position
@@ -87,7 +88,7 @@ class GameController(
             val selectedPosition = gamePlayState.uiState.selectedPosition
             requireNotNull(selectedPosition)
             applyMove(selectedPosition, position)
-            if (gameType == GameType.ONLINE) {
+            if (gameType == GameType.ONLINE && gamePlayState.promotionState is PromotionState.None ) {
                 roomData?.let {
                     onlineUIClient!!.updateRoomData(
                         model = it.copy(
@@ -104,8 +105,8 @@ class GameController(
     }
 
     fun onResponse(lastMove : String) {
-        if(lastMove.length > 1) {
-            val moves = lastMove.split(" ")
+        val moves = lastMove.split(" ")
+        if(moves.size <= 2) {
             val toPosition = enumValueOf<Position>(moves[1])
             val fromPosition = enumValueOf<Position>(moves[0])
 
@@ -134,10 +135,10 @@ class GameController(
             val stockFishResponse : Response<StockFishData> = stockFishService.get(fen = FenConverter.getFenFromSnapshot(gameSnapshotState,gamePlayState), depth = depth, mode= mode)
             val responseBody : StockFishData = stockFishResponse.body() ?: throw Exception("No reply from API")
             val bestMove = responseBody.data?.substringAfter("bestmove ")?.substringBefore("ponder") ?: throw Exception("Invalid move format")
-
+            Log.d("AI",responseBody.data)
             val fromPosition =  enumValueOf<Position>(bestMove.substring(0,2))
             val toPosition = enumValueOf<Position>(bestMove.substring(2,4))
-            val promotion = bestMove.substring(4,5)
+            val promotion = if(bestMove.length > 4) bestMove.substring(4,5) else " "
             if (promotion != " ") {
                 promotionPiece = promotion
             }
