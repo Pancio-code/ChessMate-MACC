@@ -93,7 +93,7 @@ class GameController(
                     onlineUIClient!!.updateRoomData(
                         model = it.copy(
                             gameState = if (gameSnapshotState.resolution != Resolution.IN_PROGRESS) RoomStatus.FINISHED else RoomStatus.INPROGRESS,
-                            currentTurn =  if (gameSnapshotState.toMove == Set.WHITE) "w" else "b",
+                            currentTurn =  gameSnapshotState.toMove.name,
                             lastMove = "${gameSnapshotState.lastMove?.from} ${gameSnapshotState.lastMove?.to}",
                             winner =  if (!gamePlayState.gameState.gameMetaInfo.result.isNullOrEmpty()) gamePlayState.gameState.gameMetaInfo.result!!  else "",
                             termination =  if (!gamePlayState.gameState.gameMetaInfo.termination.isNullOrEmpty()) gamePlayState.gameState.gameMetaInfo.termination!! else ""
@@ -106,17 +106,17 @@ class GameController(
 
     fun onResponse(lastMove : String) {
         val moves = lastMove.split(" ")
-        if(moves.size <= 2) {
-            val toPosition = enumValueOf<Position>(moves[1])
-            val fromPosition = enumValueOf<Position>(moves[0])
+        val fromPosition = enumValueOf<Position>(moves[0])
+        val toPosition = enumValueOf<Position>(moves[1])
 
-            toggleSelectPosition(fromPosition)
-            if (canMoveTo(toPosition)) {
-                val selectedPosition = gamePlayState.uiState.selectedPosition
-                requireNotNull(selectedPosition)
-                applyMove(selectedPosition, toPosition)
-            }
-        } else {
+        toggleSelectPosition(fromPosition)
+        if (canMoveTo(toPosition)) {
+            val selectedPosition = gamePlayState.uiState.selectedPosition
+            requireNotNull(selectedPosition)
+            applyMove(selectedPosition, toPosition)
+        }
+        if(moves.size > 2) {
+            promotionPiece = moves[2]
             val piece: Piece = convertToPiece(gameSnapshotState.toMove, this)
             onPromotionPieceSelected(piece)
         }

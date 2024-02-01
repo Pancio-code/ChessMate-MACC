@@ -2,7 +2,6 @@ package com.example.chessmate.game.ui.app
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.platform.LocalContext
@@ -100,22 +99,21 @@ fun ManagedPromotionDialog(
     if (showPromotionDialog) {
         if (gameType == GameType.TWO_OFFLINE || startColor == set) {
             PromotionDialog(set) { piece ->
+                gameController.onPromotionPieceSelected(piece)
                 if (gameType == GameType.ONLINE) {
                    roomData?.let {
                         onlineUIClient!!.updateRoomData(
                             model = it.copy(
                                 gameState = if (gameState.resolution != Resolution.IN_PROGRESS) RoomStatus.FINISHED else RoomStatus.INPROGRESS,
-                                currentTurn =  if (gameState.toMove == Set.WHITE) "w" else "b",
-                                lastMove = piece.textSymbol.lowercase(Locale.ROOT)
+                                currentTurn =  gameState.toMove.name,
+                                lastMove = "${gameState.currentSnapshotState.lastMove?.from} ${gameState.currentSnapshotState.lastMove?.to} ${piece.textSymbol.lowercase(Locale.ROOT)}"
                             )
                         )
                     }
                 }
-                gameController.onPromotionPieceSelected(piece)
             }
         } else if (gameType == GameType.ONE_OFFLINE) {
             val piece: Piece = convertToPiece(set, gameController)
-            Log.d("TAG",piece.toString())
             gameController.onPromotionPieceSelected(piece)
         }
     }
@@ -208,10 +206,10 @@ fun ManagedGameDialog(
             onExitGame = {
                 if( gameType == GameType.ONLINE) {
                     onlineUIClient?.deleteRoomData(onlineViewModel.getRoomData())
-                    onlineUIClient?.stopListeningToRoomData()
+                    onlineViewModel.setFullViewPage("")
+                    toggleFullView()
                 } else {
                     onlineViewModel.setFullViewPage("")
-                    onlineViewModel.setRoomData(RoomData())
                     onlineViewModel.setImportedFen("")
                     toggleFullView()
                 }

@@ -39,6 +39,7 @@ class OnlineUIClient(
     fun updateRoomData(model : RoomData) {
          try {
             if(model.roomId != "-1") {
+                Log.d("TAG",model.lastMove!!)
                 dbRooms.document(model.roomId).set(model)
             }
         } catch(e: Exception) {
@@ -48,7 +49,9 @@ class OnlineUIClient(
     }
 
     fun deleteRoomData(model: RoomData)  {
+        stopListeningToRoomData()
         dbRooms.document(model.roomId).delete()
+        onlineViewModel.setRoomData(RoomData())
     }
 
     private fun fetchRoomData() {

@@ -74,7 +74,7 @@ fun Game(
     onlineUIClient: OnlineUIClient? = null,
     userData: UserData? = null
 ) {
-    var isFlipped by rememberSaveable { mutableStateOf(false) }
+    var isFlipped by rememberSaveable { mutableStateOf(!(startColor != null && startColor == Set.WHITE)) }
     val gamePlayState = rememberSaveable { mutableStateOf(state) }
     val showChessMateDialog = remember { mutableStateOf(false) }
     val showGameDialog = remember { mutableStateOf(false) }
@@ -99,7 +99,9 @@ fun Game(
 
     if (gameType == GameType.ONLINE) {
         LaunchedEffect(roomData.value) {
-            roomData.value.lastMove?.let { gameController.onResponse(it) }
+            if (roomData.value.currentTurn == startColor!!.name  )
+                roomData.value.lastMove?.let { gameController.onResponse(it)
+            }
         }
     }
 

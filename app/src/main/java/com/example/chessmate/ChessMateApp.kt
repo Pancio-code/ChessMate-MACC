@@ -170,7 +170,7 @@ fun ChessMateApp(
             if (importedFen == "") {
                 Game(
                     gameType = GameType.ONE_OFFLINE,
-                    onlineViewModel = onlineViewModel!!,
+                    onlineViewModel = onlineViewModel,
                     toggleFullView = toggleFullView,
                     startColor = onlineViewModel.getStartColor(),
                     depth = onlineViewModel.getDepth(),
@@ -179,12 +179,12 @@ fun ChessMateApp(
             } else {
                 Game(
                     gameType = GameType.ONE_OFFLINE,
-                    onlineViewModel = onlineViewModel!!,
+                    onlineViewModel = onlineViewModel,
                     toggleFullView = toggleFullView,
                     startColor = onlineViewModel.getStartColor(),
                     depth = onlineViewModel.getDepth(),
                     userData = userData,
-                    importGameFEN = onlineViewModel!!.getImportedFen()
+                    importGameFEN = onlineViewModel.getImportedFen()
                 )
             }
         }

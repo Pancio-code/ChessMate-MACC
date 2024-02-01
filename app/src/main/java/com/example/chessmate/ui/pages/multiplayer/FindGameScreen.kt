@@ -123,9 +123,7 @@ fun FindGameScreen(
                 Button(
                     onClick = {
                         onlineUIClient.deleteRoomData(roomData)
-                        onlineViewModel.setRoomData(RoomData())
                         isFindingGame = false
-                        onlineUIClient.stopListeningToRoomData()
                     }) {
                     Icon(
                         imageVector = Icons.Default.StopCircle,
@@ -166,9 +164,7 @@ fun FindGameScreen(
                 Button(
                     onClick = {
                         onlineUIClient.deleteRoomData(roomData)
-                        onlineViewModel.setRoomData(RoomData())
                         isFindingGame = false
-                        onlineUIClient.stopListeningToRoomData()
                     },
                     colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.errorContainer)) {
                     Icon(
@@ -187,7 +183,6 @@ fun FindGameScreen(
             }
             RoomStatus.FINISHED -> {
                 onlineUIClient.deleteRoomData(roomData)
-                onlineViewModel.setRoomData(RoomData())
                 isFindingGame = false
             }
         }
