@@ -1,6 +1,5 @@
 package com.example.chessmate.game.ui.app
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -385,7 +384,7 @@ fun OnFinishedGameDialog(
                 else "Local Player"
             } else onlineViewModel.roomData.value.playerTwoId
             val results = if (gamePlayState.value.gameState.resolution == Resolution.CHECKMATE){
-                if(onlineViewModel.roomData.value.winner == "White") 1 else 0
+                if(gamePlayState.value.gameState.gameMetaInfo.result == "1-0") 0 else 1
             } else {
                 2
             }
