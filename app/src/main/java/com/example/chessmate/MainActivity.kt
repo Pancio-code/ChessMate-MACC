@@ -2,7 +2,6 @@ package com.example.chessmate
 import android.app.ActivityManager
 import android.opengl.GLSurfaceView
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -26,6 +25,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.chessmate.matches.MatchesUIClient
+import com.example.chessmate.matches.MatchesViewModel
 import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
 import com.example.chessmate.sign_in.AuthUIClient
@@ -49,6 +50,7 @@ class MainActivity : ComponentActivity() {
 
     private val signInViewModel: SignInViewModel by viewModels()
     private val onlineViewModel: OnlineViewModel by viewModels()
+    private val matchesViewModel: MatchesViewModel by viewModels()
     private var userAuthState =  mutableStateOf(UserAuthStateType.UNDEFINED)
     private val db = Firebase.firestore
     private var loadingText = "Setting up the game..."
@@ -103,6 +105,8 @@ class MainActivity : ComponentActivity() {
                     signInViewModel.getAuthenticationState(handler = authUIClient).run {
                         signInViewModel.isAuthenticated.collect {  userAuthState.value = it.state }
                     }
+
+
                 }
 
                 ExitApplicationComponent(this)
@@ -162,6 +166,12 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        LaunchedEffect(key1 = null) {
+                            MatchesUIClient(
+                                userData = userData.data!!, matchesViewModel = matchesViewModel)
+                                .getMatches()
+                        }
+
                         ChessMateApp(
                             windowSize = windowSize,
                             authState= authState,
@@ -175,7 +185,8 @@ class MainActivity : ComponentActivity() {
                                 isInfullView = !isInfullView
                              },
                             userData = userData.data!!,
-                            immersivePage = immersivePage
+                            immersivePage = immersivePage,
+                            matchesViewModel = matchesViewModel
                         )
                     }
 

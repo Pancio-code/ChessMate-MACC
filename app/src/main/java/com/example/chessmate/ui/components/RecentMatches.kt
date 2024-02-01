@@ -16,30 +16,45 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.StarHalf
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.SmartToy
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.chessmate.R
+import coil.compose.rememberAsyncImagePainter
+import com.example.chessmate.matches.Match
+import com.example.chessmate.matches.MatchesViewModel
+import com.example.chessmate.sign_in.UserDataHelper
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RecentMatches(matchList: Array<Match>){
+fun RecentMatches(
+    matchesViewModel: MatchesViewModel
+){
+    var matchList by remember { mutableStateOf<List<Match>>(emptyList()) }
+    LaunchedEffect(Unit) {
+        matchList = matchesViewModel.getMatches()
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -47,7 +62,7 @@ fun RecentMatches(matchList: Array<Match>){
     ) {
         LazyColumn(
             modifier = Modifier
-                .clip(shape = RoundedCornerShape(15.dp, 15.dp, 0.dp, 0.dp))
+                .clip(shape = RoundedCornerShape(15.dp, 15.dp, 15.dp, 15.dp))
                 .size(width = 300.dp, height = 320.dp)
         ) {
             stickyHeader {
@@ -57,6 +72,7 @@ fun RecentMatches(matchList: Array<Match>){
                         .fillMaxWidth()
                         .background(MaterialTheme.colorScheme.primaryContainer),
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
                         text = "Recent Games",
@@ -67,23 +83,47 @@ fun RecentMatches(matchList: Array<Match>){
                     )
                 }
             }
-            for(match in matchList) {
-                item {
-                    MatchRow(match)
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        thickness = 1.dp,
-                        modifier = Modifier
-                            .width(250.dp)
-                            .padding(start = 60.dp)
-                    )
+            if (matchesViewModel.matchList.value.isEmpty()){
+                item{
+                    EmptyMatchList()
+                }
+            } else {
+                for (match in matchesViewModel.matchList.value) {
+                    item {
+                        MatchRow(match)
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            thickness = 1.dp,
+                            modifier = Modifier
+                                .width(250.dp)
+                                .padding(start = 60.dp)
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-
+@Composable
+fun EmptyMatchList(){
+    Row(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.primary)
+            .height(290.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "No Recent Games Found",
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.inversePrimary,
+            fontSize = 16.sp,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
+    }
+}
 
 @Composable
 fun MatchRow(match: Match) {
@@ -95,73 +135,31 @@ fun MatchRow(match: Match) {
             .height(40.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if(match.type == 0) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "User Icon",
-                modifier = Modifier.size(32.dp),
-                tint = MaterialTheme.colorScheme.inversePrimary
-            )
-        } else {
-            Icon(
-                imageVector = Icons.Default.Group,
-                contentDescription = "Two People Icon",
-                modifier = Modifier
-                    .size(32.dp),
-                tint = MaterialTheme.colorScheme.onPrimary
-            )
-        }
+        IconMatch(match.matchType)
         Spacer(modifier = Modifier.width(24.dp))
-        ProfileImage2(imageResourceId = R.drawable.profile_picture)
+        ProfilePictureMatch(matchType = match.matchType, userIdTwo = match.userIdTwo, profilePictureUrlUserTwo = match.profilePictureUrlUserTwo)
         Spacer(modifier = Modifier.width(24.dp))
-        Column(
-            modifier = Modifier.width(140.dp)
-        ) {
-            Text(text = match.username, color = MaterialTheme.colorScheme.onPrimary)
-        }
-        if(match.result == 0) {
-            Icon(
-                imageVector = Icons.Default.Done,
-                contentDescription = "Done Icon",
-                modifier = Modifier.size(32.dp),
-                tint = MaterialTheme.colorScheme.outline
-            )
-        } else {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Close Icon",
-                modifier = Modifier
-                    .size(32.dp),
-                tint = MaterialTheme.colorScheme.error
-            )
-        }
+        UsernameMatch(matchType = match.matchType, usernameUserTwo = match.usernameUserTwo)
+        IconResultMatch(result = match.results)
     }
 }
 
 
-@Preview
 @Composable
-fun RecentMatchesPreview() {
-    val recentGames = arrayOf(
-        Match(0,"avatar","Awenega",1),
-        Match(1,"avatar","Username",0),
-        Match(1,"avatar","Francesco Sudoso",0),
-        Match(0,"avatar","Jhon Doe",1),
-        Match(0,"avatar","Andrew Smith",0),
-        Match(1,"avatar","Nome Cognome",1),
-        Match(1,"avatar","Nome Cognome",1),
-        Match(1,"avatar","Nome Cognome",1),
-        Match(1,"avatar","Nome Cognome",1),
-        Match(1,"avatar","Nome Cognome",1),
-        Match(1,"avatar","Nome Cognome",1),
-        Match(1,"avatar","Nome Cognome",1),
-        Match(1,"avatar","Nome Cognome",1),
-    )
-    RecentMatches(recentGames)
-}
+fun ProfilePictureMatch(matchType: String, userIdTwo: String, profilePictureUrlUserTwo: String?) {
+    var painter = rememberAsyncImagePainter(null)
+    when (matchType){
+        "ONLINE" -> {
+            painter = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userIdTwo}/${profilePictureUrlUserTwo}")
+        }
+        "ONE_OFFLINE" -> {
+            painter = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/robot.jpg")
+        }
+        "TWO_OFFLINE" -> {
+            painter = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/twoOffline.jpg")
+        }
+    }
 
-@Composable
-fun ProfileImage2(imageResourceId: Int) {
     Surface(
         modifier = Modifier
             .size(32.dp)
@@ -169,7 +167,7 @@ fun ProfileImage2(imageResourceId: Int) {
         color = Color.Transparent
     ) {
         Image(
-            painter = painterResource(id = imageResourceId),
+            painter = painter,
             contentDescription = null,
             modifier = Modifier
                 .size(32.dp)
@@ -178,9 +176,87 @@ fun ProfileImage2(imageResourceId: Int) {
     }
 }
 
-data class Match(
-    val type: Int, //0 for single - 1 for multi
-    val profileUrlId: String,
-    val username: String,
-    val result: Int, //0 for win - 1 for lose
-)
+@Composable
+fun IconMatch(matchType: String) {
+    when (matchType) {
+        "ONLINE" -> {
+            return Icon(
+                imageVector = Icons.Filled.Wifi,
+                contentDescription = "Wifi Icon",
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+        "ONE_OFFLINE" -> {
+            return Icon(
+                imageVector = Icons.Filled.SmartToy,
+                contentDescription = "Robot",
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+        "TWO_OFFLINE" -> {
+            return Icon(
+                imageVector = Icons.Filled.Group,
+                contentDescription = "Two People Icon",
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+        else -> {
+            return Icon(imageVector = Icons.Filled.Close, contentDescription = null)
+        }
+    }
+}
+
+@Composable
+fun UsernameMatch(matchType: String, usernameUserTwo: String?){
+    var username = ""
+    when (matchType){
+        "ONLINE" -> {
+            username = usernameUserTwo!!
+        }
+        "TWO_OFFLINE" -> {
+            username = "Local Friend"
+        }
+        "ONE_OFFLINE" ->{
+            username = "AI Player"
+        }
+    }
+
+    Column(
+        modifier = Modifier.width(140.dp)
+    ) {
+        Text(text = username, color = MaterialTheme.colorScheme.onPrimary)
+    }
+}
+
+@Composable
+fun IconResultMatch(result: Int){
+    when (result){
+        0 -> {
+            return Icon(
+                imageVector = Icons.Filled.Done,
+                contentDescription = "Done Icon",
+                modifier = Modifier.size(32.dp),
+                tint = Color.Green.copy(alpha = 0.7f)
+            )
+        }
+        1 -> {
+            return Icon(
+                imageVector = Icons.Filled.Close,
+                contentDescription = "Done Icon",
+                modifier = Modifier.size(32.dp),
+                tint = Color.Red.copy(alpha = 0.7f)
+            )
+        }
+        2 ->{
+            return Icon(
+                imageVector = Icons.AutoMirrored.Filled.StarHalf,
+                contentDescription = "Done Icon",
+                modifier = Modifier.size(32.dp),
+                tint = Color.Black.copy(alpha = 0.7f)
+            )
+        }
+    }
+}

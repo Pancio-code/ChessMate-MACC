@@ -11,6 +11,7 @@ fun Preset(preset: Preset) {
         state = GamePlayState(),
         preset = preset,
         onlineViewModel = OnlineViewModel(),
+        matchesViewModel = null,
         toggleFullView = {}
     )
 }

@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.chessmate.R
 import com.example.chessmate.game.model.data_chessmate.LocalActiveDatasetVisualisation
+import com.example.chessmate.game.model.game.Resolution
 import com.example.chessmate.game.model.game.controller.GameController
 import com.example.chessmate.game.model.game.preset.Preset
 import com.example.chessmate.game.model.game.speechParser.SpeechParser
@@ -55,10 +56,14 @@ import com.example.chessmate.game.ui.chess.Board
 import com.example.chessmate.game.ui.chess.CapturedPieces
 import com.example.chessmate.game.ui.chess.Moves
 import com.example.chessmate.game.ui.chess.resolutionText
+import com.example.chessmate.matches.Match
+import com.example.chessmate.matches.MatchesUIClient
+import com.example.chessmate.matches.MatchesViewModel
 import com.example.chessmate.multiplayer.GameType
 import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
 import com.example.chessmate.sign_in.UserData
+import com.example.chessmate.ui.pages.profile.generateRandomString
 
 @Composable
 fun Game(
@@ -71,6 +76,7 @@ fun Game(
     depth : Int = 5,
     toggleFullView: () -> Unit = {},
     onlineViewModel: OnlineViewModel,
+    matchesViewModel: MatchesViewModel?,
     onlineUIClient: OnlineUIClient? = null,
     userData: UserData? = null
 ) {
@@ -157,7 +163,7 @@ fun Game(
             )
 
             if (gamePlayState.value.gameState.gameMetaInfo.result != null && gamePlayState.value.gameState.gameMetaInfo.termination != null) {
-                OnFinishedGameDialog(gamePlayState = gamePlayState, gameType = gameType, userData = userData, onlineViewModel = onlineViewModel, toggleFullView = toggleFullView)
+                OnFinishedGameDialog(gamePlayState = gamePlayState, gameType = gameType, userData = userData, onlineViewModel = onlineViewModel, matchesViewModel = matchesViewModel,toggleFullView = toggleFullView)
             }
         }
 
@@ -362,8 +368,33 @@ fun OnFinishedGameDialog(
     gameType : GameType,
     userData: UserData?,
     onlineViewModel: OnlineViewModel,
+    matchesViewModel: MatchesViewModel?,
     toggleFullView: () -> Unit
 ) {
+
+    if (userData != null){
+
+        LaunchedEffect(Unit) {
+            val roomId = if(onlineViewModel.roomData.value.roomId == "-1") generateRandomString(10) else  onlineViewModel.roomData.value.roomId
+            val matchType = gameType.toString()
+            val userIdOne = userData.id
+            val userIdTwo = if(onlineViewModel.roomData.value.playerTwoId == null) {
+                if(matchType == "ONE_OFFLINE") "AI Player"
+                else "Local Player"
+            } else onlineViewModel.roomData.value.playerTwoId
+            val results = if (gamePlayState.value.gameState.resolution == Resolution.CHECKMATE){
+                if(onlineViewModel.roomData.value.winner == "White") 1 else 0
+            } else {
+                2
+            }
+            val match = Match(roomId = roomId, matchType = matchType, userIdOne = userIdOne, userIdTwo = userIdTwo!!, results = results )
+            MatchesUIClient(
+                userData = userData, matchesViewModel = matchesViewModel!!)
+                .insertMatch(match)
+        }
+    }
+
+
     Dialog(onDismissRequest = { null }) {
         Card(
             modifier = Modifier

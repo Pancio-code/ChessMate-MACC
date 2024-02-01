@@ -25,12 +25,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
+import com.example.chessmate.matches.MatchesViewModel
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserData
 import com.example.chessmate.sign_in.UserDataHelper
 import com.example.chessmate.ui.components.CardProfile
-import com.example.chessmate.ui.components.Match
 import com.example.chessmate.ui.components.RecentMatches
 import com.example.chessmate.ui.components.Score
 import kotlinx.coroutines.launch
@@ -40,12 +40,13 @@ import kotlinx.coroutines.launch
 fun ProfileReadMode(
     modifier: Modifier = Modifier,
     userData: UserData?,
-    recentMatches: Array<Match>,
     authHandler: AuthUIClient? = null,
     authViewModel: SignInViewModel? = null,
+    matchesViewModel: MatchesViewModel? = null,
     toggler: () -> Unit,
     painter: AsyncImagePainter
 ) {
+
     val lyfescope = rememberCoroutineScope()
     val context = LocalContext.current
     Column(
@@ -55,7 +56,7 @@ fun ProfileReadMode(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Row{
-            if(userData?.username != null) {
+            if(userData!!.username != null) {
                 CardProfile(userData = userData, toggler, painter)
             }
         }
@@ -65,7 +66,7 @@ fun ProfileReadMode(
             Score(userData = userData!!)
         }
         Row{
-            RecentMatches(matchList = recentMatches)
+            RecentMatches(matchesViewModel = matchesViewModel!!)
         }
         Row (
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
@@ -113,19 +114,6 @@ fun ProfileReadModePreview() {
         modifier = Modifier,
         authHandler = null,
         toggler = {  },
-        recentMatches = arrayOf(
-            Match(0,"avatar","Awenega",1),
-            Match(1,"avatar","Username",0),
-            Match(1,"avatar","Francesco Sudoso",0),
-            Match(0,"avatar","Jhon Doe",1),
-            Match(0,"avatar","Andrew Smith",0),
-            Match(1,"avatar","Nome Cognome",1),
-            Match(1,"avatar","Nome Cognome",1),
-            Match(1,"avatar","Nome Cognome",1),
-            Match(1,"avatar","Nome Cognome",1),
-            Match(1,"avatar","Nome Cognome",1),
-            Match(1,"avatar","Nome Cognome",1),
-            ),
         painter = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userData.id}/${userData.profilePictureUrl}")
     )
 }
@@ -146,18 +134,6 @@ fun ProfileReadModeTabletPreview() {
         modifier = Modifier,
         authHandler = null,
         toggler = { },
-        recentMatches = arrayOf(
-            Match(0,"avatar","Awenega",1),
-            Match(1,"avatar","Username",0),
-            Match(1,"avatar","Francesco Sudoso",0),
-            Match(0,"avatar","Jhon Doe",1),
-            Match(0,"avatar","Andrew Smith",0),
-            Match(1,"avatar","Nome Cognome",1),
-            Match(1,"avatar","Nome Cognome",1),
-            Match(1,"avatar","Nome Cognome",1),
-            Match(1,"avatar","Nome Cognome",1),
-            Match(1,"avatar","Nome Cognome",1),
-            ),
         painter = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userData.id}/${userData.profilePictureUrl}")
     )
 }

@@ -31,6 +31,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.window.layout.DisplayFeature
 import androidx.window.layout.FoldingFeature
 import com.example.chessmate.game.ui.app.Game
+import com.example.chessmate.matches.MatchesViewModel
 import com.example.chessmate.multiplayer.GameType
 import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
@@ -71,6 +72,7 @@ fun ChessMateApp(
     authHandler: AuthUIClient?,
     authViewModel:  SignInViewModel? = null,
     onlineViewModel: OnlineViewModel? = null,
+    matchesViewModel: MatchesViewModel? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
     toggleFullView: () -> Unit = {},
     onlineUIClient: OnlineUIClient? = null,
@@ -137,14 +139,18 @@ fun ChessMateApp(
                 Game(
                     gameType = GameType.TWO_OFFLINE,
                     onlineViewModel = onlineViewModel,
+                    matchesViewModel = matchesViewModel,
                     toggleFullView = toggleFullView,
+                    userData = userData
                 )
             } else {
                 Game(
                     gameType = GameType.TWO_OFFLINE,
                     onlineViewModel = onlineViewModel,
+                    matchesViewModel = matchesViewModel,
                     toggleFullView = toggleFullView,
-                    importGameFEN = onlineViewModel.getImportedFen()
+                    importGameFEN = onlineViewModel.getImportedFen(),
+                    userData = userData
                 )
             }
         }
@@ -158,6 +164,7 @@ fun ChessMateApp(
             Game(
                 gameType = GameType.ONLINE,
                 onlineViewModel = onlineViewModel,
+                matchesViewModel = matchesViewModel,
                 onlineUIClient = onlineUIClient,
                 importGamePGN = roomData.boardState,
                 toggleFullView = toggleFullView,
@@ -170,7 +177,8 @@ fun ChessMateApp(
             if (importedFen == "") {
                 Game(
                     gameType = GameType.ONE_OFFLINE,
-                    onlineViewModel = onlineViewModel,
+                    onlineViewModel = onlineViewModel!!,
+                    matchesViewModel = matchesViewModel,
                     toggleFullView = toggleFullView,
                     startColor = onlineViewModel.getStartColor(),
                     depth = onlineViewModel.getDepth(),
@@ -179,7 +187,8 @@ fun ChessMateApp(
             } else {
                 Game(
                     gameType = GameType.ONE_OFFLINE,
-                    onlineViewModel = onlineViewModel,
+                    onlineViewModel = onlineViewModel!!,
+                    matchesViewModel = matchesViewModel,
                     toggleFullView = toggleFullView,
                     startColor = onlineViewModel.getStartColor(),
                     depth = onlineViewModel.getDepth(),
@@ -196,6 +205,7 @@ fun ChessMateApp(
             authHandler = authHandler,
             authViewModel = authViewModel,
             onlineViewModel= onlineViewModel,
+            matchesViewModel = matchesViewModel,
             onlineUIClient = onlineUIClient,
             googleIntentLaucher = googleIntentLaucher,
             toggleFullView = toggleFullView,
@@ -213,6 +223,7 @@ private fun ChessMateNavigationWrapper(
     authHandler: AuthUIClient? = null,
     authViewModel: SignInViewModel? = null,
     onlineViewModel: OnlineViewModel? = null,
+    matchesViewModel: MatchesViewModel? = null,
     onlineUIClient: OnlineUIClient? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
     toggleFullView: () -> Unit = {},
@@ -248,6 +259,7 @@ private fun ChessMateNavigationWrapper(
                 isAuthenticated = isAuthenticated,
                 authViewModel = authViewModel,
                 onlineViewModel= onlineViewModel,
+                matchesViewModel= matchesViewModel,
                 onlineUIClient = onlineUIClient,
                 authHandler = authHandler,
                 googleIntentLaucher = googleIntentLaucher,
@@ -287,6 +299,7 @@ private fun ChessMateNavigationWrapper(
                 isAuthenticated = isAuthenticated,
                 authViewModel = authViewModel,
                 onlineViewModel = onlineViewModel,
+                matchesViewModel = matchesViewModel,
                 onlineUIClient = onlineUIClient,
                 authHandler = authHandler,
                 googleIntentLaucher = googleIntentLaucher,
@@ -310,6 +323,7 @@ fun ChessMateAppContent(
     isAuthenticated: Boolean,
     authViewModel: SignInViewModel? = null,
     onlineViewModel: OnlineViewModel? = null,
+    matchesViewModel: MatchesViewModel? = null,
     onlineUIClient: OnlineUIClient? = null,
     authHandler: AuthUIClient? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
@@ -340,6 +354,7 @@ fun ChessMateAppContent(
                 authHandler = authHandler,
                 authViewModel = authViewModel,
                 onlineViewModel = onlineViewModel,
+                matchesViewModel = matchesViewModel,
                 onlineUIClient = onlineUIClient,
                 googleIntentLaucher = googleIntentLaucher,
                 toggleFullView = toggleFullView,
@@ -366,6 +381,7 @@ private fun ChessMateNavHost(
     authHandler: AuthUIClient? = null,
     authViewModel: SignInViewModel? = null,
     onlineViewModel: OnlineViewModel? = null,
+    matchesViewModel: MatchesViewModel? = null,
     onlineUIClient: OnlineUIClient? = null,
     googleIntentLaucher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>? = null,
     toggleFullView: () -> Unit = {},
@@ -395,6 +411,7 @@ private fun ChessMateNavHost(
                 ProfileScreen(
                     modifier= modifier,
                     authViewModel = authViewModel,
+                    matchesViewModel = matchesViewModel,
                     authHandler = authHandler,
                     navigationType = navigationType)
             }
