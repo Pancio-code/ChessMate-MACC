@@ -54,7 +54,7 @@ class OnlineUIClient(
         onlineViewModel.setRoomData(RoomData())
     }
 
-    private fun fetchRoomData() {
+        fun fetchRoomData() {
         onlineViewModel.roomData.value.apply {
             if (roomId != "-1") {
                 stopListeningToRoomData()
@@ -70,7 +70,7 @@ class OnlineUIClient(
                         "Server"
                     }
 
-                    if (value != null && value.exists()) {
+                    if (value != null && value.exists() && source != "Local") {
                         Log.d("Game fetch", "$source data: ${value.data}")
                         val model = value.toObject(RoomData::class.java)!!
                         onlineViewModel.setRoomData(model)
@@ -81,7 +81,7 @@ class OnlineUIClient(
             }
         }
     }
-    fun stopListeningToRoomData() {
+    private fun stopListeningToRoomData() {
         roomDataListener?.remove()
     }
 

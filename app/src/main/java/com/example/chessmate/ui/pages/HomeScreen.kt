@@ -130,7 +130,9 @@ fun HomePage(
         Button(
             onClick = {
                 lyfescope.launch {
-                    if (onlineUIClient.getRoom() != null) {
+                    val room = onlineUIClient.getRoom()
+                    if (room != null) {
+                        onlineViewModel.setRoomData(room)
                         onlineViewModel.setFullViewPage(ChessMateRoute.ONLINE_GAME)
                         toggleFullView()
                     } else {

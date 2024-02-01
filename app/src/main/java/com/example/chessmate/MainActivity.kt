@@ -32,6 +32,7 @@ import com.example.chessmate.multiplayer.OnlineViewModel
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserAuthStateType
+import com.example.chessmate.sign_in.UserData
 import com.example.chessmate.ui.components.IndeterminateLoaderIndicator
 import com.example.chessmate.ui.navigation.ExitApplicationComponent
 import com.example.chessmate.ui.theme.ChessMateTheme
@@ -166,6 +167,8 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        onlineUIClient.deleteRoomData(onlineViewModel.getRoomData())
+
                         LaunchedEffect(key1 = null) {
                             MatchesUIClient(
                                 userData = userData.data!!, matchesViewModel = matchesViewModel)
@@ -224,6 +227,11 @@ class MainActivity : ComponentActivity() {
     override fun onPause() {
         super.onPause()
         glSurfaceView?.onPause()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        OnlineUIClient(applicationContext,db,onlineViewModel, UserData()).deleteRoomData(onlineViewModel.getRoomData())
     }
 
     // Check if OpenGL ES 3.0 is supported
