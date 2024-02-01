@@ -95,8 +95,8 @@ fun ManagedPromotionDialog(
     roomData : RoomData? = null,
     onlineUIClient: OnlineUIClient? = null
 ) {
-    val set = gameController.toMove
     if (showPromotionDialog) {
+        val set = gameController.toMove
         if (gameType == GameType.TWO_OFFLINE || startColor == set) {
             PromotionDialog(set) { piece ->
                 gameController.onPromotionPieceSelected(piece)
@@ -106,7 +106,7 @@ fun ManagedPromotionDialog(
                             model = it.copy(
                                 gameState = if (gameState.resolution != Resolution.IN_PROGRESS) RoomStatus.FINISHED else RoomStatus.INPROGRESS,
                                 currentTurn =  gameState.toMove.name,
-                                lastMove = "${gameState.currentSnapshotState.lastMove?.from} ${gameState.currentSnapshotState.lastMove?.to} ${piece.textSymbol.lowercase(Locale.ROOT)}"
+                                lastMove = piece.textSymbol.lowercase(Locale.ROOT)
                             )
                         )
                     }

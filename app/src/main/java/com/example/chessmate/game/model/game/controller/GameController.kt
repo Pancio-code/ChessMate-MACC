@@ -87,8 +87,10 @@ class GameController(
         } else if (canMoveTo(position)) {
             val selectedPosition = gamePlayState.uiState.selectedPosition
             requireNotNull(selectedPosition)
+            Log.d("TAGGG",position.toString())
             applyMove(selectedPosition, position)
             if (gameType == GameType.ONLINE && gamePlayState.promotionState is PromotionState.None ) {
+                Log.d("ONLINE",position.toString())
                 roomData?.let {
                     onlineUIClient!!.updateRoomData(
                         model = it.copy(
@@ -106,17 +108,18 @@ class GameController(
 
     fun onResponse(lastMove : String) {
         val moves = lastMove.split(" ")
-        val fromPosition = enumValueOf<Position>(moves[0])
-        val toPosition = enumValueOf<Position>(moves[1])
+        if(moves.size == 2) {
+            val fromPosition = enumValueOf<Position>(moves[0])
+            val toPosition = enumValueOf<Position>(moves[1])
 
-        toggleSelectPosition(fromPosition)
-        if (canMoveTo(toPosition)) {
-            val selectedPosition = gamePlayState.uiState.selectedPosition
-            requireNotNull(selectedPosition)
-            applyMove(selectedPosition, toPosition)
-        }
-        if(moves.size > 2) {
-            promotionPiece = moves[2]
+            toggleSelectPosition(fromPosition)
+            if (canMoveTo(toPosition)) {
+                val selectedPosition = gamePlayState.uiState.selectedPosition
+                requireNotNull(selectedPosition)
+                applyMove(selectedPosition, toPosition)
+            }
+        } else {
+            promotionPiece = moves[0]
             val piece: Piece = convertToPiece(gameSnapshotState.toMove, this)
             onPromotionPieceSelected(piece)
         }
