@@ -168,8 +168,11 @@ fun Game(
                 gameController = gameController,
                 gameType = gameType
             )
-
-            if (roomData.value.gameState == RoomStatus.FINISHED || gamePlayState.value.gameState.gameMetaInfo.result != null && gamePlayState.value.gameState.gameMetaInfo.termination != null) {
+            if (roomData.value.gameState == RoomStatus.FINISHED ) {
+                onlineUIClient?.deleteRoomData(roomData.value)
+                toggleFullView()
+                onlineViewModel.setFullViewPage("")
+            } else if ( gamePlayState.value.gameState.gameMetaInfo.result != null && gamePlayState.value.gameState.gameMetaInfo.termination != null) {
                 OnFinishedGameDialog(gamePlayState = gamePlayState, gameType = gameType, userData = userData, onlineViewModel = onlineViewModel, matchesViewModel = matchesViewModel,toggleFullView = toggleFullView,signInViewModel = signInViewModel, onlineUIClient = onlineUIClient, authUIClient=authUIClient)
             }
         }
@@ -382,7 +385,7 @@ fun OnFinishedGameDialog(
     onlineUIClient: OnlineUIClient?,
     authUIClient: AuthUIClient? = null
 ) {
-    var eloRankNew = 0.0f;
+    var eloRankNew = 400.0f;
 
     if (userData != null){
         LaunchedEffect(Unit) {

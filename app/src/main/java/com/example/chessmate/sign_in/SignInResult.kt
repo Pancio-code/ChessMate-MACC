@@ -14,7 +14,7 @@ data class UserData(
     val username: String? =  "",
     val matchesPlayed: Int = 0,
     val matchesWon: Int = 0,
-    val eloRank: Float = 0f,
+    val eloRank: Float = 400.00f,
     val emailVerified: Boolean = false,
     val provider: String? = null,
     val country: String? = null,
