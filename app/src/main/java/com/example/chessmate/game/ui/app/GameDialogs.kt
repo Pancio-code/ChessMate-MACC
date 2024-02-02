@@ -90,15 +90,14 @@ fun GameDialogs(
         onlineViewModel = onlineViewModel,
         toggleFullView = toggleFullView,
         gameType = gameType,
-        showOnlineExitDialog = showOnlineExitDialog
+        showOnlineExitDialog = showGameDialog
     )
 
     ManagedOnlineExitDialog(
-        showOnlineExitDialog = showGameDialog,
+        showOnlineExitDialog = showOnlineExitDialog,
         onlineUIClient = onlineUIClient,
         onlineViewModel = onlineViewModel,
-        toggleFullView = toggleFullView,
-        authUIClient = authUIClient
+        toggleFullView = toggleFullView
     )
 
     ManagedImportPgnDialog(
@@ -117,8 +116,7 @@ fun ManagedOnlineExitDialog(
     showOnlineExitDialog : MutableState<Boolean>,
     toggleFullView: () -> Unit = {},
     onlineViewModel: OnlineViewModel,
-    onlineUIClient: OnlineUIClient? = null,
-    authUIClient: AuthUIClient? = null
+    onlineUIClient: OnlineUIClient? = null
 ) {
     if (showOnlineExitDialog.value) {
         Dialog(onDismissRequest = { null }) {

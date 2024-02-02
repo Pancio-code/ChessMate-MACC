@@ -143,7 +143,7 @@ fun FindGameScreen(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(20.dp))
-                CardProfileSearch(userData = UserData(username = if(userData.id == roomData.playerOneId) roomData.playerTwoUsername else roomData.playerOneUsername), modifier = modifier, painter = painterTwo)
+                CardProfileSearch(userData = UserData(username = if(userData.id == roomData.playerOneId) roomData.playerTwoUsername else roomData.playerOneUsername, eloRank = if(userData.id == roomData.playerOneId) roomData.rankPlayerTwo!! else roomData.rankPlayerOne), modifier = modifier, painter = painterTwo)
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
                     onClick = {
