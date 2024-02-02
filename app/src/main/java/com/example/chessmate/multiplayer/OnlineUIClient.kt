@@ -39,7 +39,6 @@ class OnlineUIClient(
     fun updateRoomData(model : RoomData) {
          try {
             if(model.roomId != "-1") {
-                Log.d("TAG",model.lastMove!!)
                 dbRooms.document(model.roomId).set(model)
             }
         } catch(e: Exception) {

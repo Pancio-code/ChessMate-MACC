@@ -374,11 +374,16 @@ fun OnFinishedGameDialog(
 ) {
 
     if (userData != null){
-
+        //dovrebbe funzionare correttamente il settaggio degli userId1 e 2 dell'online (provare da bianco e da nero)
+        // Provare con AI quando si è neri e bianchi. Provare anche offline_two(se non funziona, eliminare)
+        //rimane da sistemare chi è il vincitore con 0 o 1 o 2
         LaunchedEffect(Unit) {
             val roomId = if(onlineViewModel.roomData.value.roomId == "-1") generateRandomString(10) else  onlineViewModel.roomData.value.roomId
             val matchType = gameType.toString()
-            val userIdOne = userData.id
+            val userIdOne = if(onlineViewModel.roomData.value.playerOneId == null) {
+                if(matchType == "ONE_OFFLINE") "AI Player"
+                else "Local Player"
+            } else onlineViewModel.roomData.value.playerOneId
             val userIdTwo = if(onlineViewModel.roomData.value.playerTwoId == null) {
                 if(matchType == "ONE_OFFLINE") "AI Player"
                 else "Local Player"
@@ -388,7 +393,7 @@ fun OnFinishedGameDialog(
             } else {
                 2
             }
-            val match = Match(roomId = roomId, matchType = matchType, userIdOne = userIdOne, userIdTwo = userIdTwo!!, results = results )
+            val match = Match(roomId = roomId, matchType = matchType, userIdOne = userIdOne!!, userIdTwo = userIdTwo!!, results = results )
             MatchesUIClient(
                 userData = userData, matchesViewModel = matchesViewModel!!)
                 .insertMatch(match)
