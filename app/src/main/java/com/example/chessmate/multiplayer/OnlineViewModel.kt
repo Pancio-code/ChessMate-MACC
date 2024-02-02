@@ -12,7 +12,7 @@ class OnlineViewModel: ViewModel() {
     val roomData : StateFlow<RoomData> = _roomData.asStateFlow()
 
     private val _startColor = MutableStateFlow(Set.WHITE)
-    private val startColor : StateFlow<Set> = _startColor.asStateFlow()
+    val startColor : StateFlow<Set> = _startColor.asStateFlow()
 
     private val _depth = MutableStateFlow(5)
     private val depth : StateFlow<Int> = _depth.asStateFlow()

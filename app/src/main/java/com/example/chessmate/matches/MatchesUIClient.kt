@@ -43,6 +43,6 @@ class MatchesUIClient(
             e.printStackTrace()
             if(e is CancellationException) throw e
         }
-        return matchesViewModel.addMatch(match)
+        getMatches()
     }
 }

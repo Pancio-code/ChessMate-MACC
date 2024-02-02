@@ -165,7 +165,7 @@ fun Game(
             )
 
             if (gamePlayState.value.gameState.gameMetaInfo.result != null && gamePlayState.value.gameState.gameMetaInfo.termination != null) {
-                OnFinishedGameDialog(gamePlayState = gamePlayState, gameType = gameType, userData = userData, onlineViewModel = onlineViewModel, matchesViewModel = matchesViewModel,toggleFullView = toggleFullView)
+                OnFinishedGameDialog(gamePlayState = gamePlayState, gameType = gameType, userData = userData, onlineViewModel = onlineViewModel, matchesViewModel = matchesViewModel,toggleFullView = toggleFullView, onlineUIClient = onlineUIClient)
             }
         }
 
@@ -370,33 +370,19 @@ fun OnFinishedGameDialog(
     userData: UserData?,
     onlineViewModel: OnlineViewModel,
     matchesViewModel: MatchesViewModel?,
-    toggleFullView: () -> Unit
+    toggleFullView: () -> Unit,
+    onlineUIClient: OnlineUIClient?
 ) {
 
     if (userData != null){
-        //dovrebbe funzionare correttamente il settaggio degli userId1 e 2 dell'online (provare da bianco e da nero)
-        // Provare con AI quando si è neri e bianchi. Provare anche offline_two(se non funziona, eliminare)
-        //rimane da sistemare chi è il vincitore con 0 o 1 o 2
         LaunchedEffect(Unit) {
             val roomId = if(onlineViewModel.roomData.value.roomId == "-1") generateRandomString(10) else  onlineViewModel.roomData.value.roomId
             val matchType = gameType.toString()
-            val userIdOne = if(onlineViewModel.roomData.value.playerOneId == null) {
-                if(matchType == "ONE_OFFLINE") "AI Player"
-                else "Local Player"
-            } else onlineViewModel.roomData.value.playerOneId
-            val userIdTwo = if(onlineViewModel.roomData.value.playerTwoId == null) {
-                if(matchType == "ONE_OFFLINE") "AI Player"
-                else "Local Player"
-            } else onlineViewModel.roomData.value.playerTwoId
-            val results = if (gamePlayState.value.gameState.resolution == Resolution.CHECKMATE){
-                if(gamePlayState.value.gameState.gameMetaInfo.result == "1-0") 0 else 1
-            } else {
-                2
-            }
-            val match = Match(roomId = roomId, matchType = matchType, userIdOne = userIdOne!!, userIdTwo = userIdTwo!!, results = results )
-            MatchesUIClient(
-                userData = userData, matchesViewModel = matchesViewModel!!)
-                .insertMatch(match)
+            val (userIdOne, userIdTwo) = getUserIds(onlineViewModel = onlineViewModel, matchType = matchType, userData = userData)
+            val results = getResults(matchType = matchType, resolution = gamePlayState.value.gameState.resolution, result = gamePlayState.value.gameState.gameMetaInfo.result, startColor = onlineViewModel.startColor.value )
+            val match = Match(roomId = roomId, matchType = matchType, userIdOne = userIdOne, userIdTwo = userIdTwo, results = results )
+
+            MatchesUIClient(userData = userData, matchesViewModel = matchesViewModel!!).insertMatch(match)
         }
     }
 
@@ -439,8 +425,15 @@ fun OnFinishedGameDialog(
                 Spacer(modifier = Modifier.height(15.dp))
                 Button(
                     onClick = {
-                        onlineViewModel.setFullViewPage("")
-                        toggleFullView()
+                        if( gameType == GameType.ONLINE) {
+                            onlineUIClient?.deleteRoomData(onlineViewModel.getRoomData())
+                            onlineViewModel.setFullViewPage("")
+                            toggleFullView()
+                        } else {
+                            onlineViewModel.setFullViewPage("")
+                            onlineViewModel.setImportedFen("")
+                            toggleFullView()
+                        }
                     }
                 ) {
                     Icon(
@@ -454,4 +447,53 @@ fun OnFinishedGameDialog(
             }
         }
     }
+}
+
+fun getUserIds(onlineViewModel: OnlineViewModel, matchType: String, userData: UserData?): Pair<String, String> {
+    var userIdOne = ""
+    var userIdTwo = ""
+
+    when (matchType) {
+        "ONLINE" -> {
+            userIdOne = onlineViewModel.roomData.value.playerOneId
+            userIdTwo = onlineViewModel.roomData.value.playerTwoId!!
+        }
+        "ONE_OFFLINE" -> {
+            userIdOne = userData!!.id
+            userIdTwo = "AI Player"
+        }
+        "TWO_OFFLINE" -> {
+            userIdOne = userData!!.id
+            userIdTwo = "Local player"
+        }
+    }
+
+    return Pair(userIdOne, userIdTwo)
+}
+
+fun getResults(matchType: String, resolution: Resolution, result: String?, startColor: Set?): Int{
+    if(resolution != Resolution.CHECKMATE){
+        return 2
+    }
+
+    when (matchType) {
+        "ONLINE" -> {
+            if(startColor == Set.WHITE){
+                if (result == "1-0") return 0 else return 1
+            } else{ //startColor == Set.BLACK
+                if (result == "0-1") return 1 else return 0
+            }
+        }
+        "ONE_OFFLINE" -> {
+            if(startColor == Set.WHITE){
+                if (result == "1-0") return 0 else return 1
+            } else{ //startColor == Set.BLACK
+                if (result == "1-0") return 1 else return 0
+            }
+        }
+        "TWO_OFFLINE" -> {
+            if (result == "1-0") return 0 else return 1
+        }
+    }
+    return 0
 }

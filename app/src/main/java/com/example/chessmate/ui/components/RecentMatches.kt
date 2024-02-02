@@ -214,7 +214,7 @@ fun UsernameMatch(matchType: String, usernameUserTwo: String?){
     var username = ""
     when (matchType){
         "ONLINE" -> {
-            username = usernameUserTwo!!
+            username = usernameUserTwo.toString()
         }
         "TWO_OFFLINE" -> {
             username = "Local Friend"
