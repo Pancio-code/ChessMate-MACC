@@ -1,6 +1,5 @@
 package com.example.chessmate.game.ui.app
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -63,9 +62,12 @@ import com.example.chessmate.matches.MatchesViewModel
 import com.example.chessmate.multiplayer.GameType
 import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
+import com.example.chessmate.multiplayer.RoomStatus
+import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserData
 import com.example.chessmate.ui.pages.profile.generateRandomString
+import com.example.chessmate.ui.utils.RankingManager
 
 @Composable
 fun Game(
@@ -81,12 +83,14 @@ fun Game(
     matchesViewModel: MatchesViewModel?,
     signInViewModel: SignInViewModel?,
     onlineUIClient: OnlineUIClient? = null,
+    authUIClient: AuthUIClient? = null,
     userData: UserData? = null
 ) {
     var isFlipped by rememberSaveable { mutableStateOf(!(startColor != null && startColor == Set.WHITE)) }
     val gamePlayState = rememberSaveable { mutableStateOf(state) }
     val showChessMateDialog = remember { mutableStateOf(false) }
     val showGameDialog = remember { mutableStateOf(false) }
+    val showOnlineExitDialog = remember { mutableStateOf(false) }
     val showImportPgnDialog = remember { mutableStateOf(false) }
     val showImportFenDialog = remember { mutableStateOf(false) }
     val pngToImport = remember { mutableStateOf(importGamePGN) }
@@ -108,7 +112,6 @@ fun Game(
 
     if (gameType == GameType.ONLINE) {
         LaunchedEffect(roomData.value) {
-            Log.d("FEN",fenToImport.value.toString())
             if (gamePlayState.value.gameState.toMove != startColor && roomData.value.lastMove != null && fenToImport.value == null) {
                 roomData.value.lastMove?.let { gameController.onResponse(it) }
             }
@@ -166,8 +169,8 @@ fun Game(
                 gameType = gameType
             )
 
-            if (gamePlayState.value.gameState.gameMetaInfo.result != null && gamePlayState.value.gameState.gameMetaInfo.termination != null) {
-                OnFinishedGameDialog(gamePlayState = gamePlayState, gameType = gameType, userData = userData, onlineViewModel = onlineViewModel, matchesViewModel = matchesViewModel, signInViewModel = signInViewModel, toggleFullView = toggleFullView, onlineUIClient = onlineUIClient)
+            if (roomData.value.gameState == RoomStatus.FINISHED || gamePlayState.value.gameState.gameMetaInfo.result != null && gamePlayState.value.gameState.gameMetaInfo.termination != null) {
+                OnFinishedGameDialog(gamePlayState = gamePlayState, gameType = gameType, userData = userData, onlineViewModel = onlineViewModel, matchesViewModel = matchesViewModel,toggleFullView = toggleFullView,signInViewModel = signInViewModel, onlineUIClient = onlineUIClient, authUIClient=authUIClient)
             }
         }
 
@@ -178,13 +181,15 @@ fun Game(
             showGameDialog = showGameDialog,
             showImportPgnDialog = showImportPgnDialog,
             showImportFenDialog = showImportFenDialog,
+            showOnlineExitDialog = showOnlineExitDialog,
             pngToImport = pngToImport,
             fenToImport = fenToImport,
             onlineViewModel = onlineViewModel,
             toggleFullView = toggleFullView,
             gameType = gameType,
             startColor = startColor,
-            onlineUIClient = onlineUIClient
+            onlineUIClient = onlineUIClient,
+            authUIClient = authUIClient
         )
 
         ManagedImport(
@@ -374,15 +379,37 @@ fun OnFinishedGameDialog(
     matchesViewModel: MatchesViewModel?,
     signInViewModel: SignInViewModel?,
     toggleFullView: () -> Unit,
-    onlineUIClient: OnlineUIClient?
+    onlineUIClient: OnlineUIClient?,
+    authUIClient: AuthUIClient? = null
 ) {
+    var eloRankNew = 0.0f;
 
     if (userData != null){
         LaunchedEffect(Unit) {
-            val roomId = if(onlineViewModel.roomData.value.roomId == "-1") generateRandomString(10) else  onlineViewModel.roomData.value.roomId
+            val matchesNew = userData.matchesPlayed + 1;
+            val matchesWon = userData.matchesWon;
             val matchType = gameType.toString()
             val (userIdOne, userIdTwo) = getUserIds(onlineViewModel = onlineViewModel, matchType = matchType, userData = userData)
             val results = getResults(matchType = matchType, resolution = gamePlayState.value.gameState.resolution, result = gamePlayState.value.gameState.gameMetaInfo.result, startColor = onlineViewModel.startColor.value )
+
+            if (gameType == GameType.ONLINE && authUIClient != null) {
+                val eloRatingTwo = if (userIdOne == userData.id) onlineViewModel.roomData.value.rankPlayerTwo!! else onlineViewModel.roomData.value.rankPlayerOne
+                eloRankNew = RankingManager.eloRating(
+                    matchesNew,
+                    userData.eloRank,
+                    eloRatingTwo,
+                    results == 0
+                )
+                authUIClient.update(
+                    userData = userData.copy(
+                        matchesPlayed = matchesNew,
+                        matchesWon = if (results == 1) matchesWon + 1 else matchesWon,
+                        eloRank = eloRankNew
+                    )
+                );
+            }
+
+            val roomId = if(onlineViewModel.roomData.value.roomId == "-1") generateRandomString(10) else  onlineViewModel.roomData.value.roomId
             val match = Match(roomId = roomId, matchType = matchType, userIdOne = userIdOne, userIdTwo = userIdTwo, results = results )
             val updatedUserData = getNewUserData(userData = userData, results = results)
             MatchesUIClient(userData = userData, matchesViewModel = matchesViewModel!!).insertMatch(match = match, signInViewModel = signInViewModel, userDataNew = updatedUserData )
@@ -416,10 +443,10 @@ fun OnFinishedGameDialog(
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center
                 )
-                if(gameType == GameType.ONLINE) {
+                if(gameType == GameType.ONLINE && userData != null) {
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "Updated elo rank: ${userData?.eloRank} --> ",
+                        text = "Updated elo rank: ${userData.eloRank} --> $eloRankNew",
                         color = MaterialTheme.colorScheme.onBackground,
                         style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Center

@@ -53,7 +53,7 @@ class OnlineUIClient(
         onlineViewModel.setRoomData(RoomData())
     }
 
-        fun fetchRoomData() {
+    fun fetchRoomData() {
         onlineViewModel.roomData.value.apply {
             if (roomId != "-1") {
                 stopListeningToRoomData()
@@ -80,7 +80,7 @@ class OnlineUIClient(
             }
         }
     }
-    private fun stopListeningToRoomData() {
+     fun stopListeningToRoomData() {
         roomDataListener?.remove()
     }
 

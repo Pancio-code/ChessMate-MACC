@@ -88,7 +88,6 @@ class GameController(
         } else if (canMoveTo(position)) {
             val selectedPosition = gamePlayState.uiState.selectedPosition
             requireNotNull(selectedPosition)
-            Log.d("TAGGG",position.toString())
             applyMove(selectedPosition, position)
             if (gameType == GameType.ONLINE && gamePlayState.promotionState is PromotionState.None ) {
                 Log.d("ONLINE",position.toString())

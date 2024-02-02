@@ -75,8 +75,17 @@ fun HomePage(
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
-                onlineViewModel.setFullViewPage(ChessMateRoute.FIND_GAME)
-                toggleFullView()
+                lyfescope.launch {
+                    val room = onlineUIClient.getRoom()
+                    if (room != null) {
+                        onlineViewModel.setRoomData(room)
+                        onlineViewModel.setFullViewPage(ChessMateRoute.ONLINE_GAME)
+                        toggleFullView()
+                    } else {
+                        onlineViewModel.setFullViewPage(ChessMateRoute.FIND_GAME)
+                        toggleFullView()
+                    }
+                }
             },
             modifier = Modifier
                 .fillMaxWidth(fraction = 0.6f)

@@ -280,6 +280,17 @@ class AuthUIClient(
         ).show()
     }
 
+    suspend fun update(userData: UserData): Boolean {
+        try {
+            val data = gson.toJson(userData)
+            userRemoteService.update(token=BuildConfig.TOKEN, id= userData.id, body = data.toRequestBody("application/json".toMediaTypeOrNull()));
+        } catch (e: Exception) {
+            e.printStackTrace()
+            if (e is CancellationException) throw e
+        }
+        return signInViewModel.setUserData(SignInResult(data = userData, errorMessage = null))
+    }
+
     suspend fun confirmEdits(userId: String?, newEmail: String?, profilePictureUrl: String?, newUsername: String?, country: String?, newAvatarFile: File?, userData: UserData): Boolean {
         val userData = UserData(
             id = userId.toString(),

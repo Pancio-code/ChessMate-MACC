@@ -2,8 +2,7 @@ package com.example.chessmate.ui.utils
 
 import kotlin.math.pow
 
-class RankingManager(eloRanking: Float, matchesPlayed : Int) {
-    private val k : Int = getDevelopmentCoefficient(eloRanking,matchesPlayed)
+object RankingManager{
 
     private fun getDevelopmentCoefficient(ranking: Float, matches : Int) :Int {
         return when{
@@ -16,14 +15,14 @@ class RankingManager(eloRanking: Float, matchesPlayed : Int) {
         return 1.0f * 1.0f / (1 + 1.0f * 10.0.pow((1.0f * (rating1 - rating2) / 400).toDouble()).toFloat())
     }
 
-    fun eloRating(Ra : Float,Rb : Float, d : Boolean) : Pair<Float,Float> {
-        val Pb : Float = probability(Ra, Rb)
+    fun eloRating(matchesPlayed : Int, Ra : Float,Rb : Float, d : Boolean) : Float {
+        val k : Int = getDevelopmentCoefficient(Ra,matchesPlayed)
         val Pa : Float = probability(Rb, Ra)
 
         return if (d) {
-            Pair(Ra + k * (1 - Pa), Rb + k * (0 - Pb))
+            Ra + k * (1 - Pa)
         } else {
-            Pair(Ra + k * (0 - Pa), Rb + k * (1 - Pb))
+            Ra + k * (0 - Pa)
         }
     }
 }

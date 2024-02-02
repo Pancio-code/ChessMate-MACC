@@ -171,6 +171,7 @@ fun ChessMateApp(
                 matchesViewModel = matchesViewModel,
                 signInViewModel = authViewModel,
                 onlineUIClient = onlineUIClient,
+                authUIClient = authHandler,
                 importGamePGN = roomData.boardState,
                 toggleFullView = toggleFullView,
                 userData = userData,

@@ -2,9 +2,31 @@ package com.example.chessmate.game.ui.app
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import com.example.chessmate.game.model.game.controller.GameController
 import com.example.chessmate.game.model.game.converter.FenConverter
@@ -25,6 +47,9 @@ import com.example.chessmate.game.ui.dialogs.PromotionDialog
 import com.example.chessmate.multiplayer.GameType
 import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
+import com.example.chessmate.multiplayer.RoomData
+import com.example.chessmate.multiplayer.RoomStatus
+import com.example.chessmate.sign_in.AuthUIClient
 
 @Composable
 fun GameDialogs(
@@ -32,6 +57,7 @@ fun GameDialogs(
     gameController: GameController,
     showChessMateDialog: MutableState<Boolean>,
     showGameDialog: MutableState<Boolean>,
+    showOnlineExitDialog: MutableState<Boolean>,
     showImportPgnDialog: MutableState<Boolean>,
     showImportFenDialog: MutableState<Boolean>,
     pngToImport: MutableState<String?>,
@@ -40,7 +66,8 @@ fun GameDialogs(
     onlineViewModel: OnlineViewModel,
     gameType: GameType,
     startColor : Set? = null,
-    onlineUIClient: OnlineUIClient? = null
+    onlineUIClient: OnlineUIClient? = null,
+    authUIClient: AuthUIClient? = null
 ) {
     ManagedPromotionDialog(
         showPromotionDialog = gamePlayState.value.uiState.showPromotionDialog,
@@ -63,7 +90,15 @@ fun GameDialogs(
         onlineViewModel = onlineViewModel,
         toggleFullView = toggleFullView,
         gameType = gameType,
-        onlineUIClient = onlineUIClient
+        showOnlineExitDialog = showOnlineExitDialog
+    )
+
+    ManagedOnlineExitDialog(
+        showOnlineExitDialog = showGameDialog,
+        onlineUIClient = onlineUIClient,
+        onlineViewModel = onlineViewModel,
+        toggleFullView = toggleFullView,
+        authUIClient = authUIClient
     )
 
     ManagedImportPgnDialog(
@@ -75,6 +110,81 @@ fun GameDialogs(
         showImportFenDialog = showImportFenDialog,
         fenToImport = fenToImport
     )
+}
+
+@Composable
+fun ManagedOnlineExitDialog(
+    showOnlineExitDialog : MutableState<Boolean>,
+    toggleFullView: () -> Unit = {},
+    onlineViewModel: OnlineViewModel,
+    onlineUIClient: OnlineUIClient? = null,
+    authUIClient: AuthUIClient? = null
+) {
+    if (showOnlineExitDialog.value) {
+        Dialog(onDismissRequest = { null }) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Do you want quit the game?",
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "You will the lose the match.",
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(15.dp))
+                    Button(
+                        onClick = {
+                            onlineUIClient?.updateRoomData(onlineViewModel.roomData.value.copy(gameState = RoomStatus.FINISHED))
+                            showOnlineExitDialog.value = false
+                            onlineUIClient!!.stopListeningToRoomData()
+                            onlineViewModel.setRoomData(RoomData())
+                            onlineViewModel.setFullViewPage("")
+                            toggleFullView()
+                        },
+                        colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ErrorOutline,
+                            modifier = Modifier.size(8.dp),
+                            contentDescription = "quit icon",
+                            tint = MaterialTheme.colorScheme.onError
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Quit Game",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onError
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Button(
+                        onClick = {
+                            showOnlineExitDialog.value = false
+                        }
+                    ) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Resume", style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -130,13 +240,13 @@ fun ManagedGameDialog(
     showGameDialog: MutableState<Boolean>,
     showImportPngDialog: MutableState<Boolean>,
     showImportFenDialog: MutableState<Boolean>,
+    showOnlineExitDialog: MutableState<Boolean>,
     gameState: GameState,
     gamePlayState : GamePlayState,
     gameController: GameController,
     toggleFullView: () -> Unit = {},
     onlineViewModel: OnlineViewModel,
     gameType: GameType,
-    onlineUIClient: OnlineUIClient? = null
 ) {
     if (showGameDialog.value) {
         val context = LocalContext.current
@@ -183,9 +293,8 @@ fun ManagedGameDialog(
             },
             onExitGame = {
                 if( gameType == GameType.ONLINE) {
-                    onlineUIClient?.deleteRoomData(onlineViewModel.getRoomData())
-                    onlineViewModel.setFullViewPage("")
-                    toggleFullView()
+                    showGameDialog.value = false
+                    showOnlineExitDialog.value = true
                 } else {
                     onlineViewModel.setFullViewPage("")
                     onlineViewModel.setImportedFen("")

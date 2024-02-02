@@ -51,6 +51,7 @@ fun FindGameScreen(
     toggleFullView: () -> Unit = {},
     userData: UserData?
 ) {
+
     val roomData by onlineViewModel.roomData.collectAsState()
     val lifeScope = rememberCoroutineScope()
     var isFindingGame by remember { mutableStateOf(false) }
@@ -146,7 +147,9 @@ fun FindGameScreen(
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
                     onClick = {
-                        onlineUIClient.updateRoomData(roomData.copy(gameState = RoomStatus.INPROGRESS))
+                        roomData.let {
+                            onlineUIClient.updateRoomData(model = it.copy(gameState = RoomStatus.INPROGRESS))
+                        }
                         onlineViewModel.setFullViewPage(ChessMateRoute.ONLINE_GAME)
                         toggleFullView()
                     },
