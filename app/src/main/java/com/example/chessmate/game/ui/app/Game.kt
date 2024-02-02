@@ -550,7 +550,7 @@ fun OnFinishedGameDialogOnline(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "Updated elo rank: $eloRankOld --> $eloRankNew",
+                    text = "Updated elo rank in your profile",
                     color = MaterialTheme.colorScheme.onBackground,
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center
