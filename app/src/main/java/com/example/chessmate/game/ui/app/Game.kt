@@ -491,18 +491,29 @@ fun OnFinishedGameDialogOnline(
     startColor : Set
 ) {
 
-    val eloRankOld = userData.eloRank;
     val matchesNew = userData.matchesPlayed + 1;
     val matchType = gameType.toString()
     val (userIdOne, userIdTwo) = getUserIds(onlineViewModel = onlineViewModel, matchType = matchType, userData = userData)
     val eloRatingTwo = if (userIdOne == userData.id) roomData.rankPlayerTwo!! else roomData.rankPlayerOne;
-    val results = getResults(matchType = matchType, resolution = gamePlayState.value.gameState.resolution, result = gamePlayState.value.gameState.gameMetaInfo.result, startColor = startColor )
+    val result = gamePlayState.value.gameState.gameMetaInfo.result
+    val resolution = gamePlayState.value.gameState.resolution
+
+    val win =
+        if(resolution != Resolution.CHECKMATE){
+        2
+        } else if(startColor == Set.WHITE){
+            if (result == "1-0") 0 else 1
+        } else{
+            if (result == "0-1") 0 else 1
+        }
+
+    val results = getResults(matchType = matchType, resolution = resolution, result = result, startColor = startColor )
 
     val eloRankNew = RankingManager.eloRating(
         matchesNew,
         userData.eloRank,
         eloRatingTwo,
-        results == 0
+        win == 0
     )
 
     LaunchedEffect(Unit) {
