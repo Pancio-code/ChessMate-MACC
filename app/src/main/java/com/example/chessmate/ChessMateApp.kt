@@ -141,6 +141,7 @@ fun ChessMateApp(
                     gameType = GameType.TWO_OFFLINE,
                     onlineViewModel = onlineViewModel,
                     matchesViewModel = matchesViewModel,
+                    signInViewModel = authViewModel,
                     toggleFullView = toggleFullView,
                     userData = userData
                 )
@@ -149,6 +150,7 @@ fun ChessMateApp(
                     gameType = GameType.TWO_OFFLINE,
                     onlineViewModel = onlineViewModel,
                     matchesViewModel = matchesViewModel,
+                    signInViewModel = authViewModel,
                     toggleFullView = toggleFullView,
                     importGameFEN = onlineViewModel.getImportedFen(),
                     userData = userData
@@ -167,6 +169,7 @@ fun ChessMateApp(
                 gameType = GameType.ONLINE,
                 onlineViewModel = onlineViewModel,
                 matchesViewModel = matchesViewModel,
+                signInViewModel = authViewModel,
                 onlineUIClient = onlineUIClient,
                 importGamePGN = roomData.boardState,
                 toggleFullView = toggleFullView,
@@ -182,6 +185,7 @@ fun ChessMateApp(
                     gameType = GameType.ONE_OFFLINE,
                     onlineViewModel = onlineViewModel!!,
                     matchesViewModel = matchesViewModel,
+                    signInViewModel = authViewModel,
                     toggleFullView = toggleFullView,
                     startColor = onlineViewModel.getStartColor(),
                     depth = onlineViewModel.getDepth(),
@@ -192,6 +196,7 @@ fun ChessMateApp(
                     gameType = GameType.ONE_OFFLINE,
                     onlineViewModel = onlineViewModel!!,
                     matchesViewModel = matchesViewModel,
+                    signInViewModel = authViewModel,
                     toggleFullView = toggleFullView,
                     startColor = onlineViewModel.getStartColor(),
                     depth = onlineViewModel.getDepth(),

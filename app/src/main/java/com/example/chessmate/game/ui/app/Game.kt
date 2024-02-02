@@ -63,6 +63,7 @@ import com.example.chessmate.matches.MatchesViewModel
 import com.example.chessmate.multiplayer.GameType
 import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
+import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserData
 import com.example.chessmate.ui.pages.profile.generateRandomString
 
@@ -78,6 +79,7 @@ fun Game(
     toggleFullView: () -> Unit = {},
     onlineViewModel: OnlineViewModel,
     matchesViewModel: MatchesViewModel?,
+    signInViewModel: SignInViewModel?,
     onlineUIClient: OnlineUIClient? = null,
     userData: UserData? = null
 ) {
@@ -165,7 +167,7 @@ fun Game(
             )
 
             if (gamePlayState.value.gameState.gameMetaInfo.result != null && gamePlayState.value.gameState.gameMetaInfo.termination != null) {
-                OnFinishedGameDialog(gamePlayState = gamePlayState, gameType = gameType, userData = userData, onlineViewModel = onlineViewModel, matchesViewModel = matchesViewModel,toggleFullView = toggleFullView, onlineUIClient = onlineUIClient)
+                OnFinishedGameDialog(gamePlayState = gamePlayState, gameType = gameType, userData = userData, onlineViewModel = onlineViewModel, matchesViewModel = matchesViewModel, signInViewModel = signInViewModel, toggleFullView = toggleFullView, onlineUIClient = onlineUIClient)
             }
         }
 
@@ -370,6 +372,7 @@ fun OnFinishedGameDialog(
     userData: UserData?,
     onlineViewModel: OnlineViewModel,
     matchesViewModel: MatchesViewModel?,
+    signInViewModel: SignInViewModel?,
     toggleFullView: () -> Unit,
     onlineUIClient: OnlineUIClient?
 ) {
@@ -381,8 +384,8 @@ fun OnFinishedGameDialog(
             val (userIdOne, userIdTwo) = getUserIds(onlineViewModel = onlineViewModel, matchType = matchType, userData = userData)
             val results = getResults(matchType = matchType, resolution = gamePlayState.value.gameState.resolution, result = gamePlayState.value.gameState.gameMetaInfo.result, startColor = onlineViewModel.startColor.value )
             val match = Match(roomId = roomId, matchType = matchType, userIdOne = userIdOne, userIdTwo = userIdTwo, results = results )
-
-            MatchesUIClient(userData = userData, matchesViewModel = matchesViewModel!!).insertMatch(match)
+            val updatedUserData = getNewUserData(userData = userData, results = results)
+            MatchesUIClient(userData = userData, matchesViewModel = matchesViewModel!!).insertMatch(match = match, signInViewModel = signInViewModel, userDataNew = updatedUserData )
         }
     }
 
@@ -478,22 +481,31 @@ fun getResults(matchType: String, resolution: Resolution, result: String?, start
 
     when (matchType) {
         "ONLINE" -> {
-            if(startColor == Set.WHITE){
-                if (result == "1-0") return 0 else return 1
+            return if(startColor == Set.WHITE){
+                if (result == "1-0") 0 else 1
             } else{ //startColor == Set.BLACK
-                if (result == "0-1") return 1 else return 0
+                if (result == "0-1") 1 else 0
             }
         }
         "ONE_OFFLINE" -> {
-            if(startColor == Set.WHITE){
-                if (result == "1-0") return 0 else return 1
+            return if(startColor == Set.WHITE){
+                if (result == "1-0") 0 else 1
             } else{ //startColor == Set.BLACK
-                if (result == "1-0") return 1 else return 0
+                if (result == "1-0") 1 else 0
             }
         }
         "TWO_OFFLINE" -> {
-            if (result == "1-0") return 0 else return 1
+            return if (result == "1-0") 0 else 1
         }
     }
     return 0
+}
+
+fun getNewUserData(userData: UserData, results: Int): UserData {
+    //need to check if when online, if i'm black and i won, matchesWon increase
+    return if (results == 0) {
+        userData.copy(matchesPlayed = userData.matchesPlayed+1, matchesWon = userData.matchesWon+1)
+    } else {
+        userData.copy(matchesPlayed = userData.matchesPlayed+1)
+    }
 }

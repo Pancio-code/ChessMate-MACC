@@ -1,6 +1,8 @@
 package com.example.chessmate.matches
 
 import com.example.chessmate.BuildConfig
+import com.example.chessmate.sign_in.SignInResult
+import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserData
 import com.example.chessmate.ui.utils.HelperClassMatches
 import com.example.chessmate.ui.utils.MatchesApi
@@ -35,7 +37,7 @@ class MatchesUIClient(
         }
     }
 
-    suspend fun insertMatch(match: Match) {
+    suspend fun insertMatch(match: Match, signInViewModel: SignInViewModel?, userDataNew: UserData) {
         try{
             val data = gson.toJson(match)
             matchRemoteService.create(token=BuildConfig.TOKEN, body = data)
@@ -44,5 +46,6 @@ class MatchesUIClient(
             if(e is CancellationException) throw e
         }
         getMatches()
+        signInViewModel?.setUserData(newValue = SignInResult(data = userDataNew, errorMessage = null))
     }
 }

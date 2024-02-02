@@ -12,6 +12,7 @@ fun Preset(preset: Preset) {
         preset = preset,
         onlineViewModel = OnlineViewModel(),
         matchesViewModel = null,
+        signInViewModel = null,
         toggleFullView = {}
     )
 }
