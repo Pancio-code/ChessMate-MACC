@@ -32,7 +32,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -65,6 +64,7 @@ import com.example.chessmate.matches.MatchesViewModel
 import com.example.chessmate.multiplayer.GameType
 import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
+import com.example.chessmate.multiplayer.RoomData
 import com.example.chessmate.multiplayer.RoomStatus
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInViewModel
@@ -181,7 +181,31 @@ fun Game(
                     Toast.LENGTH_LONG
                 ).show()
             } else if ( gamePlayState.value.gameState.gameMetaInfo.result != null && gamePlayState.value.gameState.gameMetaInfo.termination != null) {
-                OnFinishedGameDialog(gamePlayState = gamePlayState, gameType = gameType, userData = userData, onlineViewModel = onlineViewModel, matchesViewModel = matchesViewModel,toggleFullView = toggleFullView,signInViewModel = signInViewModel, onlineUIClient = onlineUIClient, authUIClient=authUIClient)
+                if (gameType == GameType.ONLINE) {
+                    OnFinishedGameDialogOnline(
+                        gamePlayState = gamePlayState,
+                        gameType = gameType,
+                        userData = userData!!,
+                        onlineViewModel = onlineViewModel,
+                        matchesViewModel = matchesViewModel,
+                        toggleFullView = toggleFullView,
+                        signInViewModel = signInViewModel,
+                        onlineUIClient = onlineUIClient,
+                        authUIClient = authUIClient!!,
+                        roomData = roomData.value,
+                        startColor = startColor!!
+                    )
+                } else {
+                    OnFinishedGameDialog(
+                        gamePlayState = gamePlayState,
+                        gameType = gameType,
+                        userData = userData,
+                        onlineViewModel = onlineViewModel,
+                        matchesViewModel = matchesViewModel,
+                        toggleFullView = toggleFullView,
+                        signInViewModel = signInViewModel
+                    )
+                }
             }
         }
 
@@ -389,39 +413,14 @@ fun OnFinishedGameDialog(
     onlineViewModel: OnlineViewModel,
     matchesViewModel: MatchesViewModel?,
     signInViewModel: SignInViewModel?,
-    toggleFullView: () -> Unit,
-    onlineUIClient: OnlineUIClient?,
-    authUIClient: AuthUIClient? = null
+    toggleFullView: () -> Unit
 ) {
-    var eloRankOld = 400.0f;
-    val eloRankNew = remember { mutableFloatStateOf(400.0f) };
 
     if (userData != null){
-        eloRankOld = userData.eloRank;
         LaunchedEffect(Unit) {
-            val matchesNew = userData.matchesPlayed + 1;
-            val matchesWon = userData.matchesWon;
             val matchType = gameType.toString()
             val (userIdOne, userIdTwo) = getUserIds(onlineViewModel = onlineViewModel, matchType = matchType, userData = userData)
             val results = getResults(matchType = matchType, resolution = gamePlayState.value.gameState.resolution, result = gamePlayState.value.gameState.gameMetaInfo.result, startColor = onlineViewModel.startColor.value )
-
-            if (gameType == GameType.ONLINE && authUIClient != null) {
-                val eloRatingTwo = if (userIdOne == userData.id) onlineViewModel.roomData.value.rankPlayerTwo!! else onlineViewModel.roomData.value.rankPlayerOne
-                eloRankNew.floatValue = RankingManager.eloRating(
-                    matchesNew,
-                    userData.eloRank,
-                    eloRatingTwo,
-                    results == 0
-                )
-                authUIClient.update(
-                    userData = userData.copy(
-                        matchesPlayed = matchesNew,
-                        matchesWon = if (results == 1) matchesWon + 1 else matchesWon,
-                        eloRank =  eloRankNew.floatValue
-                    )
-                );
-            }
-
             val roomId = if(onlineViewModel.roomData.value.roomId == "-1") generateRandomString(10) else  onlineViewModel.roomData.value.roomId
             val match = Match(roomId = roomId, matchType = matchType, userIdOne = userIdOne, userIdTwo = userIdTwo, results = results )
             val updatedUserData = getNewUserData(userData = userData, results = results)
@@ -456,27 +455,112 @@ fun OnFinishedGameDialog(
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center
                 )
-                if(gameType == GameType.ONLINE && userData != null) {
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = "Updated elo rank: $eloRankOld --> ${eloRankNew.floatValue}",
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center
-                    )
-                }
                 Spacer(modifier = Modifier.height(15.dp))
                 Button(
                     onClick = {
-                        if( gameType == GameType.ONLINE) {
-                            onlineUIClient?.deleteRoomData(onlineViewModel.getRoomData())
-                            onlineViewModel.setFullViewPage("")
-                            toggleFullView()
-                        } else {
-                            onlineViewModel.setFullViewPage("")
-                            onlineViewModel.setImportedFen("")
-                            toggleFullView()
-                        }
+                        onlineViewModel.setFullViewPage("")
+                        onlineViewModel.setImportedFen("")
+                        toggleFullView()
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ChevronLeft,
+                        modifier = Modifier.size(8.dp),
+                        contentDescription = "Left icon"
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Back to Home", style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun OnFinishedGameDialogOnline(
+    gamePlayState: MutableState<GamePlayState>,
+    gameType : GameType,
+    userData: UserData,
+    onlineViewModel: OnlineViewModel,
+    matchesViewModel: MatchesViewModel?,
+    signInViewModel: SignInViewModel?,
+    toggleFullView: () -> Unit,
+    onlineUIClient: OnlineUIClient?,
+    authUIClient: AuthUIClient,
+    roomData: RoomData,
+    startColor : Set
+) {
+
+    val eloRankOld = userData.eloRank;
+    val matchesNew = userData.matchesPlayed + 1;
+    val matchType = gameType.toString()
+    val (userIdOne, userIdTwo) = getUserIds(onlineViewModel = onlineViewModel, matchType = matchType, userData = userData)
+    val eloRatingTwo = if (userIdOne == userData.id) roomData.rankPlayerTwo!! else roomData.rankPlayerOne;
+    val results = getResults(matchType = matchType, resolution = gamePlayState.value.gameState.resolution, result = gamePlayState.value.gameState.gameMetaInfo.result, startColor = startColor )
+
+    val eloRankNew = RankingManager.eloRating(
+        matchesNew,
+        userData.eloRank,
+        eloRatingTwo,
+        results == 0
+    )
+
+    LaunchedEffect(Unit) {
+        val matchesWon = userData.matchesWon;
+        authUIClient.update(
+            userData = userData.copy(
+                matchesPlayed = matchesNew,
+                matchesWon = if (results == 1) matchesWon + 1 else matchesWon,
+                eloRank =  eloRankNew
+            )
+        );
+
+        val roomId = if(roomData.roomId == "-1") generateRandomString(10) else  roomData.roomId
+        val match = Match(roomId = roomId, matchType = matchType, userIdOne = userIdOne, userIdTwo = userIdTwo, results = results )
+        val updatedUserData = getNewUserData(userData = userData, results = results)
+        MatchesUIClient(userData = userData, matchesViewModel = matchesViewModel!!).insertMatch(match = match, signInViewModel = signInViewModel, userDataNew = updatedUserData )
+    }
+
+
+    Dialog(onDismissRequest = { null }) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = gamePlayState.value.gameState.gameMetaInfo.result!!,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = gamePlayState.value.gameState.gameMetaInfo.termination!!,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "Updated elo rank: $eloRankOld --> $eloRankNew",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+                Button(
+                    onClick = {
+                        onlineUIClient?.deleteRoomData(onlineViewModel.getRoomData())
+                        onlineViewModel.setFullViewPage("")
+                        toggleFullView()
                     }
                 ) {
                     Icon(
