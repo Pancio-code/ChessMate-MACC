@@ -418,6 +418,7 @@ fun OnFinishedGameDialog(
 
     if (userData != null){
         LaunchedEffect(Unit) {
+
             val matchType = gameType.toString()
             val (userIdOne, userIdTwo) = getUserIds(onlineViewModel = onlineViewModel, matchType = matchType, userData = userData)
             val results = getResults(matchType = matchType, resolution = gamePlayState.value.gameState.resolution, result = gamePlayState.value.gameState.gameMetaInfo.result, startColor = onlineViewModel.startColor.value )

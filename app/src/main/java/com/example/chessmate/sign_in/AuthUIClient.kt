@@ -331,7 +331,7 @@ class AuthUIClient(
     }
 
     suspend fun resetScore(userData: UserData): Boolean {
-        val userData = UserData(
+        val userDataReset = UserData(
             id = userData.id,
             email = userData.email,
             profilePictureUrl = userData.profilePictureUrl,
@@ -344,6 +344,6 @@ class AuthUIClient(
             e.printStackTrace()
             if (e is CancellationException) throw e
         }
-        return signInViewModel.setUserData(SignInResult(data = userData, errorMessage = null))
+        return signInViewModel.setUserData(SignInResult(data = userDataReset, errorMessage = null))
     }
 }

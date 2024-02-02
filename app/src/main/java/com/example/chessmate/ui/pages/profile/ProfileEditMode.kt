@@ -70,6 +70,7 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.chessmate.camera.photo_capture.CameraScreen
+import com.example.chessmate.matches.MatchesViewModel
 import com.example.chessmate.sign_in.AuthUIClient
 import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserData
@@ -93,6 +94,7 @@ fun ProfileEditMode(
     userData: UserData?,
     authHandler: AuthUIClient? = null,
     authViewModel: SignInViewModel? = null,
+    matchesViewModel: MatchesViewModel? = null,
     toggler: () -> Unit,
     painter: AsyncImagePainter
 ) {
@@ -237,6 +239,7 @@ fun ProfileEditMode(
                     isLoading = true
                     lifecycleOwner.lifecycleScope.launch {
                         authHandler!!.resetScore(userData = userData!!)
+                        matchesViewModel!!.setMatches(emptyList())
                         delay(1000)
                         joinAll()
                         toggler()

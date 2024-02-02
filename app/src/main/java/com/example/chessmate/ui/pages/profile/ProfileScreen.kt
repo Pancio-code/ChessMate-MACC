@@ -41,6 +41,7 @@ fun ProfileScreen(
             modifier = modifier,
             authHandler = authHandler,
             authViewModel = authViewModel,
+            matchesViewModel = matchesViewModel,
             toggler = { isEditMode = !isEditMode },
             painter = painter
         )
