@@ -1,6 +1,7 @@
 package com.example.chessmate
 
 import android.content.Context
+import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -161,6 +162,7 @@ fun ChessMateApp(
         }
         ChessMateRoute.ONLINE_GAME -> Surface(color = MaterialTheme.colorScheme.background) {
             val roomData = onlineViewModel!!.getRoomData()
+            Log.d("ROOM",roomData.toString())
             Game(
                 gameType = GameType.ONLINE,
                 onlineViewModel = onlineViewModel,
@@ -169,6 +171,7 @@ fun ChessMateApp(
                 importGamePGN = roomData.boardState,
                 toggleFullView = toggleFullView,
                 userData = userData,
+                importGameFEN = if (roomData.fen != "") roomData.fen else null,
                 startColor = if (roomData.playerOneId == userData!!.id) com.example.chessmate.game.model.piece.Set.WHITE else com.example.chessmate.game.model.piece.Set.BLACK
             )
         }

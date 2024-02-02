@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import com.example.chessmate.game.model.game.Resolution
 import com.example.chessmate.game.model.game.controller.GameController
 import com.example.chessmate.game.model.game.converter.FenConverter
 import com.example.chessmate.game.model.game.converter.PgnConverter
@@ -26,9 +25,6 @@ import com.example.chessmate.game.ui.dialogs.PromotionDialog
 import com.example.chessmate.multiplayer.GameType
 import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
-import com.example.chessmate.multiplayer.RoomData
-import com.example.chessmate.multiplayer.RoomStatus
-import java.util.Locale
 
 @Composable
 fun GameDialogs(
@@ -44,17 +40,13 @@ fun GameDialogs(
     onlineViewModel: OnlineViewModel,
     gameType: GameType,
     startColor : Set? = null,
-    roomData : RoomData? = null,
     onlineUIClient: OnlineUIClient? = null
 ) {
     ManagedPromotionDialog(
         showPromotionDialog = gamePlayState.value.uiState.showPromotionDialog,
         gameController = gameController,
         gameType = gameType,
-        gameState = gamePlayState.value.gameState,
         startColor = startColor,
-        roomData = roomData,
-        onlineUIClient = onlineUIClient
     )
     ManagedChessMateDialog(
         showChessMateDialog = showChessMateDialog,
@@ -91,26 +83,12 @@ fun ManagedPromotionDialog(
     gameController: GameController,
     startColor: Set? = null,
     gameType : GameType? = null,
-    gameState : GameState,
-    roomData : RoomData? = null,
-    onlineUIClient: OnlineUIClient? = null
 ) {
     if (showPromotionDialog) {
         val set = gameController.toMove
         if (gameType == GameType.TWO_OFFLINE || startColor == set) {
             PromotionDialog(set) { piece ->
                 gameController.onPromotionPieceSelected(piece)
-                if (gameType == GameType.ONLINE) {
-                   roomData?.let {
-                        onlineUIClient!!.updateRoomData(
-                            model = it.copy(
-                                gameState = if (gameState.resolution != Resolution.IN_PROGRESS) RoomStatus.FINISHED else RoomStatus.INPROGRESS,
-                                currentTurn =  gameState.toMove.name,
-                                lastMove = piece.textSymbol.lowercase(Locale.ROOT)
-                            )
-                        )
-                    }
-                }
             }
         } else if (gameType == GameType.ONE_OFFLINE) {
             val piece: Piece = convertToPiece(set, gameController)

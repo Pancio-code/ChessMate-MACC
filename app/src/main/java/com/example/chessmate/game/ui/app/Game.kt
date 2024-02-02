@@ -1,5 +1,6 @@
 package com.example.chessmate.game.ui.app
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -105,8 +106,8 @@ fun Game(
 
     if (gameType == GameType.ONLINE) {
         LaunchedEffect(roomData.value) {
-            Log.d("COLOR",gamePlayState.value.gameState.toMove.toString())
-            if (gamePlayState.value.gameState.toMove != startColor && roomData.value.lastMove != null) {
+            Log.d("FEN",fenToImport.value.toString())
+            if (gamePlayState.value.gameState.toMove != startColor && roomData.value.lastMove != null && fenToImport.value == null) {
                 roomData.value.lastMove?.let { gameController.onResponse(it) }
             }
         }
@@ -181,7 +182,6 @@ fun Game(
             toggleFullView = toggleFullView,
             gameType = gameType,
             startColor = startColor,
-            roomData = roomData.value,
             onlineUIClient = onlineUIClient
         )
 

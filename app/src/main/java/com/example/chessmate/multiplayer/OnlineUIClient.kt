@@ -88,7 +88,11 @@ class OnlineUIClient(
     suspend fun getRoom() : RoomData? {
         return try {
             val roomResponse =  roomRemoteService.get(token=token, id = userData.id)
-            roomResponse.body()
+            val responseBody = roomResponse.body()
+            if (responseBody?.roomId != "-1") {
+                saveRoomData(responseBody!!)
+            }
+            responseBody
         } catch(e: Exception) {
             e.printStackTrace()
             if(e is CancellationException) throw e

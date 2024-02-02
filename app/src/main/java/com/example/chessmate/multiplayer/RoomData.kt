@@ -16,6 +16,7 @@ data class RoomData(
     val lastMove: String? = null,
     val winner: String = "",
     val termination: String= "",
+    val fen: String = ""
 )
 {
     constructor() : this("-1", "", null,"",null,"",null,RoomStatus.WAITING,0.0f,null,null,RoomDataHelper.PNG_START,null,"","") {}
@@ -23,6 +24,7 @@ data class RoomData(
 
 object RoomDataHelper {
     const val PNG_START = ""
+    const val FEN_START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 }
 
 enum class RoomStatus {

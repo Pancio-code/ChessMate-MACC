@@ -167,7 +167,6 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        onlineUIClient.deleteRoomData(onlineViewModel.getRoomData())
 
                         LaunchedEffect(key1 = null) {
                             MatchesUIClient(
@@ -229,10 +228,6 @@ class MainActivity : ComponentActivity() {
         glSurfaceView?.onPause()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        OnlineUIClient(applicationContext,db,onlineViewModel, UserData()).deleteRoomData(onlineViewModel.getRoomData())
-    }
 
     // Check if OpenGL ES 3.0 is supported
     private fun checkOpenGL3(): Boolean {

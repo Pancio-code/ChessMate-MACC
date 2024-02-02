@@ -30,6 +30,7 @@ import com.example.chessmate.ui.utils.StockFishAPI
 import com.example.chessmate.ui.utils.StockFishData
 import kotlinx.coroutines.launch
 import retrofit2.Response
+import java.util.Locale
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.random.Random
 
@@ -97,6 +98,7 @@ class GameController(
                             gameState = if (gameSnapshotState.resolution != Resolution.IN_PROGRESS) RoomStatus.FINISHED else RoomStatus.INPROGRESS,
                             currentTurn =  gameSnapshotState.toMove.name,
                             lastMove = "${gameSnapshotState.lastMove?.from} ${gameSnapshotState.lastMove?.to}",
+                            fen = FenConverter.getFenFromSnapshot(gameSnapshotState,gamePlayState),
                             winner =  if (!gamePlayState.gameState.gameMetaInfo.result.isNullOrEmpty()) gamePlayState.gameState.gameMetaInfo.result!!  else "",
                             termination =  if (!gamePlayState.gameState.gameMetaInfo.termination.isNullOrEmpty()) gamePlayState.gameState.gameMetaInfo.termination!! else ""
                         )
@@ -107,11 +109,11 @@ class GameController(
     }
 
     fun onResponse(lastMove : String) {
+        Log.d("MOVE",lastMove)
         val moves = lastMove.split(" ")
         if(moves.size == 2) {
             val fromPosition = enumValueOf<Position>(moves[0])
             val toPosition = enumValueOf<Position>(moves[1])
-
             toggleSelectPosition(fromPosition)
             if (canMoveTo(toPosition)) {
                 val selectedPosition = gamePlayState.uiState.selectedPosition
@@ -258,6 +260,18 @@ class GameController(
             val selectedPosition = gamePlayState.uiState.selectedPosition
             requireNotNull(selectedPosition)
             applyMove(selectedPosition, position)
+        }
+        if (gameType == GameType.ONLINE) {
+            roomData?.let {
+                onlineUIClient!!.updateRoomData(
+                    model = it.copy(
+                        gameState = if (gamePlayState.gameState.resolution != Resolution.IN_PROGRESS) RoomStatus.FINISHED else RoomStatus.INPROGRESS,
+                        currentTurn =  gamePlayState.gameState.toMove.name,
+                        fen = FenConverter.getFenFromSnapshot(gamePlayState.gameState.currentSnapshotState,gamePlayState),
+                        lastMove = piece.textSymbol.lowercase(Locale.ROOT)
+                    )
+                )
+            }
         }
     }
 
