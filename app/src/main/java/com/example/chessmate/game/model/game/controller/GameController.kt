@@ -89,7 +89,7 @@ class GameController(
             val selectedPosition = gamePlayState.uiState.selectedPosition
             requireNotNull(selectedPosition)
             applyMove(selectedPosition, position)
-            if (gameType == GameType.ONLINE && gamePlayState.promotionState is PromotionState.None ) {
+            if (gameType == GameType.ONLINE ) {
                 Log.d("ONLINE",position.toString())
                 roomData?.let {
                     onlineUIClient!!.updateRoomData(

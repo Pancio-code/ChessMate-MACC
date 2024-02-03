@@ -90,7 +90,7 @@ fun GameDialogs(
         onlineViewModel = onlineViewModel,
         toggleFullView = toggleFullView,
         gameType = gameType,
-        showOnlineExitDialog = showGameDialog
+        showOnlineExitDialog = showOnlineExitDialog
     )
 
     ManagedOnlineExitDialog(
