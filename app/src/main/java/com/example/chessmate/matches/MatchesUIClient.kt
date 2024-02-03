@@ -37,15 +37,16 @@ class MatchesUIClient(
         }
     }
 
-    suspend fun insertMatch(match: Match, signInViewModel: SignInViewModel?, userDataNew: UserData) {
+    suspend fun insertMatch(match: Match, signInViewModel: SignInViewModel?, userDataNew: UserData): Boolean {
         try{
             val data = gson.toJson(match)
             matchRemoteService.create(token=BuildConfig.TOKEN, body = data)
         } catch(e: Exception) {
             e.printStackTrace()
             if(e is CancellationException) throw e
+            return false
         }
         getMatches()
-        signInViewModel?.setUserData(newValue = SignInResult(data = userDataNew, errorMessage = null))
+        return signInViewModel!!.setUserData(newValue = SignInResult(data = userDataNew, errorMessage = null))
     }
 }
