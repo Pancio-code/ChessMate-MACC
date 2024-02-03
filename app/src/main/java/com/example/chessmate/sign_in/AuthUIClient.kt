@@ -3,6 +3,7 @@ package com.example.chessmate.sign_in
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
+import android.util.Log
 import android.widget.Toast
 import com.example.chessmate.BuildConfig
 import com.example.chessmate.ui.utils.HelperClassUser
@@ -91,7 +92,7 @@ class AuthUIClient(
             loginToogle()
             val user = Firebase.auth.signInWithCredential(credential).await().user
             if (user != null) {
-                val userResponse =  userRemoteService.get(token=token,id= user.uid)
+                val userResponse =  userRemoteService.get(token=this.token,id= user.uid)
                 if (userResponse.code() == 204) {
                     val data = gson.toJson(
                         UserData(
@@ -101,7 +102,7 @@ class AuthUIClient(
                             username = user.displayName
                         )
                     )
-                    userRemoteService.create(token = token, body = data)
+                    userRemoteService.create(token = this.token, body = data)
                 }
             }
             SignInResult(
@@ -116,6 +117,7 @@ class AuthUIClient(
                 errorMessage = null
             )
         } catch(e: Exception) {
+            Log.d("FACE3",e.toString())
             e.printStackTrace()
             if(e is CancellationException) throw e
             SignInResult(
@@ -283,7 +285,7 @@ class AuthUIClient(
     suspend fun update(userData: UserData): Boolean {
         try {
             val data = gson.toJson(userData)
-            userRemoteService.update(token=BuildConfig.TOKEN, id= userData.id, body = data.toRequestBody("application/json".toMediaTypeOrNull()));
+            userRemoteService.update(token=token, id= userData.id, body = data.toRequestBody("application/json".toMediaTypeOrNull()));
         } catch (e: Exception) {
             e.printStackTrace()
             if (e is CancellationException) throw e
@@ -309,9 +311,9 @@ class AuthUIClient(
             if (newAvatarFile.toString() != "") {
                 val fileRequestBody = newAvatarFile!!.asRequestBody("image/*".toMediaTypeOrNull())
                 val filePart = MultipartBody.Part.createFormData("file", newAvatarFile.name, fileRequestBody)
-                userRemoteService.updateWithAvatar(token=BuildConfig.TOKEN, id= userId.toString(), body = jsonRequestBody, image= filePart)
+                userRemoteService.updateWithAvatar(token=token, id= userId.toString(), body = jsonRequestBody, image= filePart)
             } else {
-                userRemoteService.update(token=BuildConfig.TOKEN, id= userId.toString(), body = jsonRequestBody)
+                userRemoteService.update(token=token, id= userId.toString(), body = jsonRequestBody)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -322,7 +324,7 @@ class AuthUIClient(
 
     suspend fun deleteUser(userId: String?) {
         try{
-            userRemoteService.delete(token=BuildConfig.TOKEN, id= userId.toString())
+            userRemoteService.delete(token=token, id= userId.toString())
             auth.currentUser?.delete()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -339,7 +341,7 @@ class AuthUIClient(
             country = userData.country,
         )
         try{
-            userRemoteService.resetScore(token=BuildConfig.TOKEN, id= userData.id)
+            userRemoteService.resetScore(token=token, id= userData.id)
         } catch (e: Exception) {
             e.printStackTrace()
             if (e is CancellationException) throw e
