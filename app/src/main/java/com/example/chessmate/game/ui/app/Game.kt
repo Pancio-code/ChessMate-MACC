@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Loop
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,6 +35,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -71,6 +73,8 @@ import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserData
 import com.example.chessmate.ui.pages.profile.generateRandomString
 import com.example.chessmate.ui.utils.RankingManager
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun Game(
@@ -415,10 +419,18 @@ fun OnFinishedGameDialog(
     signInViewModel: SignInViewModel?,
     toggleFullView: () -> Unit
 ) {
+    var isLoading by remember { mutableStateOf(true) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(key1 = isLoading) {
+        coroutineScope.launch {
+            delay(2000)
+            isLoading = false
+        }
+    }
 
     if (userData != null){
         LaunchedEffect(Unit) {
-
             val matchType = gameType.toString()
             val (userIdOne, userIdTwo) = getUserIds(onlineViewModel = onlineViewModel, matchType = matchType, userData = userData)
             val results = getResults(matchType = matchType, resolution = gamePlayState.value.gameState.resolution, result = gamePlayState.value.gameState.gameMetaInfo.result, startColor = onlineViewModel.startColor.value )
@@ -428,7 +440,6 @@ fun OnFinishedGameDialog(
             MatchesUIClient(userData = userData, matchesViewModel = matchesViewModel!!).insertMatch(match = match, signInViewModel = signInViewModel, userDataNew = updatedUserData )
         }
     }
-
 
     Dialog(onDismissRequest = { null }) {
         Card(
@@ -457,20 +468,32 @@ fun OnFinishedGameDialog(
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(15.dp))
-                Button(
-                    onClick = {
-                        onlineViewModel.setFullViewPage("")
-                        onlineViewModel.setImportedFen("")
-                        toggleFullView()
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ChevronLeft,
-                        modifier = Modifier.size(8.dp),
-                        contentDescription = "Left icon"
+                if(isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(8.dp),
+                        color = MaterialTheme.colorScheme.primary
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Back to Home", style = MaterialTheme.typography.bodySmall)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Updating...", color = Color.White)
+                } else {
+                    Button(
+                        onClick = {
+                            onlineViewModel.setFullViewPage("")
+                            onlineViewModel.setImportedFen("")
+                            toggleFullView()
+                            isLoading = true
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ChevronLeft,
+                            modifier = Modifier.size(8.dp),
+                            contentDescription = "Left icon"
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Back to Home", style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             }
         }
@@ -492,10 +515,20 @@ fun OnFinishedGameDialogOnline(
     startColor : Set
 ) {
 
-    val matchesNew = userData.matchesPlayed + 1;
+    var isLoading by remember { mutableStateOf(true) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(key1 = isLoading) {
+        coroutineScope.launch {
+            delay(2000)
+            isLoading = false
+        }
+    }
+
+    val matchesNew = userData.matchesPlayed + 1
     val matchType = gameType.toString()
     val (userIdOne, userIdTwo) = getUserIds(onlineViewModel = onlineViewModel, matchType = matchType, userData = userData)
-    val eloRatingTwo = if (userIdOne == userData.id) roomData.rankPlayerTwo!! else roomData.rankPlayerOne;
+    val eloRatingTwo = if (userIdOne == userData.id) roomData.rankPlayerTwo!! else roomData.rankPlayerOne
     val result = gamePlayState.value.gameState.gameMetaInfo.result
     val resolution = gamePlayState.value.gameState.resolution
 
@@ -518,21 +551,20 @@ fun OnFinishedGameDialogOnline(
     )
 
     LaunchedEffect(Unit) {
-        val matchesWon = userData.matchesWon;
+        val matchesWon = userData.matchesWon
         authUIClient.update(
             userData = userData.copy(
                 matchesPlayed = matchesNew,
                 matchesWon = if (results == 1) matchesWon + 1 else matchesWon,
                 eloRank =  eloRankNew
             )
-        );
+        )
 
         val roomId = if(roomData.roomId == "-1") generateRandomString(10) else  roomData.roomId
         val match = Match(roomId = roomId, matchType = matchType, userIdOne = userIdOne, userIdTwo = userIdTwo, results = results )
         val updatedUserData = getNewUserData(userData = userData, results = results)
         MatchesUIClient(userData = userData, matchesViewModel = matchesViewModel!!).insertMatch(match = match, signInViewModel = signInViewModel, userDataNew = updatedUserData )
     }
-
 
     Dialog(onDismissRequest = { null }) {
         Card(
@@ -568,20 +600,32 @@ fun OnFinishedGameDialogOnline(
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(15.dp))
-                Button(
-                    onClick = {
-                        onlineUIClient?.deleteRoomData(onlineViewModel.getRoomData())
-                        onlineViewModel.setFullViewPage("")
-                        toggleFullView()
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ChevronLeft,
-                        modifier = Modifier.size(8.dp),
-                        contentDescription = "Left icon"
+                if(isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(8.dp),
+                        color = MaterialTheme.colorScheme.primary
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Back to Home", style = MaterialTheme.typography.bodySmall)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Updating...", color = Color.White)
+                } else {
+                    Button(
+                        onClick = {
+                            onlineViewModel.setFullViewPage("")
+                            onlineViewModel.setImportedFen("")
+                            toggleFullView()
+                            isLoading = true
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ChevronLeft,
+                            modifier = Modifier.size(8.dp),
+                            contentDescription = "Left icon"
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Back to Home", style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             }
         }
