@@ -21,9 +21,6 @@ The flask micro-service can be reached here <a href="https://github.com/Pancio-c
 
 The report can be reached through this <a href="https://docs.google.com/presentation/d/14m4oKUa0NtrDsfDYBSc2E8W-CHii6r46UYwr1hnUr1E/edit?usp=sharing">Link</a>
 
-## 🎮 Manual of the game
-
-The manual of the game can be reached through this <a href="#">Link</a>
 
 
 
