@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewModelScope
 import com.example.chessmate.game.model.game.controller.GameController
 import com.example.chessmate.game.model.game.converter.FenConverter
 import com.example.chessmate.game.model.game.converter.PgnConverter
@@ -44,12 +45,20 @@ import com.example.chessmate.game.ui.dialogs.ImportFenDialog
 import com.example.chessmate.game.ui.dialogs.ImportPgnDialog
 import com.example.chessmate.game.ui.dialogs.PickActiveVisualisationDialog
 import com.example.chessmate.game.ui.dialogs.PromotionDialog
+import com.example.chessmate.matches.Match
+import com.example.chessmate.matches.MatchesUIClient
+import com.example.chessmate.matches.MatchesViewModel
 import com.example.chessmate.multiplayer.GameType
 import com.example.chessmate.multiplayer.OnlineUIClient
 import com.example.chessmate.multiplayer.OnlineViewModel
 import com.example.chessmate.multiplayer.RoomData
 import com.example.chessmate.multiplayer.RoomStatus
 import com.example.chessmate.sign_in.AuthUIClient
+import com.example.chessmate.sign_in.SignInViewModel
+import com.example.chessmate.sign_in.UserData
+import com.example.chessmate.ui.pages.profile.generateRandomString
+import com.example.chessmate.ui.utils.RankingManager
+import kotlinx.coroutines.launch
 
 @Composable
 fun GameDialogs(
@@ -67,7 +76,11 @@ fun GameDialogs(
     gameType: GameType,
     startColor : Set? = null,
     onlineUIClient: OnlineUIClient? = null,
-    authUIClient: AuthUIClient? = null
+    authUIClient: AuthUIClient? = null,
+    matchesViewModel: MatchesViewModel? = null,
+    signInViewModel: SignInViewModel? = null,
+    roomData: RoomData? = null,
+    userData: UserData? = null
 ) {
     ManagedPromotionDialog(
         showPromotionDialog = gamePlayState.value.uiState.showPromotionDialog,
@@ -97,7 +110,14 @@ fun GameDialogs(
         showOnlineExitDialog = showOnlineExitDialog,
         onlineUIClient = onlineUIClient,
         onlineViewModel = onlineViewModel,
-        toggleFullView = toggleFullView
+        toggleFullView = toggleFullView,
+        signInViewModel = signInViewModel,
+        matchesViewModel = matchesViewModel,
+        roomData = roomData,
+        userData = userData,
+        authUIClient = authUIClient,
+        gameType = gameType,
+        startColor = startColor
     )
 
     ManagedImportPgnDialog(
@@ -116,7 +136,14 @@ fun ManagedOnlineExitDialog(
     showOnlineExitDialog : MutableState<Boolean>,
     toggleFullView: () -> Unit = {},
     onlineViewModel: OnlineViewModel,
-    onlineUIClient: OnlineUIClient? = null
+    onlineUIClient: OnlineUIClient? = null,
+    gameType: GameType,
+    userData : UserData?,
+    roomData: RoomData?,
+    authUIClient: AuthUIClient?,
+    matchesViewModel: MatchesViewModel?,
+    signInViewModel: SignInViewModel?,
+    startColor: Set?
 ) {
     if (showOnlineExitDialog.value) {
         Dialog(onDismissRequest = { null }) {
@@ -148,6 +175,40 @@ fun ManagedOnlineExitDialog(
                     Spacer(modifier = Modifier.height(15.dp))
                     Button(
                         onClick = {
+                            val matchesNew = userData!!.matchesPlayed + 1
+                            val matchType = gameType.toString()
+                            val (userIdOne, userIdTwo) = getUserIds(onlineViewModel = onlineViewModel, matchType = matchType, userData = userData)
+                            val eloRatingTwo = if (userIdOne == userData.id) roomData!!.rankPlayerTwo!! else roomData!!.rankPlayerOne
+
+                            val results = if(startColor == Set.WHITE){
+                                1
+                            } else{ //startColor == Set.BLACK
+                                0
+                            };
+
+                            val eloRankNew = RankingManager.eloRating(
+                                matchesNew,
+                                userData.eloRank,
+                                eloRatingTwo,
+                                false
+                            )
+
+                            onlineViewModel.viewModelScope.launch {
+                                val matchesWon = userData.matchesWon
+                                authUIClient!!.update(
+                                    userData = userData.copy(
+                                        matchesPlayed = matchesNew,
+                                        matchesWon = matchesWon,
+                                        eloRank =  eloRankNew
+                                    )
+                                )
+
+                                val roomId = if(roomData.roomId == "-1") generateRandomString(10) else  roomData.roomId
+                                val match = Match(roomId = roomId, matchType = matchType, userIdOne = userIdOne, userIdTwo = userIdTwo, results = results )
+                                val updatedUserData = getNewUserData(userData = userData, results = results)
+                                MatchesUIClient(userData = userData, matchesViewModel = matchesViewModel!!).insertMatch(match = match, signInViewModel = signInViewModel, userDataNew = updatedUserData )
+                            }
+
                             onlineUIClient?.updateRoomData(onlineViewModel.roomData.value.copy(gameState = RoomStatus.FINISHED))
                             showOnlineExitDialog.value = false
                             onlineUIClient!!.stopListeningToRoomData()

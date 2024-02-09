@@ -228,7 +228,11 @@ fun Game(
             gameType = gameType,
             startColor = startColor,
             onlineUIClient = onlineUIClient,
-            authUIClient = authUIClient
+            authUIClient = authUIClient,
+            matchesViewModel = matchesViewModel,
+            signInViewModel = signInViewModel,
+            roomData = roomData.value,
+            userData = userData
         )
 
         ManagedImport(
