@@ -41,7 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -73,6 +72,7 @@ import com.example.chessmate.sign_in.SignInViewModel
 import com.example.chessmate.sign_in.UserData
 import com.example.chessmate.ui.pages.profile.generateRandomString
 import com.example.chessmate.ui.utils.RankingManager
+import com.facebook.FacebookSdk.getApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -176,14 +176,49 @@ fun Game(
                 gameType = gameType
             )
             if (roomData.value.gameState == RoomStatus.FINISHED && roomData.value.winner == "") {
+                val matchesNew = userData!!.matchesPlayed + 1
+                val matchType = gameType.toString()
+                val (userIdOne, userIdTwo) = getUserIds(onlineViewModel = onlineViewModel, matchType = matchType, userData = userData)
+                val eloRatingTwo = if (userIdOne == userData.id) roomData.value.rankPlayerTwo!! else roomData.value.rankPlayerOne
+
+                val results = if(startColor == Set.WHITE){
+                    0
+                } else{ //startColor == Set.BLACK
+                    1
+                };
+
+                val eloRankNew = RankingManager.eloRating(
+                    matchesNew,
+                    userData.eloRank,
+                    eloRatingTwo,
+                    true
+                )
+
+                LaunchedEffect(true) {
+                    val matchesWon = userData.matchesWon
+                    authUIClient!!.update(
+                        userData = userData.copy(
+                            matchesPlayed = matchesNew,
+                            matchesWon = matchesWon,
+                            eloRank =  eloRankNew
+                        )
+                    )
+
+                    val roomId = if(roomData.value.roomId == "-1") generateRandomString(10) else  roomData.value.roomId
+                    val match = Match(roomId = roomId, matchType = matchType, userIdOne = userIdOne, userIdTwo = userIdTwo, results = results )
+                    val updatedUserData = getNewUserData(userData = userData, results = results)
+                    MatchesUIClient(userData = userData, matchesViewModel = matchesViewModel!!).insertMatch(match = match, signInViewModel = signInViewModel, userDataNew = updatedUserData )
+
+
                 onlineUIClient?.deleteRoomData(roomData.value)
                 toggleFullView()
                 onlineViewModel.setFullViewPage("")
-                Toast.makeText(
-                    LocalContext.current,
-                    "Adversary Exit Game!",
-                    Toast.LENGTH_LONG
-                ).show()
+                    Toast.makeText(
+                        getApplicationContext(),
+                        "Adversary Exit Game!",
+                        Toast.LENGTH_LONG
+                    ).show()
+            }
             } else if ( gamePlayState.value.gameState.gameMetaInfo.result != null && gamePlayState.value.gameState.gameMetaInfo.termination != null) {
                 if (gameType == GameType.ONLINE) {
                     OnFinishedGameDialogOnline(
