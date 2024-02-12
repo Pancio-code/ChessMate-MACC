@@ -324,8 +324,8 @@ class AuthUIClient(
 
     suspend fun deleteUser(userId: String?) {
         try{
-            userRemoteService.delete(token=token, id= userId.toString())
             auth.currentUser?.delete()
+            userRemoteService.delete(token=token, id= userId.toString())
         } catch (e: Exception) {
             e.printStackTrace()
             if (e is CancellationException) throw e
