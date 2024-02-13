@@ -150,7 +150,11 @@ fun ProfilePictureMatch(matchType: String, userIdTwo: String, profilePictureUrlU
     var painter = rememberAsyncImagePainter(null)
     when (matchType){
         "ONLINE" -> {
-            painter = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userIdTwo}/${profilePictureUrlUserTwo}")
+            if (profilePictureUrlUserTwo!!.startsWith("http")) {
+                painter = rememberAsyncImagePainter("$profilePictureUrlUserTwo")
+            } else {
+                painter = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userIdTwo}/${profilePictureUrlUserTwo}")
+            }
         }
         "ONE_OFFLINE" -> {
             painter = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/robot.jpg")

@@ -129,6 +129,7 @@ fun ChessMateApp(
     when (immersivePage) {
         ChessMateRoute.FIND_GAME -> FindGameScreen(
             modifier = Modifier,
+            authHandler = authHandler,
             onlineUIClient = onlineUIClient!!,
             onlineViewModel = onlineViewModel!!,
             toggleFullView = toggleFullView,

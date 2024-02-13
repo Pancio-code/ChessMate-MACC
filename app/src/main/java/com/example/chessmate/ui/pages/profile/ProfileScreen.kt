@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import com.example.chessmate.matches.MatchesViewModel
 import com.example.chessmate.sign_in.AuthUIClient
@@ -23,7 +24,12 @@ fun ProfileScreen(
     matchesViewModel: MatchesViewModel? = null,
 ) {
     val userData by authViewModel!!.userData.collectAsStateWithLifecycle()
-    val painter = rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userData.data!!.id}/${userData.data!!.profilePictureUrl}")
+    val provider = authHandler?.getProvider()
+    var painter: AsyncImagePainter = if (provider == "password" || provider == null) {
+        rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userData.data!!.id}/${userData.data!!.profilePictureUrl}")
+    } else {
+        rememberAsyncImagePainter("${userData.data!!.profilePictureUrl}")
+    }
     var isEditMode by remember { mutableStateOf(false) }
     if (!isEditMode) {
         ProfileReadMode(

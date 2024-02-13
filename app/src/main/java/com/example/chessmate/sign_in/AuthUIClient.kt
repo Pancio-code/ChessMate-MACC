@@ -348,4 +348,8 @@ class AuthUIClient(
         }
         return signInViewModel.setUserData(SignInResult(data = userDataReset, errorMessage = null))
     }
+
+    fun getProvider(): String? {
+        return auth.currentUser?.providerData?.get(1)?.providerId
+    }
 }
