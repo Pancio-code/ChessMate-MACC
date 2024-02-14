@@ -24,11 +24,10 @@ fun ProfileScreen(
     matchesViewModel: MatchesViewModel? = null,
 ) {
     val userData by authViewModel!!.userData.collectAsStateWithLifecycle()
-    val provider = authHandler?.getProvider()
-    var painter: AsyncImagePainter = if (provider == "password" || provider == null) {
-        rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userData.data!!.id}/${userData.data!!.profilePictureUrl}")
-    } else {
+    var painter: AsyncImagePainter = if (userData.data!!.profilePictureUrl!!.startsWith("http")) {
         rememberAsyncImagePainter("${userData.data!!.profilePictureUrl}")
+    } else {
+        rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userData.data!!.id}/${userData.data!!.profilePictureUrl}")
     }
     var isEditMode by remember { mutableStateOf(false) }
     if (!isEditMode) {

@@ -58,11 +58,10 @@ fun FindGameScreen(
     val roomData by onlineViewModel.roomData.collectAsState()
     val lifeScope = rememberCoroutineScope()
     var isFindingGame by remember { mutableStateOf(false) }
-    val provider = authHandler?.getProvider()
-    var painter: AsyncImagePainter = if (provider == "password" || provider == null) {
-        rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userData!!.id}/${userData.profilePictureUrl}")
-    } else {
+    var painter: AsyncImagePainter = if (userData!!.profilePictureUrl!!.startsWith("http")) {
         rememberAsyncImagePainter("${userData!!.profilePictureUrl}")
+    } else {
+        rememberAsyncImagePainter("${UserDataHelper.AVATAR_URL}/${userData!!.id}/${userData.profilePictureUrl}")
     }
 
     LaunchedEffect(isFindingGame) {
