@@ -17,8 +17,7 @@ import java.nio.ShortBuffer
 class CubeOpenGL(context: Context ){
     ///vertex shader
     var vShaderStr =
-        """
-        #version 300 es 
+        """#version 300 es 
         precision mediump float;
         
 
@@ -34,8 +33,8 @@ class CubeOpenGL(context: Context ){
         """
 
     //fragment shader
-    var fShaderStr = """
-        #version 300 es		 			          	
+    var fShaderStr =
+        """#version 300 es		 			          	
         precision mediump float;
         					  	
         in vec2 vTexCoord;
@@ -172,7 +171,6 @@ class CubeOpenGL(context: Context ){
         // Load shaders and create program
         val vertexShader = loadShader(GLES30.GL_VERTEX_SHADER, vShaderStr)
         val fragmentShader = loadShader(GLES30.GL_FRAGMENT_SHADER, fShaderStr)
-
         program = GLES30.glCreateProgram()
         if (program == 0) {
             Log.e(TAG, "Cube.kt : error on glCreateProgram?")

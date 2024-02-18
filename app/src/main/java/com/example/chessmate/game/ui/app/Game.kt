@@ -651,6 +651,7 @@ fun OnFinishedGameDialogOnline(
                 } else {
                     Button(
                         onClick = {
+                            onlineUIClient!!.deleteRoomData(roomData)
                             onlineViewModel.setFullViewPage("")
                             onlineViewModel.setImportedFen("")
                             toggleFullView()
